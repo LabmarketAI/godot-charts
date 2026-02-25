@@ -85,9 +85,13 @@ var _rebuild_queued: bool = false
 # ---------------------------------------------------------------------------
 
 func _ready() -> void:
-	_container = Node3D.new()
-	_container.name = "ChartContent"
-	add_child(_container)
+	# Use an existing container when _ready() fires more than once
+	# (e.g. node removed/re-added, or @tool script reload in editor).
+	_container = get_node_or_null("ChartContent") as Node3D
+	if not is_instance_valid(_container):
+		_container = Node3D.new()
+		_container.name = "ChartContent"
+		add_child(_container)
 	_rebuild()
 
 
@@ -113,11 +117,13 @@ func _rebuild() -> void:
 # Public helpers
 # ---------------------------------------------------------------------------
 
-## Remove all children from the chart container.
+## Remove all children from the chart container immediately.
+## Uses free() rather than queue_free() so geometry is gone before the next
+## add_child() call in the same _rebuild() pass — prevents double-rendering.
 func clear() -> void:
 	if is_instance_valid(_container):
 		for child in _container.get_children():
-			child.queue_free()
+			child.free()
 
 # ---------------------------------------------------------------------------
 # Protected helpers available to sub-classes

@@ -84,9 +84,13 @@ var _internal: Node3D = null
 # ---------------------------------------------------------------------------
 
 func _ready() -> void:
-	_internal = Node3D.new()
-	_internal.name = "_FrameInternal"
-	add_child(_internal)
+	# Reuse an existing internal node when _ready() fires more than once
+	# (e.g. node removed/re-added, or @tool script reload in editor).
+	_internal = get_node_or_null("_FrameInternal") as Node3D
+	if not is_instance_valid(_internal):
+		_internal = Node3D.new()
+		_internal.name = "_FrameInternal"
+		add_child(_internal)
 	_rebuild()
 
 
@@ -120,7 +124,7 @@ func _rebuild() -> void:
 	if not is_instance_valid(_internal):
 		return
 	for child in _internal.get_children():
-		child.queue_free()
+		child.free()
 	_build_panel()
 	_fit_child_charts()
 

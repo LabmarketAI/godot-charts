@@ -99,6 +99,14 @@ func _rebuild() -> void:
 			_container.add_child(mi)
 
 	_draw_axes(chart_size.x, chart_size.y, chart_size.x)
+
+	var names: Array = []
+	var cols: Array = []
+	for ds_idx in datasets.size():
+		names.append(datasets[ds_idx].get("name", "Series %d" % ds_idx))
+		cols.append(_get_color(ds_idx))
+	_draw_legend(names, cols, chart_size.x, chart_size.y)
+
 	emit_signal("data_changed")
 
 

@@ -114,13 +114,22 @@ func _rebuild() -> void:
 			mi.position = Vector3(x_center, bar_h * 0.5, bar_depth * 0.5)
 			_container.add_child(mi)
 
+	_draw_grid_xy(chart_size.x, chart_size.y)
 	_draw_axes(chart_size.x, chart_size.y, 0.01)
+	_draw_ticks_y(chart_size.y, max_val)
 
 	if show_labels:
 		for cat_idx in n_categories:
 			var lbl_text: String = labels[cat_idx] if cat_idx < labels.size() else str(cat_idx)
 			var x_center: float = (float(cat_idx) + 0.5) * x_step
 			_container.add_child(_make_label(lbl_text, Vector3(x_center, -0.2, 0)))
+
+	var names: Array = []
+	var cols: Array = []
+	for ds_idx in n_datasets:
+		names.append(datasets[ds_idx].get("name", "Series %d" % ds_idx))
+		cols.append(_get_color(ds_idx))
+	_draw_legend(names, cols, chart_size.x, chart_size.y)
 
 	emit_signal("data_changed")
 

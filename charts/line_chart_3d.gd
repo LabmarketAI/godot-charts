@@ -114,12 +114,21 @@ func _rebuild_scalar_mode(datasets: Array, labels: Array) -> void:
 		_draw_series_2d(values, color, x_scale, y_scale, min_val, z)
 
 	var ax_z: float = float(n_datasets - 1) * series_z_spacing + 0.01
+	_draw_grid_xy(chart_size.x, chart_size.y)
 	_draw_axes(chart_size.x, chart_size.y, ax_z)
+	_draw_ticks_y(chart_size.y, max_val, min_val)
 
 	if show_labels:
 		for i in n_points:
 			var lbl: String = labels[i] if i < labels.size() else str(i)
 			_container.add_child(_make_label(lbl, Vector3(float(i) * x_scale, -0.2, 0)))
+
+	var names: Array = []
+	var cols: Array = []
+	for ds_idx in n_datasets:
+		names.append(datasets[ds_idx].get("name", "Series %d" % ds_idx))
+		cols.append(_get_color(ds_idx))
+	_draw_legend(names, cols, chart_size.x, chart_size.y)
 
 
 func _draw_series_2d(
@@ -217,6 +226,13 @@ func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
 					_container.add_child(smi)
 
 	_draw_axes(chart_size.x, chart_size.y, chart_size.x)
+
+	var names: Array = []
+	var cols: Array = []
+	for ds_idx in datasets.size():
+		names.append(datasets[ds_idx].get("name", "Series %d" % ds_idx))
+		cols.append(_get_color(ds_idx))
+	_draw_legend(names, cols, chart_size.x, chart_size.y)
 
 
 func _draw_demo() -> void:

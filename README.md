@@ -18,15 +18,30 @@ Add beautiful, interactive 3D charts to any Godot project with a few lines of GD
 
 ## Installation
 
-### From the Godot Asset Library (recommended)
+### From Git (recommended)
+
+Navigate to your Godot 4 project's root directory and run:
+
+```bash
+cd addons/
+git clone https://github.com/LabmarketAI/godot-charts.git godot_charts
+```
+
+That's it! Open your project in Godot 4 and enable the plugin under **Project → Project Settings → Plugins**.
+
+### From the Godot Asset Library (coming soon)
+
 1. Open your Godot 4 project.
 2. Navigate to **AssetLib** and search for *"Godot Charts"*.
 3. Click **Download** → **Install**.
 4. Enable the plugin under **Project → Project Settings → Plugins**.
 
-### Manual
-1. Copy the `addons/godot_charts/` folder into your project's `addons/` directory.
-2. Enable the plugin under **Project → Project Settings → Plugins**.
+### Manual Download
+
+1. Download the repository as a ZIP file from [GitHub](https://github.com/LabmarketAI/godot-charts).
+2. Extract and rename the folder to `godot_charts`.
+3. Place it in your project's `addons/` directory.
+4. Enable the plugin under **Project → Project Settings → Plugins**.
 
 ---
 

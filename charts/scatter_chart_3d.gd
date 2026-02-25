@@ -150,6 +150,7 @@ func _rebuild() -> void:
 					if mat_override != null:
 						_apply_material_to_scene(inst, mat_override)
 					_container.add_child(inst)
+					_apply_animation(inst)
 			else:
 				var mi := MeshInstance3D.new()
 				mi.mesh = effective_mesh

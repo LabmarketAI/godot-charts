@@ -71,6 +71,15 @@ extends Chart3D
 		bar_mesh_scene = v
 		_queue_rebuild()
 
+## Radius of the rounded corners on each bar (Godot units).
+## 0.0 (default) = sharp BoxMesh corners.  Clamped to half the smaller of
+## [member bar_width] / [member bar_depth] so the geometry is always valid.
+## Ignored when [member bar_mesh_scene] is set.
+@export_range(0.0, 0.5, 0.005) var bar_corner_radius: float = 0.0 :
+	set(v):
+		bar_corner_radius = v
+		_queue_rebuild()
+
 @export_group("")
 
 # ---------------------------------------------------------------------------
@@ -150,11 +159,17 @@ func _render_bar_data(d: Dictionary) -> void:
 					if override != null:
 						_apply_material_to_scene(inst, override)
 					_container.add_child(inst)
+					_apply_animation(inst)
 			else:
-				var box := BoxMesh.new()
-				box.size = Vector3(bw, bar_h, bar_depth)
+				var bar_mesh: Mesh
+				if bar_corner_radius > 0.0:
+					bar_mesh = _build_rounded_bar_mesh(bw, bar_h, bar_depth, bar_corner_radius)
+				else:
+					var box := BoxMesh.new()
+					box.size = Vector3(bw, bar_h, bar_depth)
+					bar_mesh = box
 				var mi := MeshInstance3D.new()
-				mi.mesh = box
+				mi.mesh = bar_mesh
 				mi.material_override = mat
 				# All bars sit at Z = bar_depth * 0.5 so the front face is at Z = 0.
 				mi.position = bar_pos

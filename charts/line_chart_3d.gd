@@ -219,6 +219,7 @@ func _draw_series_2d(
 					if point_mat_override != null:
 						_apply_material_to_scene(inst, point_mat_override)
 					_container.add_child(inst)
+					_apply_animation(inst)
 			else:
 				var mi := MeshInstance3D.new()
 				mi.mesh = effective_mesh
@@ -295,6 +296,7 @@ func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
 							if point_ov != null:
 								_apply_material_to_scene(inst, point_ov)
 							_container.add_child(inst)
+							_apply_animation(inst)
 					else:
 						var smi := MeshInstance3D.new()
 						smi.mesh = effective_mesh

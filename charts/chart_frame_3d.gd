@@ -71,6 +71,14 @@ signal resized(new_size: Vector2)
 		padding = v
 		_fit_child_charts()
 
+## Radius of the rounded corners on the background panel (Godot units).
+## 0.0 (default) = sharp BoxMesh corners.  Clamped to half the smaller of
+## [member size].x / [member size].y so the geometry is always valid.
+@export_range(0.0, 2.0, 0.01) var corner_radius: float = 0.0 :
+	set(v):
+		corner_radius = v
+		_rebuild()
+
 # ---------------------------------------------------------------------------
 # Internal state
 # ---------------------------------------------------------------------------
@@ -131,17 +139,22 @@ func _rebuild() -> void:
 
 func _build_panel() -> void:
 	if show_background:
-		var box := BoxMesh.new()
-		box.size = Vector3(size.x, size.y, frame_depth)
+		var panel_mesh: Mesh
+		if corner_radius > 0.0:
+			panel_mesh = _build_rounded_panel_mesh(size.x, size.y, frame_depth, corner_radius)
+		else:
+			var box := BoxMesh.new()
+			box.size = Vector3(size.x, size.y, frame_depth)
+			panel_mesh = box
 
 		var mat := StandardMaterial3D.new()
 		mat.albedo_color = background_color
 
 		var mi := MeshInstance3D.new()
 		mi.name = "Background"
-		mi.mesh = box
+		mi.mesh = panel_mesh
 		mi.material_override = mat
-		# Centre the box on (size/2) so the frame origin (0,0,0) is the
+		# Centre the mesh on (size/2) so the frame origin (0,0,0) is the
 		# bottom-left corner; push it back so the front face sits at Z=0.
 		mi.position = Vector3(size.x * 0.5, size.y * 0.5, -frame_depth * 0.5)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -194,3 +207,84 @@ func _fit_child_charts() -> void:
 			# Place the chart origin at the inner bottom-left, slightly in
 			# front of the background panel.
 			chart.position = Vector3(padding, padding, 0.005)
+
+
+## Builds an [ArrayMesh] prism with a rounded-rectangle cross-section in the XY
+## plane, extruded along the Z axis.  Matches the centering of [BoxMesh]:
+## X ∈ [-w/2, w/2], Y ∈ [-h/2, h/2], Z ∈ [-d/2, d/2].
+##
+## [param r] is the corner radius (clamped to half the smaller XY dimension).
+## [param segs] controls arc smoothness (segments per quarter-circle, min 1).
+func _build_rounded_panel_mesh(w: float, h: float, d: float, r: float, segs: int = 5) -> ArrayMesh:
+	r = clampf(r, 0.001, minf(w, h) * 0.5 - 0.001)
+	segs = maxi(segs, 1)
+	var hw := w * 0.5
+	var hh := h * 0.5
+	var hd := d * 0.5
+
+	# --- Build 2D profile (XY plane, CCW viewed from +Z / front face) ---
+	var profile: PackedVector2Array = []
+	var corner_data: Array[Array] = [
+		[hw - r,   hh - r,  0.0],          # +X +Y corner
+		[-(hw-r),  hh - r,  PI * 0.5],     # -X +Y corner
+		[-(hw-r), -(hh-r),  PI],           # -X -Y corner
+		[hw - r,  -(hh-r),  PI * 1.5],     # +X -Y corner
+	]
+	for ci in corner_data.size():
+		var cx: float  = corner_data[ci][0]
+		var cy: float  = corner_data[ci][1]
+		var sa: float  = corner_data[ci][2]
+		var first: int = 0 if ci == 0 else 1
+		for i in range(first, segs + 1):
+			var a := sa + (PI * 0.5) * float(i) / float(segs)
+			profile.append(Vector2(cx + cos(a) * r, cy + sin(a) * r))
+
+	var n := profile.size()  # 4*segs + 1
+
+	# --- Vertex layout ---
+	# [0 .. n-1]   back ring   z = -hd
+	# [n .. 2n-1]  front ring  z = +hd
+	# [2n]         back centre
+	# [2n+1]       front centre
+	var verts := PackedVector3Array()
+	var norms := PackedVector3Array()
+	var indices := PackedInt32Array()
+
+	for p in profile:
+		verts.append(Vector3(p.x, p.y, -hd))
+	for p in profile:
+		verts.append(Vector3(p.x, p.y,  hd))
+	verts.append(Vector3(0.0, 0.0, -hd))
+	verts.append(Vector3(0.0, 0.0,  hd))
+	norms.resize(verts.size())
+	norms.fill(Vector3.ZERO)
+
+	var bc := n * 2       # back centre index
+	var fc := n * 2 + 1   # front centre index
+
+	for i in n:
+		var j := (i + 1) % n
+		# Side quads — winding verified to give outward normals for CCW XY profile.
+		indices.append_array([i, j, j + n])
+		indices.append_array([i, j + n, i + n])
+		# Back cap (normal = -Z).
+		indices.append_array([bc, j, i])
+		# Front cap (normal = +Z).
+		indices.append_array([fc, i + n, j + n])
+
+	# Smooth normals via face-normal accumulation.
+	for ti in range(0, indices.size(), 3):
+		var a := indices[ti]; var b := indices[ti + 1]; var c := indices[ti + 2]
+		var fn := (verts[b] - verts[a]).cross(verts[c] - verts[a])
+		norms[a] += fn;  norms[b] += fn;  norms[c] += fn
+	for vi in norms.size():
+		norms[vi] = norms[vi].normalized()
+
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = norms
+	arrays[Mesh.ARRAY_INDEX]  = indices
+	var arr_mesh := ArrayMesh.new()
+	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return arr_mesh

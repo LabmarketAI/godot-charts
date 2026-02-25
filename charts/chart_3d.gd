@@ -11,6 +11,12 @@ extends Node3D
 ## Emitted after the chart geometry has been rebuilt.
 signal data_changed
 
+## Emitted for every [PackedScene] instance after it is added to the scene tree.
+## [param mesh_instance] is the instantiated root [Node3D].
+## [param animation_player] is the first [AnimationPlayer] found in its subtree,
+## or null when none exists.  Connect to drive animations from outside the chart.
+signal mesh_spawned(mesh_instance: Node3D, animation_player: AnimationPlayer)
+
 # ---------------------------------------------------------------------------
 # Exported properties – changes automatically redraw the chart in the editor.
 # ---------------------------------------------------------------------------
@@ -128,6 +134,20 @@ signal data_changed
 	set(v):
 		legend_material = v
 		_queue_rebuild()
+
+@export_group("")
+
+@export_group("Animation")
+
+## Name of an animation to play the moment each [PackedScene] mesh is spawned.
+## Requires the scene to contain an [AnimationPlayer] node.  Leave empty (default)
+## to skip automatic playback — the [signal mesh_spawned] signal still fires so
+## you can drive the player yourself.
+@export var spawn_animation: StringName = &""
+
+## When true, the [member spawn_animation] loops indefinitely.
+## When false (default), the animation plays once and stops.
+@export var loop_animation: bool = false
 
 @export_group("")
 
@@ -384,3 +404,106 @@ func _draw_legend(dataset_names: Array, legend_colors: Array, extent_x: float, e
 		_container.add_child(swatch_mi)
 		var ds_name: String = dataset_names[i] if i < dataset_names.size() else ""
 		_container.add_child(_make_label(ds_name, Vector3(start_x + swatch_w + 0.15, y, 0.0), 44))
+
+
+## Finds the [AnimationPlayer] in [param instance], emits [signal mesh_spawned],
+## and plays [member spawn_animation] if set.
+## Call this immediately after [code]_container.add_child(inst)[/code] for every
+## [PackedScene] instance — works even when [member spawn_animation] is empty so
+## callers always get the [signal mesh_spawned] notification.
+func _apply_animation(instance: Node3D) -> void:
+	var ap := instance.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	mesh_spawned.emit(instance, ap)
+	if ap == null or spawn_animation == &"":
+		return
+	if not ap.has_animation(spawn_animation):
+		return
+	ap.play(spawn_animation)
+	if not loop_animation:
+		ap.animation_finished.connect(
+			func(_anim_name: StringName) -> void: ap.stop(),
+			CONNECT_ONE_SHOT)
+
+
+## Builds an [ArrayMesh] prism with a rounded-rectangle cross-section in the XZ
+## plane, extruded along the Y axis.  Matches the centering of [BoxMesh]:
+## X ∈ [-w/2, w/2], Y ∈ [-h/2, h/2], Z ∈ [-d/2, d/2].
+##
+## [param r] is the corner radius (clamped to half the smaller XZ dimension).
+## [param segs] controls arc smoothness (segments per quarter-circle, min 1).
+## When [param r] ≤ 0 the caller should use a plain [BoxMesh] instead.
+func _build_rounded_bar_mesh(w: float, h: float, d: float, r: float, segs: int = 5) -> ArrayMesh:
+	r = clampf(r, 0.001, minf(w, d) * 0.5 - 0.001)
+	segs = maxi(segs, 1)
+	var hw := w * 0.5
+	var hd := d * 0.5
+	var hh := h * 0.5
+
+	# --- Build 2D profile (XZ plane, CCW viewed from +Y) ---
+	# Four quarter-circle arcs, one per corner; each arc shares its endpoint
+	# with the next arc so no duplicate vertices are needed.
+	var profile: PackedVector2Array = []
+	var corner_data: Array[Array] = [
+		[hw - r,   hd - r,  0.0],          # +X +Z corner
+		[-(hw-r),  hd - r,  PI * 0.5],     # -X +Z corner
+		[-(hw-r), -(hd-r),  PI],           # -X -Z corner
+		[hw - r,  -(hd-r),  PI * 1.5],     # +X -Z corner
+	]
+	for ci in corner_data.size():
+		var cx: float   = corner_data[ci][0]
+		var cz: float   = corner_data[ci][1]
+		var sa: float   = corner_data[ci][2]
+		var first: int  = 0 if ci == 0 else 1  # avoid duplicating shared endpoints
+		for i in range(first, segs + 1):
+			var a := sa + (PI * 0.5) * float(i) / float(segs)
+			profile.append(Vector2(cx + cos(a) * r, cz + sin(a) * r))
+
+	var n := profile.size()  # 4*segs + 1
+
+	# --- Vertex layout ---
+	# [0 .. n-1]   bottom ring  y = -hh
+	# [n .. 2n-1]  top ring     y = +hh
+	# [2n]         bottom cap centre
+	# [2n+1]       top cap centre
+	var verts := PackedVector3Array()
+	var norms := PackedVector3Array()
+	var indices := PackedInt32Array()
+
+	for p in profile:
+		verts.append(Vector3(p.x, -hh, p.y))
+	for p in profile:
+		verts.append(Vector3(p.x,  hh, p.y))
+	verts.append(Vector3(0.0, -hh, 0.0))
+	verts.append(Vector3(0.0,  hh, 0.0))
+	norms.resize(verts.size())
+	norms.fill(Vector3.ZERO)
+
+	var bc := n * 2       # bottom centre index
+	var tc := n * 2 + 1   # top centre index
+
+	for i in n:
+		var j := (i + 1) % n
+		# Side quads — winding verified to give outward normals for CCW XZ profile.
+		indices.append_array([i, j + n, j])
+		indices.append_array([i, i + n, j + n])
+		# Bottom cap (normal = -Y).
+		indices.append_array([bc, i, j])
+		# Top cap (normal = +Y).
+		indices.append_array([tc, j + n, i + n])
+
+	# Smooth normals via face-normal accumulation.
+	for ti in range(0, indices.size(), 3):
+		var a := indices[ti]; var b := indices[ti + 1]; var c := indices[ti + 2]
+		var fn := (verts[b] - verts[a]).cross(verts[c] - verts[a])
+		norms[a] += fn;  norms[b] += fn;  norms[c] += fn
+	for vi in norms.size():
+		norms[vi] = norms[vi].normalized()
+
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = norms
+	arrays[Mesh.ARRAY_INDEX]  = indices
+	var arr_mesh := ArrayMesh.new()
+	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return arr_mesh

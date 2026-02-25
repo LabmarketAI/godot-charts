@@ -71,54 +71,59 @@ func _rebuild() -> void:
 	var n_datasets: int = datasets.size()
 	var n_categories: int = 0
 	for ds in datasets:
-		var vals: Array = ds.get("values", [])
-		n_categories = maxi(n_categories, vals.size())
+		n_categories = maxi(n_categories, (ds.get("values", []) as Array).size())
 
 	if n_categories == 0:
 		return
 
-	# Find the maximum value across all datasets to scale axes.
 	var max_val: float = 0.0
 	for ds in datasets:
 		for v in ds.get("values", []):
 			max_val = maxf(max_val, float(v))
 
-	var step: float = bar_width * (n_datasets + series_gap) + group_gap * bar_width
-	var group_start: float = -(n_datasets * (bar_width + series_gap * bar_width) - series_gap * bar_width) * 0.5
+	if max_val == 0.0:
+		return
+
+	# Distribute categories evenly across chart_size.x; scale heights to chart_size.y.
+	var x_step: float = chart_size.x / float(n_categories)
+	var y_scale: float = chart_size.y / max_val
+
+	# Cap bar width so it never overflows a category slot.
+	var bw: float = minf(bar_width, x_step * 0.85)
+
+	# Spread datasets symmetrically along the Z axis.
+	var series_pitch: float = bw * (1.0 + series_gap)
+	var z_start: float = -(float(n_datasets) - 1.0) * series_pitch * 0.5
 
 	for ds_idx in n_datasets:
 		var ds: Dictionary = datasets[ds_idx]
 		var values: Array = ds.get("values", [])
 		var color: Color = _get_color(ds_idx)
 		var mat: StandardMaterial3D = _create_material(color)
-
-		var z_offset: float = group_start + ds_idx * (bar_width + series_gap * bar_width)
+		var z_offset: float = z_start + float(ds_idx) * series_pitch
 
 		for cat_idx in n_categories:
 			var val: float = float(values[cat_idx]) if cat_idx < values.size() else 0.0
 			if val <= 0.0:
 				continue
-			var x_pos: float = cat_idx * step
-			var height: float = val
+			var x_center: float = (float(cat_idx) + 0.5) * x_step
+			var bar_h: float = val * y_scale
 
 			var box := BoxMesh.new()
-			box.size = Vector3(bar_width, height, bar_depth)
-
+			box.size = Vector3(bw, bar_h, bar_depth)
 			var mi := MeshInstance3D.new()
 			mi.mesh = box
 			mi.material_override = mat
-			mi.position = Vector3(x_pos, height * 0.5, z_offset)
+			mi.position = Vector3(x_center, bar_h * 0.5, z_offset)
 			_container.add_child(mi)
 
-	# Axes and category labels
-	var axis_x: float = (n_categories - 1) * step + step * 0.5
-	_draw_axes(axis_x, max_val * 1.15, 0.01)
+	_draw_axes(chart_size.x, chart_size.y, 0.01)
 
 	if show_labels:
 		for cat_idx in n_categories:
 			var lbl_text: String = labels[cat_idx] if cat_idx < labels.size() else str(cat_idx)
-			var x_pos: float = cat_idx * step
-			_container.add_child(_make_label(lbl_text, Vector3(x_pos, -0.2, 0)))
+			var x_center: float = (float(cat_idx) + 0.5) * x_step
+			_container.add_child(_make_label(lbl_text, Vector3(x_center, -0.2, 0)))
 
 	emit_signal("data_changed")
 

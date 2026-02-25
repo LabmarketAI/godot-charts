@@ -101,28 +101,25 @@ func _rebuild_scalar_mode(datasets: Array, labels: Array) -> void:
 		max_val = min_val + 1.0
 	min_val = minf(min_val, 0.0)
 
-	var x_scale: float = 1.0  # 1 unit per category
-	var y_scale: float = 1.0 / maxf(max_val - min_val, 0.001)
+	# Normalise to chart_size: spread n_points evenly across width, scale height.
+	var x_scale: float = chart_size.x / float(n_points - 1)
+	var y_scale: float = chart_size.y / maxf(max_val - min_val, 0.001)
 
 	for ds_idx in n_datasets:
 		var ds: Dictionary = datasets[ds_idx]
 		var values: Array = ds.get("values", [])
 		var color: Color = _get_color(ds_idx)
-		var z: float = ds_idx * series_z_spacing
+		var z: float = float(ds_idx) * series_z_spacing
 
 		_draw_series_2d(values, color, x_scale, y_scale, min_val, z)
 
-	# Axes
-	var ax_x: float = (n_points - 1) * x_scale
-	var ax_y: float = (max_val - min_val) * y_scale * 1.1
-	var ax_z: float = (n_datasets - 1) * series_z_spacing + 0.01
-	_draw_axes(ax_x, ax_y, ax_z)
+	var ax_z: float = float(n_datasets - 1) * series_z_spacing + 0.01
+	_draw_axes(chart_size.x, chart_size.y, ax_z)
 
-	# X-axis labels
 	if show_labels:
 		for i in n_points:
 			var lbl: String = labels[i] if i < labels.size() else str(i)
-			_container.add_child(_make_label(lbl, Vector3(i * x_scale, -0.2, 0)))
+			_container.add_child(_make_label(lbl, Vector3(float(i) * x_scale, -0.2, 0)))
 
 
 func _draw_series_2d(
@@ -163,11 +160,27 @@ func _draw_series_2d(
 
 
 func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
-	var max_extent: float = 0.0
+	# Find per-axis data extents across all datasets.
+	var min_x := INF;  var max_x := -INF
+	var min_y := INF;  var max_y := -INF
+	var min_z := INF;  var max_z := -INF
 	for ds in datasets:
 		for pt: Variant in ds.get("points", []) as Array:
 			if pt is Vector3:
-				max_extent = maxf(max_extent, (pt as Vector3).length())
+				var v := pt as Vector3
+				min_x = minf(min_x, v.x); max_x = maxf(max_x, v.x)
+				min_y = minf(min_y, v.y); max_y = maxf(max_y, v.y)
+				min_z = minf(min_z, v.z); max_z = maxf(max_z, v.z)
+
+	if max_x == INF:
+		return
+	if max_x == min_x: max_x = min_x + 1.0
+	if max_y == min_y: max_y = min_y + 1.0
+	if max_z == min_z: max_z = min_z + 1.0
+
+	var xs: float = chart_size.x / (max_x - min_x)
+	var ys: float = chart_size.y / (max_y - min_y)
+	var zs: float = chart_size.x / (max_z - min_z)
 
 	for ds_idx in datasets.size():
 		var ds: Dictionary = datasets[ds_idx]
@@ -181,7 +194,8 @@ func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
 		mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, _create_unshaded_material(color))
 		for pt: Variant in pts:
 			if pt is Vector3:
-				mesh.surface_add_vertex(pt as Vector3)
+				var v := pt as Vector3
+				mesh.surface_add_vertex(Vector3((v.x - min_x) * xs, (v.y - min_y) * ys, (v.z - min_z) * zs))
 		mesh.surface_end()
 		var mi := MeshInstance3D.new()
 		mi.mesh = mesh
@@ -195,13 +209,14 @@ func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
 			var mat := _create_material(color)
 			for pt: Variant in pts:
 				if pt is Vector3:
+					var v := pt as Vector3
 					var smi := MeshInstance3D.new()
 					smi.mesh = sphere
 					smi.material_override = mat
-					smi.position = pt as Vector3
+					smi.position = Vector3((v.x - min_x) * xs, (v.y - min_y) * ys, (v.z - min_z) * zs)
 					_container.add_child(smi)
 
-	_draw_axes(max_extent, max_extent, max_extent)
+	_draw_axes(chart_size.x, chart_size.y, chart_size.x)
 
 
 func _draw_demo() -> void:

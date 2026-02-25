@@ -39,6 +39,14 @@ signal data_changed
 		z_label = v
 		_queue_rebuild()
 
+## Target bounding box of the chart geometry (width × height in Godot units).
+## ChartFrame3D sets this automatically when charts are added as children.
+## All chart types normalise their geometry to fill this area.
+@export var chart_size: Vector2 = Vector2(4.0, 3.0) :
+	set(v):
+		chart_size = Vector2(maxf(v.x, 0.01), maxf(v.y, 0.01))
+		_queue_rebuild()
+
 ## Color palette cycled across datasets / series.
 @export var colors: Array[Color] = [
 	Color(0.204, 0.596, 1.000),  # blue

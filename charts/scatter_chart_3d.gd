@@ -54,20 +54,33 @@ func _rebuild() -> void:
 		_draw_demo()
 		return
 
+	# Find per-axis data extents across all datasets.
+	var min_x := INF;  var max_x := -INF
+	var min_y := INF;  var max_y := -INF
+	var min_z := INF;  var max_z := -INF
+	for ds in datasets:
+		for pt: Variant in ds.get("points", []) as Array:
+			if pt is Vector3:
+				var v := pt as Vector3
+				min_x = minf(min_x, v.x); max_x = maxf(max_x, v.x)
+				min_y = minf(min_y, v.y); max_y = maxf(max_y, v.y)
+				min_z = minf(min_z, v.z); max_z = maxf(max_z, v.z)
+
+	if max_x == INF:
+		return
+	if max_x == min_x: max_x = min_x + 1.0
+	if max_y == min_y: max_y = min_y + 1.0
+	if max_z == min_z: max_z = min_z + 1.0
+
+	var xs: float = chart_size.x / (max_x - min_x)
+	var ys: float = chart_size.y / (max_y - min_y)
+	var zs: float = chart_size.x / (max_z - min_z)
+
 	var sphere := SphereMesh.new()
 	sphere.radius = point_radius
 	sphere.height = point_radius * 2.0
 	sphere.radial_segments = 8
 	sphere.rings = 4
-
-	var max_extent: float = 0.001
-	for ds in datasets:
-		for pt: Variant in ds.get("points", []) as Array:
-			if pt is Vector3:
-				var v := pt as Vector3
-				max_extent = maxf(max_extent, absf(v.x))
-				max_extent = maxf(max_extent, absf(v.y))
-				max_extent = maxf(max_extent, absf(v.z))
 
 	for ds_idx in datasets.size():
 		var ds: Dictionary = datasets[ds_idx]
@@ -78,13 +91,14 @@ func _rebuild() -> void:
 		for pt: Variant in pts:
 			if not (pt is Vector3):
 				continue
+			var v := pt as Vector3
 			var mi := MeshInstance3D.new()
 			mi.mesh = sphere
 			mi.material_override = mat
-			mi.position = pt as Vector3
+			mi.position = Vector3((v.x - min_x) * xs, (v.y - min_y) * ys, (v.z - min_z) * zs)
 			_container.add_child(mi)
 
-	_draw_axes(max_extent * 1.1, max_extent * 1.1, max_extent * 1.1)
+	_draw_axes(chart_size.x, chart_size.y, chart_size.x)
 	emit_signal("data_changed")
 
 

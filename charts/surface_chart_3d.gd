@@ -123,13 +123,14 @@ func _rebuild() -> void:
 	if max_h == min_h:
 		max_h = min_h + 1.0
 
-	# Create one vertex per grid cell.
+	# Create one vertex per grid cell, normalised to chart_size.
 	for zi in rows:
 		for xi in cols:
-			var x: float = float(xi) / float(cols - 1)
-			var z: float = float(zi) / float(rows - 1)
+			var x: float = float(xi) / float(cols - 1) * chart_size.x
+			var z: float = float(zi) / float(rows - 1) * chart_size.x
 			var h: float = float((heights[zi] as Array)[xi])
-			verts.append(Vector3(x, h, z))
+			var h_norm: float = (h - min_h) / (max_h - min_h) * chart_size.y
+			verts.append(Vector3(x, h_norm, z))
 			var t: float = (h - min_h) / (max_h - min_h)
 			col_arr.append(gradient_low.lerp(gradient_high, t) if use_height_gradient else _get_color(0))
 			norms.append(Vector3.UP)  # will be recalculated below
@@ -177,7 +178,7 @@ func _rebuild() -> void:
 	mi.mesh = amesh
 	_container.add_child(mi)
 
-	_draw_axes(1.05, (max_h - min_h) * 1.1 + 0.05, 1.05)
+	_draw_axes(chart_size.x * 1.05, chart_size.y * 1.1, chart_size.x * 1.05)
 	emit_signal("data_changed")
 
 

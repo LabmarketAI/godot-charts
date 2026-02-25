@@ -4,8 +4,10 @@ extends Chart3D
 
 ## A 3D grouped bar chart.
 ##
-## Each dataset produces a row of bars along the X axis.  Multiple datasets are
-## offset along the Z axis so bars from different series sit side-by-side.
+## Categories are distributed evenly along the X axis.  Within each category
+## slot, bars from different datasets are placed side-by-side in X (matplotlib-
+## style grouping), so the chart reads clearly from any viewing angle.
+## All bars share the same Z depth — bar_depth controls thickness toward +Z.
 ##
 ## [b]Data format[/b]
 ## [codeblock]
@@ -82,25 +84,25 @@ func _rebuild() -> void:
 	var x_step: float = chart_size.x / float(n_categories)
 	var y_scale: float = chart_size.y / max_val
 
-	# Cap bar width so it never overflows a category slot.
-	var bw: float = minf(bar_width, x_step * 0.85)
-
-	# Spread datasets symmetrically along the Z axis.
-	var series_pitch: float = bw * (1.0 + series_gap)
-	var z_start: float = -(float(n_datasets) - 1.0) * series_pitch * 0.5
+	# Each category slot is divided equally among datasets (side-by-side in X).
+	# series_gap is the fraction of each sub-slot that becomes empty space.
+	var bar_pitch: float = (x_step * 0.85) / float(n_datasets)
+	var bw: float = minf(bar_width, bar_pitch * (1.0 - series_gap))
+	bw = maxf(bw, 0.02)
 
 	for ds_idx in n_datasets:
 		var ds: Dictionary = datasets[ds_idx]
 		var values: Array = ds.get("values", [])
 		var color: Color = _get_color(ds_idx)
 		var mat: StandardMaterial3D = _create_material(color)
-		var z_offset: float = z_start + float(ds_idx) * series_pitch
 
 		for cat_idx in n_categories:
 			var val: float = float(values[cat_idx]) if cat_idx < values.size() else 0.0
 			if val <= 0.0:
 				continue
-			var x_center: float = (float(cat_idx) + 0.5) * x_step
+			# Left edge of the 85%-wide group inside this category slot.
+			var group_left: float = float(cat_idx) * x_step + x_step * 0.075
+			var x_center: float = group_left + (float(ds_idx) + 0.5) * bar_pitch
 			var bar_h: float = val * y_scale
 
 			var box := BoxMesh.new()
@@ -108,7 +110,8 @@ func _rebuild() -> void:
 			var mi := MeshInstance3D.new()
 			mi.mesh = box
 			mi.material_override = mat
-			mi.position = Vector3(x_center, bar_h * 0.5, z_offset)
+			# All bars sit at Z = bar_depth * 0.5 so the front face is at Z = 0.
+			mi.position = Vector3(x_center, bar_h * 0.5, bar_depth * 0.5)
 			_container.add_child(mi)
 
 	_draw_axes(chart_size.x, chart_size.y, 0.01)

@@ -34,12 +34,6 @@ extends Chart3D
 		bar_width = v
 		_queue_rebuild()
 
-## Gap between category groups expressed as a fraction of bar_width.
-@export_range(0.0, 2.0, 0.05) var group_gap: float = 0.6 :
-	set(v):
-		group_gap = v
-		_queue_rebuild()
-
 ## Gap between datasets within a group, expressed as a fraction of bar_width.
 @export_range(0.0, 1.0, 0.05) var series_gap: float = 0.1 :
 	set(v):

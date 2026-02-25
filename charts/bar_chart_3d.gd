@@ -48,6 +48,17 @@ extends Chart3D
 		bar_depth = v
 		_queue_rebuild()
 
+@export_group("Materials")
+
+## Override material applied to every bar.  null = automatic per-dataset color.
+## Assign any [Material] (including [ShaderMaterial]) for custom shader effects.
+@export var bar_material: Material = null :
+	set(v):
+		bar_material = v
+		_queue_rebuild()
+
+@export_group("")
+
 # ---------------------------------------------------------------------------
 # Override
 # ---------------------------------------------------------------------------
@@ -58,11 +69,19 @@ func _rebuild() -> void:
 		return
 
 	var datasets: Array = data.get("datasets", [])
-	var labels: Array = data.get("labels", [])
-
 	if datasets.is_empty():
 		_draw_demo()
 		return
+
+	_render_bar_data(data)
+	emit_signal("data_changed")
+
+
+## Renders bar geometry from [param d] (a dict with "labels" and "datasets").
+## Called by [method _rebuild] and by [HistogramChart3D] with computed bin data.
+func _render_bar_data(d: Dictionary) -> void:
+	var datasets: Array = d.get("datasets", [])
+	var labels: Array = d.get("labels", [])
 
 	var n_datasets: int = datasets.size()
 	var n_categories: int = 0
@@ -94,7 +113,8 @@ func _rebuild() -> void:
 		var ds: Dictionary = datasets[ds_idx]
 		var values: Array = ds.get("values", [])
 		var color: Color = _get_color(ds_idx)
-		var mat: StandardMaterial3D = _create_material(color)
+		# bar_material overrides per-dataset color when set (Issue #4 / Phase 5a).
+		var mat: Material = _create_material(color, bar_material)
 
 		for cat_idx in n_categories:
 			var val: float = float(values[cat_idx]) if cat_idx < values.size() else 0.0
@@ -130,8 +150,6 @@ func _rebuild() -> void:
 		names.append(datasets[ds_idx].get("name", "Series %d" % ds_idx))
 		cols.append(_get_color(ds_idx))
 	_draw_legend(names, cols, chart_size.x, chart_size.y)
-
-	emit_signal("data_changed")
 
 
 func _draw_demo() -> void:

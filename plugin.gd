@@ -37,6 +37,12 @@ func _enable_plugin() -> void:
 		preload("charts/surface_chart_3d.gd"),
 		null
 	)
+	add_custom_type(
+		"HistogramChart3D",
+		"Node3D",
+		preload("charts/histogram_chart_3d.gd"),
+		null
+	)
 
 
 func _disable_plugin() -> void:
@@ -45,3 +51,4 @@ func _disable_plugin() -> void:
 	remove_custom_type("LineChart3D")
 	remove_custom_type("ScatterChart3D")
 	remove_custom_type("SurfaceChart3D")
+	remove_custom_type("HistogramChart3D")

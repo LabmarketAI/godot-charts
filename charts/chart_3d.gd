@@ -196,7 +196,11 @@ func _get_color(index: int) -> Color:
 
 
 ## Creates a simple lit [StandardMaterial3D] with the given albedo color.
-func _create_material(color: Color) -> StandardMaterial3D:
+## Pass a non-null [param override] to return it unchanged — enables shader/material
+## substitution from any subclass without duplicating logic (Phase 5a / Issue #4).
+func _create_material(color: Color, override: Material = null) -> Material:
+	if override != null:
+		return override
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
 	return mat

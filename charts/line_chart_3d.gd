@@ -72,6 +72,26 @@ extends Chart3D
 		point_materials = v
 		_queue_rebuild()
 
+@export_group("Mesh Overrides")
+
+## Override the default [SphereMesh] data-point with a custom [Mesh] resource.
+## When null (default), the built-in [SphereMesh] is used.
+## Ignored when [member point_mesh_scene] is set.
+@export var point_mesh: Mesh = null :
+	set(v):
+		point_mesh = v
+		_queue_rebuild()
+
+## Replace each data-point sphere with an instance of this [PackedScene] (e.g. a Blender-exported .tscn).
+## Takes priority over [member point_mesh] when both are set.
+## When null (default), [member point_mesh] or the built-in [SphereMesh] is used.
+## If a matching entry exists in [member point_materials] for this dataset, it is applied
+## to all [MeshInstance3D] descendants of the instantiated scene.
+@export var point_mesh_scene: PackedScene = null :
+	set(v):
+		point_mesh_scene = v
+		_queue_rebuild()
+
 @export_group("")
 
 # ---------------------------------------------------------------------------
@@ -179,18 +199,32 @@ func _draw_series_2d(
 	line_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_container.add_child(line_mi)
 
-	# Data-point spheres
+	# Data-point spheres / custom mesh
 	if show_points:
-		var sphere := SphereMesh.new()
-		sphere.radius = point_radius
-		sphere.height = point_radius * 2.0
+		var effective_mesh: Mesh = null
+		if point_mesh_scene == null:
+			if point_mesh != null:
+				effective_mesh = point_mesh
+			else:
+				var sphere := SphereMesh.new()
+				sphere.radius = point_radius
+				sphere.height = point_radius * 2.0
+				effective_mesh = sphere
 		var mat: Material = _create_material(color, point_mat_override)
 		for pt in pts:
-			var mi := MeshInstance3D.new()
-			mi.mesh = sphere
-			mi.material_override = mat
-			mi.position = pt
-			_container.add_child(mi)
+			if point_mesh_scene != null:
+				var inst: Node3D = point_mesh_scene.instantiate() as Node3D
+				if inst != null:
+					inst.position = pt
+					if point_mat_override != null:
+						_apply_material_to_scene(inst, point_mat_override)
+					_container.add_child(inst)
+			else:
+				var mi := MeshInstance3D.new()
+				mi.mesh = effective_mesh
+				mi.material_override = mat
+				mi.position = pt
+				_container.add_child(mi)
 
 
 func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
@@ -240,18 +274,33 @@ func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
 		_container.add_child(mi)
 
 		if show_points:
-			var sphere := SphereMesh.new()
-			sphere.radius = point_radius
-			sphere.height = point_radius * 2.0
+			var effective_mesh: Mesh = null
+			if point_mesh_scene == null:
+				if point_mesh != null:
+					effective_mesh = point_mesh
+				else:
+					var sphere := SphereMesh.new()
+					sphere.radius = point_radius
+					sphere.height = point_radius * 2.0
+					effective_mesh = sphere
 			var mat: Material = _create_material(color, point_ov)
 			for pt: Variant in pts:
 				if pt is Vector3:
 					var v := pt as Vector3
-					var smi := MeshInstance3D.new()
-					smi.mesh = sphere
-					smi.material_override = mat
-					smi.position = Vector3((v.x - min_x) * xs, (v.y - min_y) * ys, (v.z - min_z) * zs)
-					_container.add_child(smi)
+					var pos := Vector3((v.x - min_x) * xs, (v.y - min_y) * ys, (v.z - min_z) * zs)
+					if point_mesh_scene != null:
+						var inst: Node3D = point_mesh_scene.instantiate() as Node3D
+						if inst != null:
+							inst.position = pos
+							if point_ov != null:
+								_apply_material_to_scene(inst, point_ov)
+							_container.add_child(inst)
+					else:
+						var smi := MeshInstance3D.new()
+						smi.mesh = effective_mesh
+						smi.material_override = mat
+						smi.position = pos
+						_container.add_child(smi)
 
 	_draw_axes(chart_size.x, chart_size.y, chart_size.x)
 

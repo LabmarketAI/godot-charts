@@ -59,6 +59,18 @@ extends Chart3D
 		bar_materials = v
 		_queue_rebuild()
 
+@export_group("Mesh Overrides")
+
+## Replace each bar's built-in [BoxMesh] with an instance of this [PackedScene].
+## The scene root must be a [Node3D]; it will be scaled to (bar_width, bar_height, bar_depth).
+## When null (default) the built-in [BoxMesh] is used.
+## If a matching entry exists in [member bar_materials] for this dataset, it is applied
+## to all [MeshInstance3D] descendants of the instantiated scene.
+@export var bar_mesh_scene: PackedScene = null :
+	set(v):
+		bar_mesh_scene = v
+		_queue_rebuild()
+
 @export_group("")
 
 # ---------------------------------------------------------------------------
@@ -129,14 +141,24 @@ func _render_bar_data(d: Dictionary) -> void:
 			var x_center: float = group_left + (float(ds_idx) + 0.5) * bar_pitch
 			var bar_h: float = val * y_scale
 
-			var box := BoxMesh.new()
-			box.size = Vector3(bw, bar_h, bar_depth)
-			var mi := MeshInstance3D.new()
-			mi.mesh = box
-			mi.material_override = mat
-			# All bars sit at Z = bar_depth * 0.5 so the front face is at Z = 0.
-			mi.position = Vector3(x_center, bar_h * 0.5, bar_depth * 0.5)
-			_container.add_child(mi)
+			var bar_pos := Vector3(x_center, bar_h * 0.5, bar_depth * 0.5)
+			if bar_mesh_scene != null:
+				var inst: Node3D = bar_mesh_scene.instantiate() as Node3D
+				if inst != null:
+					inst.scale = Vector3(bw, bar_h, bar_depth)
+					inst.position = bar_pos
+					if override != null:
+						_apply_material_to_scene(inst, override)
+					_container.add_child(inst)
+			else:
+				var box := BoxMesh.new()
+				box.size = Vector3(bw, bar_h, bar_depth)
+				var mi := MeshInstance3D.new()
+				mi.mesh = box
+				mi.material_override = mat
+				# All bars sit at Z = bar_depth * 0.5 so the front face is at Z = 0.
+				mi.position = bar_pos
+				_container.add_child(mi)
 
 	_draw_grid_xy(chart_size.x, chart_size.y)
 	_draw_axes(chart_size.x, chart_size.y, 0.01)

@@ -347,6 +347,18 @@ func _draw_ticks_y(extent_y: float, max_val: float, min_val: float = 0.0) -> voi
 			_container.add_child(_make_label("%.1f" % val, Vector3(-tick_len - 0.18, y, 0.0), 40))
 
 
+## Applies [param mat] as [code]material_override[/code] to every [MeshInstance3D]
+## found in the subtree rooted at [param root].
+## Used when a [PackedScene] is instantiated in place of a default mesh and a
+## per-dataset material override is set (Phase 5b / Issue #4).
+func _apply_material_to_scene(root: Node3D, mat: Material) -> void:
+	if root is MeshInstance3D:
+		(root as MeshInstance3D).material_override = mat
+	for child in root.get_children():
+		if child is Node3D:
+			_apply_material_to_scene(child as Node3D, mat)
+
+
 ## Draws a legend at the right edge of the chart: one colored swatch + name per dataset.
 ## [param dataset_names] and [param legend_colors] must be parallel arrays.
 ## Set [member legend_material] to override swatch materials (all swatches share it).

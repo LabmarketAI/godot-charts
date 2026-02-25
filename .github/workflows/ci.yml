@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    name: Unit Tests (Godot ${{ matrix.godot-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        godot-version: ["4.3", "4.4"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run GdUnit4 Tests
+        uses: MikeSchulze/gdUnit4-action@v1
+        with:
+          godot-version: ${{ matrix.godot-version }}
+          godot-status: stable
+          version: latest
+          paths: |
+            res://tests
+          report-name: unit-tests-${{ matrix.godot-version }}
+          timeout: 10

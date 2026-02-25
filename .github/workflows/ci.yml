@@ -17,8 +17,40 @@ jobs:
         godot-version: ["4.3", "4.4"]
 
     steps:
-      - name: Checkout
+      - name: Checkout addon
         uses: actions/checkout@v4
+        with:
+          path: src
+
+      # GdUnit4 needs a proper Godot project at the workspace root with the
+      # addon installed under addons/godot_charts/.  We build this structure
+      # from the checked-out source rather than committing a project.godot to
+      # the addon repo (which would cause Godot to treat the addon directory
+      # as a sub-project and break class_name registration in parent projects).
+      - name: Build test-harness project
+        run: |
+          mkdir -p addons/godot_charts tests
+
+          # Copy addon files; exclude VCS and CI meta that don't belong in res://
+          cp -r src/. addons/godot_charts/
+          rm -rf addons/godot_charts/.git \
+                 addons/godot_charts/.github \
+                 addons/godot_charts/tests
+
+          # Place test suites at the project root so they resolve as res://tests/
+          cp src/tests/*.gd tests/
+
+          # Minimal project.godot — class_name declarations are auto-scanned;
+          # no plugin activation required for GDScript type access.
+          cat > project.godot << 'PEOF'
+          ; Engine configuration file.
+          config_version=5
+
+          [application]
+
+          config/name="Godot Charts Tests"
+          config/features=PackedStringArray("4.3", "Forward Plus")
+          PEOF
 
       - name: Run GdUnit4 Tests
         uses: MikeSchulze/gdUnit4-action@v1

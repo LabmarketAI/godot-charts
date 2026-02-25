@@ -40,6 +40,19 @@ extends Chart3D
 		point_radius = v
 		_queue_rebuild()
 
+@export_group("Materials")
+
+## Per-dataset point material overrides.  Index 0 → first dataset, index 1 → second, etc.
+## An empty array (default) uses automatic per-dataset colors.
+## Assign any [Material] (including [ShaderMaterial]) at the matching index to
+## override only that dataset; datasets without an entry keep their auto-color.
+@export var point_materials: Array[Material] = [] :
+	set(v):
+		point_materials = v
+		_queue_rebuild()
+
+@export_group("")
+
 # ---------------------------------------------------------------------------
 # Override
 # ---------------------------------------------------------------------------
@@ -86,7 +99,8 @@ func _rebuild() -> void:
 		var ds: Dictionary = datasets[ds_idx]
 		var pts: Array = ds.get("points", [])
 		var color: Color = _get_color(ds_idx)
-		var mat: StandardMaterial3D = _create_material(color)
+		var override: Material = point_materials[ds_idx] if ds_idx < point_materials.size() else null
+		var mat: Material = _create_material(color, override)
 
 		for pt: Variant in pts:
 			if not (pt is Vector3):

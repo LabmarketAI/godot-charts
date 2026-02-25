@@ -87,6 +87,19 @@ extends Chart3D
 		gradient_high = v
 		_queue_rebuild()
 
+@export_group("Materials")
+
+## Override material for the surface mesh.  null = built-in vertex-color material.
+## Assign any [Material] (including [ShaderMaterial]) for custom shader effects.
+## Note: custom materials must read COLOR or use vertex color to retain the height
+## gradient; otherwise set [member use_height_gradient] to false.
+@export var surface_material: Material = null :
+	set(v):
+		surface_material = v
+		_queue_rebuild()
+
+@export_group("")
+
 # ---------------------------------------------------------------------------
 # Override
 # ---------------------------------------------------------------------------
@@ -170,8 +183,11 @@ func _rebuild() -> void:
 	var amesh := ArrayMesh.new()
 	amesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
+	var mat: Material = surface_material
+	if mat == null:
+		var std_mat := StandardMaterial3D.new()
+		std_mat.vertex_color_use_as_albedo = true
+		mat = std_mat
 	amesh.surface_set_material(0, mat)
 
 	var mi := MeshInstance3D.new()

@@ -131,6 +131,29 @@ signal data_changed
 
 @export_group("")
 
+@export_group("Data Source")
+
+## Optional data source that feeds this chart.
+## When set the chart subscribes to [signal ChartDataSource.data_updated] and
+## redraws automatically whenever the source emits new data.  The source takes
+## priority over the chart's own [code]data[/code] property in sub-classes that
+## support it ([BarChart3D], [LineChart3D], [ScatterChart3D]).
+##
+## Compatible sources: [DictDataSource], [CSVDataSource], [StreamDataSource],
+## or any custom [ChartDataSource] sub-class.
+@export var data_source: ChartDataSource = null :
+	set(v):
+		if data_source != null \
+				and data_source.data_updated.is_connected(_on_data_source_updated):
+			data_source.data_updated.disconnect(_on_data_source_updated)
+		data_source = v
+		if data_source != null \
+				and not data_source.data_updated.is_connected(_on_data_source_updated):
+			data_source.data_updated.connect(_on_data_source_updated)
+		_queue_rebuild()
+
+@export_group("")
+
 # ---------------------------------------------------------------------------
 # Internal state
 # ---------------------------------------------------------------------------
@@ -151,6 +174,11 @@ func _ready() -> void:
 		_container = Node3D.new()
 		_container.name = "ChartContent"
 		add_child(_container)
+	# Reconnect data_source signal in case it was assigned before _ready() fired
+	# (e.g. when loading a saved scene).
+	if data_source != null \
+			and not data_source.data_updated.is_connected(_on_data_source_updated):
+		data_source.data_updated.connect(_on_data_source_updated)
 	_rebuild()
 
 
@@ -171,6 +199,24 @@ func _queue_rebuild() -> void:
 ## Override in sub-classes to emit geometry into [member _container].
 func _rebuild() -> void:
 	pass
+
+
+## Called when the assigned [member data_source] emits [signal ChartDataSource.data_updated].
+## Queues a rebuild so the chart redraws with the latest data on the next frame.
+func _on_data_source_updated(_new_data: Dictionary) -> void:
+	_queue_rebuild()
+
+
+## Returns [method ChartDataSource.get_data] when a [member data_source] is assigned,
+## otherwise returns an empty [Dictionary].
+## Sub-classes call this in [method _rebuild] to resolve the effective dataset:
+## [codeblock]
+## var d: Dictionary = _get_source_data() if data_source != null else data
+## [/codeblock]
+func _get_source_data() -> Dictionary:
+	if data_source != null:
+		return data_source.get_data()
+	return {}
 
 # ---------------------------------------------------------------------------
 # Public helpers

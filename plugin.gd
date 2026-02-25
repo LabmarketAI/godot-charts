@@ -8,6 +8,30 @@ func _get_plugin_name() -> String:
 
 func _enable_plugin() -> void:
 	add_custom_type(
+		"ChartDataSource",
+		"Resource",
+		preload("utils/chart_data_source.gd"),
+		null
+	)
+	add_custom_type(
+		"DictDataSource",
+		"Resource",
+		preload("utils/dict_data_source.gd"),
+		null
+	)
+	add_custom_type(
+		"CSVDataSource",
+		"Resource",
+		preload("utils/csv_data_source.gd"),
+		null
+	)
+	add_custom_type(
+		"StreamDataSource",
+		"Resource",
+		preload("utils/stream_data_source.gd"),
+		null
+	)
+	add_custom_type(
 		"ChartFrame3D",
 		"Node3D",
 		preload("charts/chart_frame_3d.gd"),
@@ -46,6 +70,10 @@ func _enable_plugin() -> void:
 
 
 func _disable_plugin() -> void:
+	remove_custom_type("ChartDataSource")
+	remove_custom_type("DictDataSource")
+	remove_custom_type("CSVDataSource")
+	remove_custom_type("StreamDataSource")
 	remove_custom_type("ChartFrame3D")
 	remove_custom_type("BarChart3D")
 	remove_custom_type("LineChart3D")

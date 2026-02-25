@@ -62,7 +62,8 @@ func _rebuild() -> void:
 	if not is_instance_valid(_container):
 		return
 
-	var datasets: Array = data.get("datasets", [])
+	var d: Dictionary = _get_source_data() if data_source != null else data
+	var datasets: Array = d.get("datasets", [])
 	if datasets.is_empty():
 		_draw_demo()
 		return

@@ -50,11 +50,13 @@ extends Chart3D
 
 @export_group("Materials")
 
-## Override material applied to every bar.  null = automatic per-dataset color.
-## Assign any [Material] (including [ShaderMaterial]) for custom shader effects.
-@export var bar_material: Material = null :
+## Per-dataset material overrides.  Index 0 → first dataset, index 1 → second, etc.
+## An empty array (default) uses automatic per-dataset colors.
+## Assign any [Material] (including [ShaderMaterial]) at the matching index to
+## override only that dataset; datasets without an entry keep their auto-color.
+@export var bar_materials: Array[Material] = [] :
 	set(v):
-		bar_material = v
+		bar_materials = v
 		_queue_rebuild()
 
 @export_group("")
@@ -113,8 +115,9 @@ func _render_bar_data(d: Dictionary) -> void:
 		var ds: Dictionary = datasets[ds_idx]
 		var values: Array = ds.get("values", [])
 		var color: Color = _get_color(ds_idx)
-		# bar_material overrides per-dataset color when set (Issue #4 / Phase 5a).
-		var mat: Material = _create_material(color, bar_material)
+		# Use per-dataset override when provided; fall back to auto-color (Issue #4).
+		var override: Material = bar_materials[ds_idx] if ds_idx < bar_materials.size() else null
+		var mat: Material = _create_material(color, override)
 
 		for cat_idx in n_categories:
 			var val: float = float(values[cat_idx]) if cat_idx < values.size() else 0.0

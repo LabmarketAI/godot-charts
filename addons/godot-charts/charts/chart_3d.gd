@@ -143,11 +143,17 @@ signal mesh_spawned(mesh_instance: Node3D, animation_player: AnimationPlayer)
 ## Requires the scene to contain an [AnimationPlayer] node.  Leave empty (default)
 ## to skip automatic playback — the [signal mesh_spawned] signal still fires so
 ## you can drive the player yourself.
-@export var spawn_animation: StringName = &""
+@export var spawn_animation: StringName = &"" :
+	set(v):
+		spawn_animation = v
+		_queue_rebuild()
 
 ## When true, the [member spawn_animation] loops indefinitely.
 ## When false (default), the animation plays once and stops.
-@export var loop_animation: bool = false
+@export var loop_animation: bool = false :
+	set(v):
+		loop_animation = v
+		_queue_rebuild()
 
 @export_group("")
 
@@ -269,6 +275,19 @@ func _create_material(color: Color, override: Material = null) -> Material:
 		return override
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
+	return mat
+
+
+## Creates a lit [StandardMaterial3D] with the given albedo color and an optional texture.
+## Pass a non-null [param override] to return it unchanged — same pattern as [method _create_material].
+## [param texture] is applied as [code]albedo_texture[/code] when non-null.
+func _create_material_with_texture(color: Color, texture: Texture2D, override: Material = null) -> Material:
+	if override != null:
+		return override
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	if texture != null:
+		mat.albedo_texture = texture
 	return mat
 
 

@@ -31,11 +31,8 @@ jobs:
         run: |
           mkdir -p addons/godot_charts tests
 
-          # Copy addon files; exclude VCS and CI meta that don't belong in res://
-          cp -r src/. addons/godot_charts/
-          rm -rf addons/godot_charts/.git \
-                 addons/godot_charts/.github \
-                 addons/godot_charts/tests
+          # Addon files live under addons/godot-charts/ in the source repo
+          cp -r src/addons/godot-charts/. addons/godot_charts/
 
           # Place test suites at the project root so they resolve as res://tests/
           cp src/tests/*.gd tests/

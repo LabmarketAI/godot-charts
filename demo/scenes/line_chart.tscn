@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://d5k2j8q1p6r4"]
+
+[ext_resource type="Script" path="res://scenes/line_chart.gd" id="1_d5k2j"]
+
+[node name="LineChartDemo" type="Node3D"]
+script = ExtResource("1_d5k2j")

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://f2p6r4n8m1q7"]
+
+[ext_resource type="Script" path="res://scenes/surface_chart.gd" id="1_f2p6r"]
+
+[node name="SurfaceChartDemo" type="Node3D"]
+script = ExtResource("1_f2p6r")

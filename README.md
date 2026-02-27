@@ -14,35 +14,91 @@ Add beautiful, interactive 3D charts to any Godot project with a few lines of GD
 | `LineChart3D` | Multi-series 3D line chart (scalar or `Vector3` points) |
 | `ScatterChart3D` | 3D scatter / point-cloud plot |
 | `SurfaceChart3D` | Height-map surface from a 2D grid or a `func(x,z)->float` callable |
+| `HistogramChart3D` | Auto-binned histogram built on top of `BarChart3D` |
+| `GraphNetworkChart2D` | Force-directed / circular graph network rendered in the XY plane |
+| `GraphNetworkChart3D` | Same as 2D but with full 3D node positions (Fibonacci sphere layout) |
 
 ---
 
 ## Installation
 
-### From Git (recommended)
+### Option A — Git submodule (recommended for staying up to date)
 
-Navigate to your Godot 4 project's root directory and run:
+From inside your Godot 4 project's root directory:
 
 ```bash
-cd addons/
-git clone https://github.com/LabmarketAI/godot-charts.git godot_charts
+git submodule add https://github.com/LabmarketAI/godot-charts addons/godot-charts
+git submodule update --init
 ```
 
-Then open your project in Godot 4 and enable the plugin under **Project → Project Settings → Plugins**.
+The checkout lands at `res://addons/godot-charts/`, exactly where Godot expects it.
+Enable the plugin under **Project → Project Settings → Plugins → Godot Charts**.
 
-### From the Godot Asset Library (coming soon)
+To pull future updates:
+
+```bash
+git submodule update --remote addons/godot-charts
+```
+
+### Option B — Install script (zero-dependency, CI-friendly)
+
+Clone the repo once, then run `install.sh` to copy the addon into any project:
+
+```bash
+git clone https://github.com/LabmarketAI/godot-charts
+./godot-charts/install.sh /path/to/your-godot-project
+```
+
+This copies `addons/godot-charts/` into the target project and prints a reminder
+to enable the plugin.
+
+### Option C — Symlink (best for iterating on the plugin itself)
+
+```bash
+# from inside your consumer project
+ln -s /path/to/godot-charts/addons/godot-charts addons/godot-charts
+```
+
+Edits to the plugin are immediately reflected in the consumer project without
+copying any files.
+
+### Option D — From the Godot Asset Library (coming soon)
 
 1. Open your Godot 4 project.
 2. Navigate to **AssetLib** and search for *"Godot Charts"*.
 3. Click **Download** → **Install**.
 4. Enable the plugin under **Project → Project Settings → Plugins**.
 
-### Manual Download
+### Option E — Manual ZIP download
 
 1. Download the repository as a ZIP file from [GitHub](https://github.com/LabmarketAI/godot-charts).
-2. Extract and rename the folder to `godot_charts`.
+2. Extract the `addons/godot-charts/` folder from the ZIP.
 3. Place it in your project's `addons/` directory.
 4. Enable the plugin under **Project → Project Settings → Plugins**.
+
+---
+
+## Demo project
+
+A self-contained Godot 4 demo lives in the `demo/` folder at the root of this
+repository.  It shows every chart type with hardcoded sample data.
+
+```bash
+git clone https://github.com/LabmarketAI/godot-charts
+# Open demo/ as a project in Godot 4 — the addon symlink is already wired up.
+```
+
+The demo references the addon via a symlink at `demo/addons/godot-charts →
+../../addons/godot-charts`, so any changes you make to the addon are immediately
+visible inside the demo.
+
+**Keyboard shortcuts in the main demo scene:**
+
+| Key | Action |
+|---|---|
+| `1` – `7` | Fly camera to that chart |
+| `Space` | Toggle surface mode (surface_chart scene) |
+| `Tab` | Cycle layout modes (graph_network scene) |
 
 ---
 

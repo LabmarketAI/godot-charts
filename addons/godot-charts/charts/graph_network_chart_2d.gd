@@ -2,6 +2,9 @@
 class_name GraphNetworkChart2D
 extends Chart3D
 
+const _DEFAULT_NODE_MESH := preload("res://addons/godot-charts/assets/meshes/node_sphere.tres")
+const _DEFAULT_ARROW_HEAD := preload("res://addons/godot-charts/assets/meshes/arrow_head.tres")
+
 ## A 2D graph network chart rendered in the XY plane.
 ##
 ## Nodes and edges are drawn from NetworkX / iGraph style data supplied via
@@ -341,13 +344,6 @@ func _create_node_instance(n: Dictionary, pos: Vector3) -> Node3D:
 		_apply_animation(inst)
 		return inst
 
-	# Default: SphereMesh.
-	var mesh := SphereMesh.new()
-	mesh.radius = node_radius
-	mesh.height = node_radius * 2.0
-	mesh.radial_segments = 8
-	mesh.rings = 4
-
 	var mat: Material
 	if node_type_materials.has(ntype) and node_type_materials[ntype] is Material:
 		mat = node_type_materials[ntype] as Material
@@ -355,7 +351,8 @@ func _create_node_instance(n: Dictionary, pos: Vector3) -> Node3D:
 		mat = _create_material(color)
 
 	var mi := MeshInstance3D.new()
-	mi.mesh = mesh
+	mi.mesh = _DEFAULT_NODE_MESH
+	mi.scale = Vector3.ONE * node_radius
 	mi.material_override = mat
 	mi.position = pos
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -414,13 +411,9 @@ func _draw_arrow_tip(from: Vector3, to: Vector3, mat: Material) -> void:
 		return
 	var tip_pos := to - dir * (node_radius + edge_width * 3.0)
 
-	var cone := CylinderMesh.new()
-	cone.top_radius = 0.0
-	cone.bottom_radius = edge_width * 2.5
-	cone.height = edge_width * 5.0
-
 	var mi := MeshInstance3D.new()
-	mi.mesh = cone
+	mi.mesh = _DEFAULT_ARROW_HEAD
+	mi.scale = Vector3(edge_width * 2.5, edge_width * 5.0, edge_width * 2.5)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.material_override = mat if mat != null else _create_unshaded_material(Color(0.6, 0.6, 0.65))
 	mi.position = tip_pos

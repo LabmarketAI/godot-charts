@@ -2,6 +2,8 @@
 class_name ScatterChart3D
 extends Chart3D
 
+const _DEFAULT_POINT_MESH := preload("res://addons/godot-charts/assets/meshes/point_sphere.tres")
+
 ## A 3D scatter plot.
 ##
 ## Each dataset is a collection of [Vector3] points rendered as small spheres.
@@ -112,9 +114,6 @@ func _rebuild() -> void:
 	var ys: float = chart_size.y / (max_y - min_y)
 	var zs: float = chart_size.x / (max_z - min_z)
 
-	# Build a default sphere once; reused by any dataset without a mesh override.
-	var default_sphere: SphereMesh = null
-
 	for ds_idx in datasets.size():
 		var ds: Dictionary = datasets[ds_idx]
 		var pts: Array = ds.get("points", [])
@@ -126,17 +125,13 @@ func _rebuild() -> void:
 		var ds_scene: PackedScene = point_mesh_scenes[ds_idx] if ds_idx < point_mesh_scenes.size() else null
 		var ds_mesh: Mesh = point_meshes[ds_idx] if ds_idx < point_meshes.size() else null
 		var effective_mesh: Mesh = null
+		var use_default_mesh: bool = false
 		if ds_scene == null:
 			if ds_mesh != null:
 				effective_mesh = ds_mesh
 			else:
-				if default_sphere == null:
-					default_sphere = SphereMesh.new()
-					default_sphere.radius = point_radius
-					default_sphere.height = point_radius * 2.0
-					default_sphere.radial_segments = 8
-					default_sphere.rings = 4
-				effective_mesh = default_sphere
+				effective_mesh = _DEFAULT_POINT_MESH
+				use_default_mesh = true
 
 		for pt: Variant in pts:
 			if not (pt is Vector3):
@@ -156,6 +151,8 @@ func _rebuild() -> void:
 				mi.mesh = effective_mesh
 				mi.material_override = mat
 				mi.position = pos
+				if use_default_mesh:
+					mi.scale = Vector3.ONE * point_radius
 				_container.add_child(mi)
 
 	_draw_axes(chart_size.x, chart_size.y, chart_size.x)

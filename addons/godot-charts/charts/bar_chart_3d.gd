@@ -2,6 +2,8 @@
 class_name BarChart3D
 extends Chart3D
 
+const _DEFAULT_BAR_MESH := preload("res://addons/godot-charts/assets/meshes/bar_box.tres")
+
 ## A 3D grouped bar chart.
 ##
 ## Categories are distributed evenly along the X axis.  Within each category
@@ -161,15 +163,12 @@ func _render_bar_data(d: Dictionary) -> void:
 					_container.add_child(inst)
 					_apply_animation(inst)
 			else:
-				var bar_mesh: Mesh
-				if bar_corner_radius > 0.0:
-					bar_mesh = _build_rounded_bar_mesh(bw, bar_h, bar_depth, bar_corner_radius)
-				else:
-					var box := BoxMesh.new()
-					box.size = Vector3(bw, bar_h, bar_depth)
-					bar_mesh = box
 				var mi := MeshInstance3D.new()
-				mi.mesh = bar_mesh
+				if bar_corner_radius > 0.0:
+					mi.mesh = _build_rounded_bar_mesh(bw, bar_h, bar_depth, bar_corner_radius)
+				else:
+					mi.mesh = _DEFAULT_BAR_MESH
+					mi.scale = Vector3(bw, bar_h, bar_depth)
 				mi.material_override = mat
 				# All bars sit at Z = bar_depth * 0.5 so the front face is at Z = 0.
 				mi.position = bar_pos

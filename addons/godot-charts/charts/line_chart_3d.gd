@@ -2,6 +2,8 @@
 class_name LineChart3D
 extends Chart3D
 
+const _DEFAULT_POINT_MESH := preload("res://addons/godot-charts/assets/meshes/point_sphere.tres")
+
 ## A 3D multi-series line chart.
 ##
 ## Each dataset is drawn as a poly-line. An optional dot is rendered at every
@@ -202,14 +204,13 @@ func _draw_series_2d(
 	# Data-point spheres / custom mesh
 	if show_points:
 		var effective_mesh: Mesh = null
+		var use_default_mesh: bool = false
 		if point_mesh_scene == null:
 			if point_mesh != null:
 				effective_mesh = point_mesh
 			else:
-				var sphere := SphereMesh.new()
-				sphere.radius = point_radius
-				sphere.height = point_radius * 2.0
-				effective_mesh = sphere
+				effective_mesh = _DEFAULT_POINT_MESH
+				use_default_mesh = true
 		var mat: Material = _create_material(color, point_mat_override)
 		for pt in pts:
 			if point_mesh_scene != null:
@@ -225,6 +226,8 @@ func _draw_series_2d(
 				mi.mesh = effective_mesh
 				mi.material_override = mat
 				mi.position = pt
+				if use_default_mesh:
+					mi.scale = Vector3.ONE * point_radius
 				_container.add_child(mi)
 
 
@@ -276,14 +279,13 @@ func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
 
 		if show_points:
 			var effective_mesh: Mesh = null
+			var use_default_mesh: bool = false
 			if point_mesh_scene == null:
 				if point_mesh != null:
 					effective_mesh = point_mesh
 				else:
-					var sphere := SphereMesh.new()
-					sphere.radius = point_radius
-					sphere.height = point_radius * 2.0
-					effective_mesh = sphere
+					effective_mesh = _DEFAULT_POINT_MESH
+					use_default_mesh = true
 			var mat: Material = _create_material(color, point_ov)
 			for pt: Variant in pts:
 				if pt is Vector3:
@@ -302,6 +304,8 @@ func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
 						smi.mesh = effective_mesh
 						smi.material_override = mat
 						smi.position = pos
+						if use_default_mesh:
+							smi.scale = Vector3.ONE * point_radius
 						_container.add_child(smi)
 
 	_draw_axes(chart_size.x, chart_size.y, chart_size.x)

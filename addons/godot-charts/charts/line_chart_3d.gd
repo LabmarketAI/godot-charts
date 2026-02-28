@@ -1,8 +1,6 @@
 @tool
 class_name LineChart3D
-extends Chart3D
-
-const _DEFAULT_POINT_MESH := preload("res://addons/godot-charts/assets/meshes/point_sphere.tres")
+extends PointChart3D
 
 ## A 3D multi-series line chart.
 ##
@@ -52,12 +50,6 @@ const _DEFAULT_POINT_MESH := preload("res://addons/godot-charts/assets/meshes/po
 		show_points = v
 		_queue_rebuild()
 
-## Radius of the point spheres when [member show_points] is enabled.
-@export_range(0.01, 0.5, 0.005) var point_radius: float = 0.06 :
-	set(v):
-		point_radius = v
-		_queue_rebuild()
-
 @export_group("Materials")
 
 ## Per-dataset line material overrides.  Index 0 → first dataset, index 1 → second, etc.
@@ -65,33 +57,6 @@ const _DEFAULT_POINT_MESH := preload("res://addons/godot-charts/assets/meshes/po
 @export var line_materials: Array[Material] = [] :
 	set(v):
 		line_materials = v
-		_queue_rebuild()
-
-## Per-dataset point material overrides (used when [member show_points] is true).
-## An empty array (default) uses automatic per-dataset colors.
-@export var point_materials: Array[Material] = [] :
-	set(v):
-		point_materials = v
-		_queue_rebuild()
-
-@export_group("Mesh Overrides")
-
-## Override the default [SphereMesh] data-point with a custom [Mesh] resource.
-## When null (default), the built-in [SphereMesh] is used.
-## Ignored when [member point_mesh_scene] is set.
-@export var point_mesh: Mesh = null :
-	set(v):
-		point_mesh = v
-		_queue_rebuild()
-
-## Replace each data-point sphere with an instance of this [PackedScene] (e.g. a Blender-exported .tscn).
-## Takes priority over [member point_mesh] when both are set.
-## When null (default), [member point_mesh] or the built-in [SphereMesh] is used.
-## If a matching entry exists in [member point_materials] for this dataset, it is applied
-## to all [MeshInstance3D] descendants of the instantiated scene.
-@export var point_mesh_scene: PackedScene = null :
-	set(v):
-		point_mesh_scene = v
 		_queue_rebuild()
 
 @export_group("")
@@ -149,12 +114,8 @@ func _rebuild_scalar_mode(datasets: Array, labels: Array) -> void:
 	for ds_idx in n_datasets:
 		var ds: Dictionary = datasets[ds_idx]
 		var values: Array = ds.get("values", [])
-		var color: Color = _get_color(ds_idx)
 		var z: float = float(ds_idx) * series_z_spacing
-
-		var line_ov: Material = line_materials[ds_idx] if ds_idx < line_materials.size() else null
-		var point_ov: Material = point_materials[ds_idx] if ds_idx < point_materials.size() else null
-		_draw_series_2d(values, color, x_scale, y_scale, min_val, z, line_ov, point_ov)
+		_draw_series_2d(ds_idx, values, x_scale, y_scale, min_val, z)
 
 	var ax_z: float = float(n_datasets - 1) * series_z_spacing + 0.01
 	_draw_grid_xy(chart_size.x, chart_size.y)
@@ -175,22 +136,21 @@ func _rebuild_scalar_mode(datasets: Array, labels: Array) -> void:
 
 
 func _draw_series_2d(
+	ds_idx: int,
 	values: Array,
-	color: Color,
 	x_scale: float,
 	y_scale: float,
 	min_val: float,
 	z: float,
-	line_mat_override: Material = null,
-	point_mat_override: Material = null,
 ) -> void:
 	var pts: PackedVector3Array = []
 	for i in values.size():
 		pts.append(Vector3(i * x_scale, (float(values[i]) - min_val) * y_scale, z))
 
 	# Line strip — use override when provided, otherwise default unshaded color.
-	var line_mat: Material = line_mat_override if line_mat_override != null \
-		else _create_unshaded_material(color)
+	var color := _get_color(ds_idx)
+	var line_ov: Material = line_materials[ds_idx] if ds_idx < line_materials.size() else null
+	var line_mat: Material = line_ov if line_ov != null else _create_unshaded_material(color)
 	var mesh := ImmediateMesh.new()
 	mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, line_mat)
 	for pt in pts:
@@ -201,34 +161,11 @@ func _draw_series_2d(
 	line_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_container.add_child(line_mi)
 
-	# Data-point spheres / custom mesh
 	if show_points:
-		var effective_mesh: Mesh = null
-		var use_default_mesh: bool = false
-		if point_mesh_scene == null:
-			if point_mesh != null:
-				effective_mesh = point_mesh
-			else:
-				effective_mesh = _DEFAULT_POINT_MESH
-				use_default_mesh = true
-		var mat: Material = _create_material(color, point_mat_override)
 		for pt in pts:
-			if point_mesh_scene != null:
-				var inst: Node3D = point_mesh_scene.instantiate() as Node3D
-				if inst != null:
-					inst.position = pt
-					if point_mat_override != null:
-						_apply_material_to_scene(inst, point_mat_override)
-					_container.add_child(inst)
-					_apply_animation(inst)
-			else:
-				var mi := MeshInstance3D.new()
-				mi.mesh = effective_mesh
-				mi.material_override = mat
-				mi.position = pt
-				if use_default_mesh:
-					mi.scale = Vector3.ONE * point_radius
-				_container.add_child(mi)
+			var inst := _create_point_instance(ds_idx, pt)
+			if inst != null:
+				_container.add_child(inst)
 
 
 func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
@@ -259,7 +196,6 @@ func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
 		var pts: Array = ds.get("points", [])
 		var color: Color = _get_color(ds_idx)
 		var line_ov: Material = line_materials[ds_idx] if ds_idx < line_materials.size() else null
-		var point_ov: Material = point_materials[ds_idx] if ds_idx < point_materials.size() else null
 
 		if pts.size() < 2:
 			continue
@@ -278,35 +214,13 @@ func _rebuild_vector3_mode(datasets: Array, _labels: Array) -> void:
 		_container.add_child(mi)
 
 		if show_points:
-			var effective_mesh: Mesh = null
-			var use_default_mesh: bool = false
-			if point_mesh_scene == null:
-				if point_mesh != null:
-					effective_mesh = point_mesh
-				else:
-					effective_mesh = _DEFAULT_POINT_MESH
-					use_default_mesh = true
-			var mat: Material = _create_material(color, point_ov)
 			for pt: Variant in pts:
 				if pt is Vector3:
 					var v := pt as Vector3
 					var pos := Vector3((v.x - min_x) * xs, (v.y - min_y) * ys, (v.z - min_z) * zs)
-					if point_mesh_scene != null:
-						var inst: Node3D = point_mesh_scene.instantiate() as Node3D
-						if inst != null:
-							inst.position = pos
-							if point_ov != null:
-								_apply_material_to_scene(inst, point_ov)
-							_container.add_child(inst)
-							_apply_animation(inst)
-					else:
-						var smi := MeshInstance3D.new()
-						smi.mesh = effective_mesh
-						smi.material_override = mat
-						smi.position = pos
-						if use_default_mesh:
-							smi.scale = Vector3.ONE * point_radius
-						_container.add_child(smi)
+					var inst := _create_point_instance(ds_idx, pos)
+					if inst != null:
+						_container.add_child(inst)
 
 	_draw_axes(chart_size.x, chart_size.y, chart_size.x)
 

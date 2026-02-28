@@ -38,6 +38,12 @@ func _enable_plugin() -> void:
 		null
 	)
 	add_custom_type(
+		"PointChart3D",
+		"Node3D",
+		preload("charts/point_chart_3d.gd"),
+		null
+	)
+	add_custom_type(
 		"BarChart3D",
 		"Node3D",
 		preload("charts/bar_chart_3d.gd"),
@@ -94,6 +100,7 @@ func _disable_plugin() -> void:
 	remove_custom_type("StreamDataSource")
 	remove_custom_type("GraphNetworkDataSource")
 	remove_custom_type("ChartFrame3D")
+	remove_custom_type("PointChart3D")
 	remove_custom_type("BarChart3D")
 	remove_custom_type("LineChart3D")
 	remove_custom_type("ScatterChart3D")

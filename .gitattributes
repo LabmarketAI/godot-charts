@@ -1,3 +1,29 @@
+# Ensure all text files use LF line endings for cross-platform compatibility
+* text=auto
+*.gd text eol=lf
+*.gdshader text eol=lf
+*.tscn text eol=lf
+*.tres text eol=lf
+*.gd.uid text eol=lf
+*.tscn.uid text eol=lf
+*.tres.uid text eol=lf
+*.cfg text eol=lf
+*.godot text eol=lf
+*.json text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg binary
+*.icns binary
+*.exe binary
+
 # Files to exclude from Asset Library ZIP downloads
 tests/           export-ignore
 demo/            export-ignore

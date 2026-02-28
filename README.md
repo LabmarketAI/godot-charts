@@ -96,13 +96,13 @@ git clone https://github.com/LabmarketAI/godot-charts
 cd godot-charts
 ```
 
-**On Windows (PowerShell):**
-```powershell
+**On Windows (PowerShell / CMD):**
+```cmd
 git clone https://github.com/LabmarketAI/godot-charts
 cd godot-charts
 ```
 
-**On Windows (WSL):**
+**On Windows (WSL / Git Bash):**
 ```bash
 git clone https://github.com/LabmarketAI/godot-charts
 cd godot-charts
@@ -141,18 +141,31 @@ If you're iterating on the addon code and want changes to be immediately visible
 
 **On Windows (PowerShell):**
 ```powershell
-# Option 1: Use WSL
+# Option 1: Use WSL (if installed)
 wsl ./install.sh /mnt/c/path/to/your-project
 
-# Option 2: Use robocopy (CMD only, not PowerShell)
+# Option 2: Use robocopy (copy command with full directory tree)
 robocopy addons\godot-charts C:\path\to\your-project\addons\godot-charts /E
 
-# Option 3: Manual copy via GUI
-# Copy addons/godot-charts/ folder to your-project/addons/
+# Option 3: Manual copy via File Explorer
+# Navigate to addons/godot-charts, copy folder, paste into your-project/addons/
+```
+
+**On Windows (CMD):**
+```cmd
+REM Option 1: Use robocopy
+robocopy addons\godot-charts C:\path\to\your-project\addons\godot-charts /E
+
+REM Option 2: Use xcopy
+xcopy addons\godot-charts C:\path\to\your-project\addons\godot-charts /E /I /Y
+
+REM Option 3: Manual copy via File Explorer
+REM Navigate to addons/godot-charts, copy folder, paste into your-project/addons/
 ```
 
 **On Windows (Git Bash):**
 ```bash
+# If you have Git Bash installed, you can use the same bash syntax as Linux
 ./install.sh /c/path/to/your-project
 ```
 

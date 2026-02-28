@@ -112,7 +112,7 @@ cd godot-charts
 
 All platforms follow the same steps:
 
-1. Launch **Godot 4.7+**
+1. Launch **Godot 4.6+**
 2. Click **Open Project** (or go to **File → Open Project**)
 3. Navigate to the `godot-charts/demo/` folder
 4. Select `project.godot` and click **Open**

@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        godot-version: ["4.3", "4.4"]
+        godot-version: ["4.6"]
 
     steps:
       - name: Checkout addon
@@ -46,7 +46,7 @@ jobs:
           [application]
 
           config/name="Godot Charts Tests"
-          config/features=PackedStringArray("4.3", "Forward Plus")
+          config/features=PackedStringArray("4.6", "Forward Plus")
           PEOF
 
       - name: Run GdUnit4 Tests

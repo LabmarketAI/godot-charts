@@ -88,20 +88,73 @@ available for local development and testing when you clone the repository.
 
 ### Running the demo locally
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/LabmarketAI/godot-charts
-   cd godot-charts
-   ```
+#### Step 1: Clone the repository
 
-2. **Open the demo project in Godot 4.7+:**
-   - Launch Godot and select **Open Project**
-   - Navigate to `godot-charts/demo/project.godot`
-   - Click **Open & Edit**
+**On Linux/macOS:**
+```bash
+git clone https://github.com/LabmarketAI/godot-charts
+cd godot-charts
+```
 
-3. The addon is automatically available at `res://addons/godot-charts/`
-   - Changes to the addon source code are immediately reflected in the demo
-   - All chart types are editable in both the editor and via code
+**On Windows (PowerShell):**
+```powershell
+git clone https://github.com/LabmarketAI/godot-charts
+cd godot-charts
+```
+
+**On Windows (WSL):**
+```bash
+git clone https://github.com/LabmarketAI/godot-charts
+cd godot-charts
+```
+
+#### Step 2: Open the demo in Godot
+
+All platforms follow the same steps:
+
+1. Launch **Godot 4.7+**
+2. Click **Open Project** (or go to **File → Open Project**)
+3. Navigate to the `godot-charts/demo/` folder
+4. Select `project.godot` and click **Open**
+5. Click **Open & Edit** (or double-click the project)
+
+The addon is automatically available at `res://addons/godot-charts/`:
+- Changes to the addon source code are immediately reflected in the demo
+- All chart types are editable in both the editor and via code
+- The demo works identically on Windows, Linux, and macOS
+
+### Installing addon updates in development
+
+If you're iterating on the addon code and want changes to be immediately visible:
+
+**Recommended approach (all platforms):**
+- Edit files directly in `addons/godot-charts/` (either in VS Code or Godot's built-in editor)
+- Save changes
+- Return to Godot; the addon recompiles automatically
+
+**For consuming projects (copy addon to another project):**
+
+**On Linux/macOS:**
+```bash
+./install.sh /path/to/your-project
+```
+
+**On Windows (PowerShell):**
+```powershell
+# Option 1: Use WSL
+wsl ./install.sh /mnt/c/path/to/your-project
+
+# Option 2: Use robocopy (CMD only, not PowerShell)
+robocopy addons\godot-charts C:\path\to\your-project\addons\godot-charts /E
+
+# Option 3: Manual copy via GUI
+# Copy addons/godot-charts/ folder to your-project/addons/
+```
+
+**On Windows (Git Bash):**
+```bash
+./install.sh /c/path/to/your-project
+```
 
 ### Building demos or examples into your own project
 

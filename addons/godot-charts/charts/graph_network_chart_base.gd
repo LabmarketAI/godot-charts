@@ -164,7 +164,7 @@ var _type_color_index: Dictionary = {}  # type_string -> int
 ## Subclass should override to return the layout positions for all nodes.
 ## For 2D, return a Dictionary[id → Vector2].
 ## For 3D, return a Dictionary[id → Vector3].
-func _compute_layout(nodes: Array, edges: Array) -> Dictionary:
+func _compute_layout(_nodes: Array, _edges: Array) -> Dictionary:
 	push_error("GraphNetworkChartBase._compute_layout() not implemented in subclass")
 	return {}
 
@@ -258,9 +258,9 @@ func _create_node_instance(n: Dictionary, pos: Vector3) -> Node3D:
 		var inst: Node3D = scene.instantiate() as Node3D
 		inst.position = pos
 		inst.scale = Vector3.ONE * node_radius
-		var mat: Material = node_type_materials.get(ntype, null) as Material
-		if mat != null:
-			_apply_material_to_scene(inst, mat)
+		var m: Material = node_type_materials.get(ntype, null) as Material
+		if m != null:
+			_apply_material_to_scene(inst, m)
 		_apply_animation(inst)
 		return inst
 
@@ -361,7 +361,7 @@ func _draw_edges(edges: Array, layout: Dictionary) -> void:
 		if tex != null:
 			var edge_color := Color(0.6, 0.6, 0.65) if mat == null else Color.WHITE
 			mat = _create_material_with_texture(edge_color, tex, mat)
-		else if mat == null:
+		elif mat == null:
 			mat = _create_unshaded_material(Color(0.6, 0.6, 0.65))
 
 		# Draw edge (line or cylindrical).
@@ -379,7 +379,7 @@ func _draw_edges(edges: Array, layout: Dictionary) -> void:
 
 
 ## Draw a cylindrical edge between two 3D points.
-func _draw_edge_cylinder(v0: Vector3, v1: Vector3, etype: String, mat: Material) -> void:
+func _draw_edge_cylinder(v0: Vector3, v1: Vector3, _etype: String, mat: Material) -> void:
 	var dir := (v1 - v0)
 	var dist := dir.length()
 	if dist < 0.001:
@@ -406,7 +406,7 @@ func _draw_edge_cylinder(v0: Vector3, v1: Vector3, etype: String, mat: Material)
 
 
 ## Instantiate a custom scene for each edge.
-func _draw_edge_scene(v0: Vector3, v1: Vector3, etype: String, mat: Material) -> void:
+func _draw_edge_scene(v0: Vector3, v1: Vector3, _etype: String, mat: Material) -> void:
 	var inst := edge_mesh_scene.instantiate() as Node3D
 	if inst == null:
 		return
@@ -459,7 +459,7 @@ func _draw_node_labels(nodes: Array, layout: Dictionary) -> void:
 	for n in nodes:
 		var id := str(n.get("id", ""))
 		var lbl_text := str(n.get("label", id))
-		var pos = layout.get(id, Vector2.ZERO if layout else Vector3.ZERO)
+		var pos = layout.get(id)
 		var pos3 := _layout_position_to_vector3(pos)
 		var lbl := _make_label(lbl_text, pos3 + Vector3(0.0, node_radius + 0.12, 0.0), 44)
 		_label_container.add_child(lbl)

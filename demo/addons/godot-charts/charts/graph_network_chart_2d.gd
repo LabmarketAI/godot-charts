@@ -59,6 +59,7 @@ func _layout_preset(nodes: Array) -> Dictionary:
 	for n in nodes:
 		var id := str(n.get("id", ""))
 		raw[id] = Vector2(float(n.get("x", 0.0)), float(n.get("y", 0.0)))
+	return raw
 
 
 

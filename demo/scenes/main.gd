@@ -29,9 +29,10 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed:
 		return
-	var k := event.keycode
+	var key_event := event as InputEventKey
+	var k: int = key_event.keycode
 	if k >= KEY_1 and k <= KEY_7:
-		var idx := k - KEY_1
+		var idx: int = k - KEY_1
 		if idx < _frame_centres.size():
 			_fly_to(_frame_centres[idx])
 

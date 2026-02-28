@@ -123,6 +123,29 @@ The addon is automatically available at `res://addons/godot-charts/`:
 - All chart types are editable in both the editor and via code
 - The demo works identically on Windows, Linux, and macOS
 
+### Repository structure & development workflow
+
+This repository contains **two copies** of the addon to maintain the distributable nature of Godot addons:
+
+- **`addons/godot-charts/`** — Primary addon source (what gets distributed)
+- **`demo/addons/godot-charts/`** — Copy used by the demo project
+
+**Local developers should only edit in `addons/godot-charts/`.**  
+The demo copy is kept automatically in sync via CI/CD, so changes you make to the primary addon are reflected in the demo after each push.
+
+**How sync works:**
+1. You edit files in `addons/godot-charts/` locally
+2. You commit and push your changes
+3. GitHub Actions runs `scripts/sync-demo-addon.sh` to copy updated files to `demo/addons/godot-charts/`
+4. The sync commit is automatically created and pushed
+5. Everyone pulls the synced changes
+
+This ensures:
+- ✅ Single source of truth (primary addon location)
+- ✅ No manual sync required from developers
+- ✅ Demo always uses the latest addon code
+- ✅ Clean separation between distributable and demo code
+
 ### Installing addon updates in development
 
 If you're iterating on the addon code and want changes to be immediately visible:
@@ -184,6 +207,49 @@ The main demo scene (`demo/scenes/main.tscn`) includes interactive navigation:
 | `1` – `7` | Fly camera to that chart |
 | `Space` | Toggle surface mode (on surface_chart scene) |
 | `Tab` | Cycle layout modes (on graph_network scene) |
+
+### Troubleshooting local development
+
+#### "Parse Error: Could not resolve script" on Windows
+
+**Symptom:** Godot fails to load the plugin with errors like:
+```
+Parse Error: Could not resolve script "res://addons/godot-charts/charts/graph_network_chart_2d.gd"
+```
+
+**Cause:** This typically occurs on Windows when GDScript files have CRLF (Windows-style) line endings instead of LF (Unix-style).
+
+**Solution:** Normalize line endings to LF:
+
+```bash
+# On WSL / Git Bash, from the root of the repository
+find addons/godot-charts -type f \( -name "*.gd" -o -name "*.tscn" -o -name "*.tres" \) -exec dos2unix {} +
+```
+
+Or on Windows CMD (if you have Git installed):
+```cmd
+git config core.autocrlf false
+git add -A
+git commit -m "Normalize line endings to LF"
+```
+
+Then restart Godot — the addon should load without errors.
+
+**Prevention:** The repository's `.gitattributes` file ensures line endings are normalized for future commits on all platforms.
+
+#### Demo addon out of sync with primary addon
+
+**Symptom:** You edited `addons/godot-charts/` but changes don't appear in the demo.
+
+**Cause:** The sync script hasn't been run yet (it runs automatically in CI/CD on push).
+
+**Solution (local sync):**
+```bash
+# From the repository root
+bash scripts/sync-demo-addon.sh
+```
+
+This copies all changes from `addons/godot-charts/` to `demo/addons/godot-charts/`.
 
 ---
 

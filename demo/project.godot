@@ -17,6 +17,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="Godot Charts Demo"
 config/description="Interactive demo of all Godot Charts chart types."
 config/version="1.0.0"
+run/main_scene="uid://bq7x1m2n4k8p"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 config/run/main_scene="res://scenes/main.tscn"

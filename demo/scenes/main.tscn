@@ -1,6 +1,36 @@
-[gd_scene load_steps=2 format=3 uid="uid://bq7x1m2n4k8p"]
+[gd_scene load_steps=7 format=3 uid="uid://bq7x1m2n4k8p"]
 
-[ext_resource type="Script" path="res://scenes/main.gd" id="1_bq7x1"]
+[ext_resource type="Script" uid="uid://c0df0dadc3i2r" path="res://scenes/main.gd" id="1_bq7x1"]
 
-[node name="Main" type="Node3D"]
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_o5qli"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_0wfyh"]
+sky_material = SubResource("ProceduralSkyMaterial_o5qli")
+
+[sub_resource type="Environment" id="Environment_sugp2"]
+background_mode = 2
+sky = SubResource("Sky_0wfyh")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_o5qli"]
+size = Vector3(10, 0.5, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0wfyh"]
+size = Vector3(10, 0.5, 10)
+
+[node name="Main" type="Node3D" unique_id=1989120593]
 script = ExtResource("1_bq7x1")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=210379738]
+environment = SubResource("Environment_sugp2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1015886009]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=185935099]
+shape = SubResource("BoxShape3D_o5qli")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=975826152]
+mesh = SubResource("BoxMesh_0wfyh")

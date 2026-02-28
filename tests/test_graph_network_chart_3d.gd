@@ -208,3 +208,48 @@ func test_data_source_get_source_data_matches_loaded() -> void:
 	var d: Dictionary = _chart._get_source_data()
 	assert_array(d["nodes"]).has_size(SAMPLE_NODES.size())
 	assert_array(d["edges"]).has_size(SAMPLE_EDGES.size())
+
+
+# ---------------------------------------------------------------------------
+# GraphNetworkChartBase properties accessible from GraphNetworkChart3D
+# ---------------------------------------------------------------------------
+
+func test_base_node_default_mesh_accessible() -> void:
+	var m := SphereMesh.new()
+	_chart.node_default_mesh = m
+	assert_object(_chart.node_default_mesh).is_equal(m)
+
+
+func test_base_node_type_meshes_accessible() -> void:
+	var m := BoxMesh.new()
+	_chart.node_type_meshes = {"source": m}
+	assert_object(_chart.node_type_meshes["source"]).is_equal(m)
+
+
+func test_base_node_default_texture_accessible() -> void:
+	var tex := ImageTexture.new()
+	_chart.node_default_texture = tex
+	assert_object(_chart.node_default_texture).is_equal(tex)
+
+
+func test_base_edge_radius_accessible() -> void:
+	_chart.edge_radius = 0.03
+	assert_float(_chart.edge_radius).is_equal_approx(0.03, 0.0001)
+
+
+func test_base_edge_default_texture_accessible() -> void:
+	var tex := ImageTexture.new()
+	_chart.edge_default_texture = tex
+	assert_object(_chart.edge_default_texture).is_equal(tex)
+
+
+func test_base_get_node_mesh_falls_through_to_preloaded_default() -> void:
+	# No overrides → returns the preloaded _DEFAULT_NODE_MESH (non-null).
+	var m := _chart._get_node_mesh("node")
+	assert_object(m).is_not_null()
+
+
+func test_base_spring_per_frame_queues_rebuild() -> void:
+	_chart._rebuild_queued = false
+	_chart.spring_per_frame = true
+	assert_bool(_chart._rebuild_queued).is_true()

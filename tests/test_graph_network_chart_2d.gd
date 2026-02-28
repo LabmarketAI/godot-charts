@@ -198,3 +198,67 @@ func test_data_source_get_data_node_count() -> void:
 	_chart.data_source = src
 	var d: Dictionary = _chart._get_source_data()
 	assert_array(d["nodes"]).has_size(2)
+
+
+# ---------------------------------------------------------------------------
+# GraphNetworkChartBase properties accessible from GraphNetworkChart2D
+# ---------------------------------------------------------------------------
+
+func test_base_node_default_mesh_accessible() -> void:
+	var m := SphereMesh.new()
+	_chart.node_default_mesh = m
+	assert_object(_chart.node_default_mesh).is_equal(m)
+
+
+func test_base_node_type_meshes_accessible() -> void:
+	var m := BoxMesh.new()
+	_chart.node_type_meshes = {"person": m}
+	assert_object(_chart.node_type_meshes["person"]).is_equal(m)
+
+
+func test_base_node_default_texture_accessible() -> void:
+	var tex := ImageTexture.new()
+	_chart.node_default_texture = tex
+	assert_object(_chart.node_default_texture).is_equal(tex)
+
+
+func test_base_node_type_textures_accessible() -> void:
+	var tex := ImageTexture.new()
+	_chart.node_type_textures = {"org": tex}
+	assert_object(_chart.node_type_textures["org"]).is_equal(tex)
+
+
+func test_base_edge_radius_accessible() -> void:
+	_chart.edge_radius = 0.05
+	assert_float(_chart.edge_radius).is_equal_approx(0.05, 0.0001)
+
+
+func test_base_edge_default_texture_accessible() -> void:
+	var tex := ImageTexture.new()
+	_chart.edge_default_texture = tex
+	assert_object(_chart.edge_default_texture).is_equal(tex)
+
+
+func test_base_edge_type_textures_accessible() -> void:
+	var tex := ImageTexture.new()
+	_chart.edge_type_textures = {"employs": tex}
+	assert_object(_chart.edge_type_textures["employs"]).is_equal(tex)
+
+
+func test_base_get_node_mesh_resolution_order() -> void:
+	# type-specific mesh overrides default mesh.
+	var default_m := SphereMesh.new()
+	var type_m := BoxMesh.new()
+	_chart.node_default_mesh = default_m
+	_chart.node_type_meshes = {"person": type_m}
+	assert_object(_chart._get_node_mesh("person")).is_equal(type_m)
+	assert_object(_chart._get_node_mesh("org")).is_equal(default_m)
+
+
+func test_base_get_edge_texture_resolution_order() -> void:
+	var default_tex := ImageTexture.new()
+	var type_tex := ImageTexture.new()
+	_chart.edge_default_texture = default_tex
+	_chart.edge_type_textures = {"employs": type_tex}
+	assert_object(_chart._get_edge_texture("employs")).is_equal(type_tex)
+	assert_object(_chart._get_edge_texture("")).is_equal(default_tex)

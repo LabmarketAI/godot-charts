@@ -14,110 +14,35 @@ Add beautiful, interactive 3D charts to any Godot project with a few lines of GD
 | `LineChart3D` | Multi-series 3D line chart (scalar or `Vector3` points) |
 | `ScatterChart3D` | 3D scatter / point-cloud plot |
 | `SurfaceChart3D` | Height-map surface from a 2D grid or a `func(x,z)->float` callable |
-| `HistogramChart3D` | Auto-binned histogram built on top of `BarChart3D` |
-| `GraphNetworkChart2D` | Force-directed / circular graph network rendered in the XY plane |
-| `GraphNetworkChart3D` | Same as 2D but with full 3D node positions (Fibonacci sphere layout) |
 
 ---
 
 ## Installation
 
-### Option A — Git submodule (recommended for staying up to date)
+### From Git (recommended)
 
-From inside your Godot 4 project's root directory:
-
-```bash
-git submodule add https://github.com/LabmarketAI/godot-charts addons/godot-charts
-git submodule update --init
-```
-
-The checkout lands at `res://addons/godot-charts/`, exactly where Godot expects it.
-Enable the plugin under **Project → Project Settings → Plugins → Godot Charts**.
-
-To pull future updates:
+Navigate to your Godot 4 project's root directory and run:
 
 ```bash
-git submodule update --remote addons/godot-charts
+cd addons/
+git clone https://github.com/LabmarketAI/godot-charts.git godot_charts
 ```
 
-### Option B — Install script (zero-dependency, CI-friendly)
+Then open your project in Godot 4 and enable the plugin under **Project → Project Settings → Plugins**.
 
-Clone the repo once, then run `install.sh` to copy the addon into any project:
-
-```bash
-git clone https://github.com/LabmarketAI/godot-charts
-./godot-charts/install.sh /path/to/your-godot-project
-```
-
-This copies `addons/godot-charts/` into the target project and prints a reminder
-to enable the plugin.
-
-### Option C — Symlink (best for iterating on the plugin itself)
-
-```bash
-# from inside your consumer project
-ln -s /path/to/godot-charts/addons/godot-charts addons/godot-charts
-```
-
-Edits to the plugin are immediately reflected in the consumer project without
-copying any files.
-
-### Option D — From the Godot Asset Library (coming soon)
+### From the Godot Asset Library (coming soon)
 
 1. Open your Godot 4 project.
 2. Navigate to **AssetLib** and search for *"Godot Charts"*.
 3. Click **Download** → **Install**.
 4. Enable the plugin under **Project → Project Settings → Plugins**.
 
-### Option E — Manual ZIP download
+### Manual Download
 
 1. Download the repository as a ZIP file from [GitHub](https://github.com/LabmarketAI/godot-charts).
-2. Extract the `addons/godot-charts/` folder from the ZIP.
+2. Extract and rename the folder to `godot_charts`.
 3. Place it in your project's `addons/` directory.
 4. Enable the plugin under **Project → Project Settings → Plugins**.
-
----
-
-## Local Development & Demo Project
-
-A self-contained Godot 4 demo project lives in the `demo/` folder at the root of this
-repository. It showcases every chart type with interactive scenes and sample data.
-
-**Note:** The demo is excluded from Asset Library downloads via `.gitattributes` but is 
-available for local development and testing when you clone the repository.
-
-### Running the demo locally
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/LabmarketAI/godot-charts
-   cd godot-charts
-   ```
-
-2. **Open the demo project in Godot 4.7+:**
-   - Launch Godot and select **Open Project**
-   - Navigate to `godot-charts/demo/project.godot`
-   - Click **Open & Edit**
-
-3. The addon is automatically available at `res://addons/godot-charts/`
-   - Changes to the addon source code are immediately reflected in the demo
-   - All chart types are editable in both the editor and via code
-
-### Building demos or examples into your own project
-
-If you want a self-contained example project for distribution or sharing:
-- Copy the `demo/scenes/` folder and `demo/addons/godot-charts/` into your project
-- Or follow the **Quickstart** section below to build interactive examples from scratch
-
-### Demo scene keyboard shortcuts
-
-The main demo scene (`demo/scenes/main.tscn`) includes interactive navigation:
-
-| Key | Action |
-|---|---|
-| `1` – `7` | Fly camera to that chart |
-| `Space` | Toggle surface mode (on surface_chart scene) |
-| `Tab` | Cycle layout modes (on graph_network scene) |
 
 ---
 

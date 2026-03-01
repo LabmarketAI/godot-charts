@@ -32,5 +32,6 @@ XRToolsRumbleManager="*uid://by853dk86g1qw"
 enabled=PackedStringArray("res://addons/godot-charts/plugin.cfg", "res://addons/godot-xr-tools/plugin.cfg")
 
 [xr]
+openxr/enabled=true
 
 shaders/enabled=true

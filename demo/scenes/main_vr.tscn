@@ -1,7 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://cnbkvrc53h3n5"]
+[gd_scene load_steps=9 format=3 uid="uid://cnbkvrc53h3n5"]
 
 [ext_resource type="PackedScene" uid="uid://bq7x1m2n4k8p" path="res://scenes/main.tscn" id="1_main"]
 [ext_resource type="Script" uid="uid://06e8pnwum5s1" path="res://scenes/main_vr.gd" id="2_vr_script"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/player/player_body.tscn" id="3_body"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn" id="4_l_hand"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="5_r_hand"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_mov"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="7_turn"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/functions/function_teleport.tscn" id="8_tele"]
 
 [node name="Main" instance=ExtResource("1_main")]
 script = ExtResource("2_vr_script")
@@ -20,6 +26,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 1.5, -0.3)
 tracker = &"left_hand"
 
+[node name="LeftHand" parent="XROrigin3D/LeftHand" index="0" instance=ExtResource("4_l_hand")]
+
+[node name="MovementDirect" parent="XROrigin3D/LeftHand" index="1" instance=ExtResource("6_mov")]
+
+[node name="MovementTurn" parent="XROrigin3D/LeftHand" index="2" instance=ExtResource("7_turn")]
+
 [node name="RightHand" type="XRController3D" parent="XROrigin3D" index="2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 1.5, -0.3)
 tracker = &"right_hand"
+
+[node name="RightHand" parent="XROrigin3D/RightHand" index="0" instance=ExtResource("5_r_hand")]
+
+[node name="FunctionTeleport" parent="XROrigin3D/RightHand" index="1" instance=ExtResource("8_tele")]
+
+[node name="PlayerBody" parent="XROrigin3D" index="3" instance=ExtResource("3_body")]
+

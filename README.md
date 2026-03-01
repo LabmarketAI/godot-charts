@@ -82,6 +82,7 @@ copying any files.
 
 A self-contained Godot 4 demo project lives in the `demo/` folder at the root of this
 repository. It showcases every chart type with interactive scenes and sample data.
+The demo includes a unified "Data Room" environment accessible via both a standard **desktop first-person controller** and an **OpenXR virtual reality (VR)** setup.
 
 **Note:** The demo is excluded from Asset Library downloads via `.gitattributes` but is 
 available for local development and testing when you clone the repository.
@@ -198,15 +199,23 @@ If you want a self-contained example project for distribution or sharing:
 - Copy the `demo/scenes/` folder and `demo/addons/godot-charts/` into your project
 - Or follow the **Quickstart** section below to build interactive examples from scratch
 
-### Demo scene keyboard shortcuts
+### Demo Scenes & Navigation
 
-The main demo scene (`demo/scenes/main.tscn`) includes interactive navigation:
+The `demo/scenes/` folder contains two main entry points that both instantiate the same central 3D data room (`data_room.tscn`):
 
-| Key | Action |
-|---|---|
-| `1` – `7` | Fly camera to that chart |
-| `Space` | Toggle surface mode (on surface_chart scene) |
-| `Tab` | Cycle layout modes (on graph_network scene) |
+#### 1. Desktop Demo (`main.tscn`)
+Features a standard first-person controller to walk around the chart displays.
+- `W` `A` `S` `D` (or Arrows): Walk and strafe
+- **Mouse**: Look around
+- `1` – `7`: Instantly teleport to the viewing position for a specific chart
+- `Escape`: Toggle mouse capture (release or hide cursor)
+
+#### 2. VR Demo (`main_vr.tscn`) *[requires OpenXR]*
+Features a Godot XR Tools rig for exploring the data room in virtual reality.
+- **Requirements**: Connected headset, OpenXR runtime active (e.g. SteamVR on Windows, WiVRn on Linux).
+- **Controls**: Standard Godot XR Tools mappings (Left thumbstick for movement/turn, Right trigger for teleport).
+
+*(Note: There are also standalone, minimal examples for each chart type like `surface_chart.tscn` and `graph_network.tscn`. In those specific minimal scenes, press `Space` to toggle surface mode, or `Tab` to cycle node layout modes.)*
 
 ### Troubleshooting local development
 

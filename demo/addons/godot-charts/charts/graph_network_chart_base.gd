@@ -57,6 +57,15 @@ enum LayoutMode {
 		edge_radius = v
 		_queue_rebuild()
 
+## Multiplier applied to the per-edge [code]weight[/code] field when drawing
+## cylindrical edges.  Edge weights are clamped to (0, 1] before scaling, so
+## a weight of 1.0 (the default) renders at full [member edge_radius].
+## Set to 0.0 to ignore weights entirely (uniform radius).
+@export_range(0.0, 2.0, 0.01) var edge_weight_scale: float = 1.0 :
+	set(v):
+		edge_weight_scale = v
+		_queue_rebuild()
+
 ## Draw a billboard label above each node.
 @export var show_node_labels: bool = true :
 	set(v):
@@ -364,9 +373,13 @@ func _draw_edges(edges: Array, layout: Dictionary) -> void:
 		elif mat == null:
 			mat = _create_unshaded_material(Color(0.6, 0.6, 0.65))
 
+		# Weight-adjusted cylinder radius: clamp weight to (0,1], scale by edge_weight_scale.
+		var weight := clampf(float(e.get("weight", 1.0)), 0.001, 1.0)
+		var eff_radius := edge_radius * (1.0 if edge_weight_scale == 0.0 else weight * edge_weight_scale)
+
 		# Draw edge (line or cylindrical).
 		if edge_radius > 0.0 and edge_mesh_scene == null:
-			_draw_edge_cylinder(v0, v1, etype, mat)
+			_draw_edge_cylinder(v0, v1, etype, mat, eff_radius)
 		elif edge_mesh_scene != null:
 			_draw_edge_scene(v0, v1, etype, mat)
 		else:
@@ -379,15 +392,16 @@ func _draw_edges(edges: Array, layout: Dictionary) -> void:
 
 
 ## Draw a cylindrical edge between two 3D points.
-func _draw_edge_cylinder(v0: Vector3, v1: Vector3, _etype: String, mat: Material) -> void:
+## [param radius] overrides [member edge_radius] so per-edge weight scaling can be applied.
+func _draw_edge_cylinder(v0: Vector3, v1: Vector3, _etype: String, mat: Material, radius: float = -1.0) -> void:
 	var dir := (v1 - v0)
 	var dist := dir.length()
 	if dist < 0.001:
 		return
-	
+
 	var cyl := CylinderMesh.new()
 	cyl.height = dist
-	cyl.radius = edge_radius
+	cyl.radius = radius if radius >= 0.0 else edge_radius
 	
 	var mi := MeshInstance3D.new()
 	mi.mesh = cyl

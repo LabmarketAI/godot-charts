@@ -30,6 +30,22 @@ extends GraphNetworkChartBase
 ## custom meshes and materials.  Similarly use [member edge_type_materials]
 ## for per-type edge styling.
 
+## When [code]true[/code], the spring layout runs one iteration per
+## [code]_process[/code] tick so nodes visibly settle into position.
+## When [code]false[/code] (default), all iterations run synchronously on rebuild.
+@export var spring_per_frame: bool = false :
+	set(v):
+		spring_per_frame = v
+		_queue_rebuild()
+
+# Per-frame spring simulation state (2D).
+var _spring_running: bool = false
+var _spring_pos: Dictionary = {}    # id (String) -> Vector2
+var _spring_ids: Array[String] = []
+var _spring_edges: Array = []        # raw edge dicts
+var _spring_temp: float = 0.0
+var _spring_step: int = 0
+
 # ---------------------------------------------------------------------------
 # Lifecycle
 # ---------------------------------------------------------------------------
@@ -39,10 +55,56 @@ func _process(delta: float) -> void:
 	# Drive hot-reload on any GraphNetworkDataSource assigned as data_source.
 	if data_source != null and data_source.has_method("tick"):
 		data_source.tick(delta)
+	# Advance per-frame spring simulation one step.
+	if _spring_running:
+		_spring_step_2d()
 
 # ---------------------------------------------------------------------------
 # Layout computation
 # ---------------------------------------------------------------------------
+
+func _rebuild() -> void:
+	if not is_instance_valid(_container):
+		return
+	_ensure_sub_containers()
+
+	# Stop any in-progress per-frame simulation before starting fresh.
+	_spring_running = false
+
+	var d: Dictionary = _get_source_data() if data_source != null else data
+	var nodes: Array = d.get("nodes", [])
+	var edges: Array = d.get("edges", [])
+
+	if nodes.is_empty():
+		_clear_all()
+		_draw_demo()
+		return
+
+	# 1. Compute (or start) layout.
+	var layout: Dictionary  # id -> Vector2
+	if layout_mode == LayoutMode.SPRING and spring_per_frame:
+		layout = _start_spring_2d(nodes, edges)
+	else:
+		layout = _compute_layout(nodes, edges)
+
+	# 2. Differential node sync.
+	_sync_nodes(nodes, layout)
+
+	# 3. Edges — full rebuild each time.
+	for child in _edge_container.get_children():
+		child.free()
+	_draw_edges(edges, layout)
+
+	# 4. Labels — full rebuild each time.
+	for child in _label_container.get_children():
+		child.free()
+	if show_node_labels:
+		_draw_node_labels(nodes, layout)
+	if show_edge_labels:
+		_draw_edge_labels(edges, layout)
+
+	emit_signal("data_changed")
+
 
 func _compute_layout(nodes: Array, edges: Array) -> Dictionary:
 	match layout_mode:
@@ -134,6 +196,83 @@ func _layout_spring(nodes: Array, edges: Array) -> Dictionary:
 		temperature *= 0.95
 
 	return _normalize_to_chart(pos)
+
+
+## Initialise per-frame spring state and return the seed layout.
+## Called by [method _rebuild] when [member spring_per_frame] is [code]true[/code].
+func _start_spring_2d(nodes: Array, edges: Array) -> Dictionary:
+	_spring_edges = edges
+	_spring_ids.clear()
+	_spring_pos.clear()
+	var n := nodes.size()
+	for i in n:
+		var id := str(nodes[i].get("id", ""))
+		_spring_ids.append(id)
+		var angle := TAU * float(i) / float(n) - PI * 0.5
+		_spring_pos[id] = Vector2(0.5 + cos(angle) * 0.4, 0.5 + sin(angle) * 0.4)
+	_spring_temp = 0.15
+	_spring_step = 0
+	_spring_running = true
+	return _normalize_to_chart(_spring_pos)
+
+
+## Advance the 2D per-frame spring simulation by one Fruchterman-Reingold step.
+func _spring_step_2d() -> void:
+	if _spring_step >= spring_iterations:
+		_spring_running = false
+		return
+
+	var n := _spring_ids.size()
+	var k := sqrt(1.0 / float(maxi(n, 1)))
+	var disp: Dictionary = {}
+	for id in _spring_ids:
+		disp[id] = Vector2.ZERO
+
+	# Repulsion between every pair.
+	for i in n:
+		for j in range(i + 1, n):
+			var vi: String = _spring_ids[i]
+			var vj: String = _spring_ids[j]
+			var delta: Vector2 = (_spring_pos[vi] as Vector2) - (_spring_pos[vj] as Vector2)
+			var dist := maxf(delta.length(), 0.001)
+			var force := k * k / dist
+			var d_norm := delta / dist
+			disp[vi] = (disp[vi] as Vector2) + d_norm * force
+			disp[vj] = (disp[vj] as Vector2) - d_norm * force
+
+	# Attraction along edges.
+	for e in _spring_edges:
+		var src := str(e.get("source", ""))
+		var tgt := str(e.get("target", ""))
+		if not (_spring_pos.has(src) and _spring_pos.has(tgt)):
+			continue
+		var delta: Vector2 = (_spring_pos[tgt] as Vector2) - (_spring_pos[src] as Vector2)
+		var dist := maxf(delta.length(), 0.001)
+		var force := dist * dist / k
+		var d_norm := delta / dist
+		disp[tgt] = (disp[tgt] as Vector2) - d_norm * force
+		disp[src] = (disp[src] as Vector2) + d_norm * force
+
+	# Apply displacement clamped by temperature.
+	for id in _spring_ids:
+		var dv: Vector2 = disp[id]
+		var d_len := maxf(dv.length(), 0.001)
+		_spring_pos[id] = (_spring_pos[id] as Vector2) + (dv / d_len) * minf(d_len, _spring_temp)
+
+	_spring_temp *= 0.95
+	_spring_step += 1
+
+	# Push updated positions to the scene.
+	var layout := _normalize_to_chart(_spring_pos)
+	for id in _spring_ids:
+		if _node_instances.has(id):
+			(_node_instances[id] as Node3D).position = _layout_position_to_vector3(layout.get(id))
+
+	# Rebuild edges every step so they track new positions.
+	if is_instance_valid(_edge_container):
+		for child in _edge_container.get_children():
+			child.free()
+		_draw_edges(_spring_edges, layout)
 
 
 ## Scale raw positions so every node fits within the chart area with [member node_radius] margins.

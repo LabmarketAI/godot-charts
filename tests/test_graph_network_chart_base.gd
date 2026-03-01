@@ -324,3 +324,9 @@ func test_setting_show_edge_labels_queues_rebuild() -> void:
 	_chart._rebuild_queued = false
 	_chart.show_edge_labels = true
 	assert_bool(_chart._rebuild_queued).is_true()
+
+
+func test_setting_edge_weight_scale_queues_rebuild() -> void:
+	_chart._rebuild_queued = false
+	_chart.edge_weight_scale = 0.5
+	assert_bool(_chart._rebuild_queued).is_true()

@@ -262,3 +262,34 @@ func test_base_get_edge_texture_resolution_order() -> void:
 	_chart.edge_type_textures = {"employs": type_tex}
 	assert_object(_chart._get_edge_texture("employs")).is_equal(type_tex)
 	assert_object(_chart._get_edge_texture("")).is_equal(default_tex)
+
+
+# ---------------------------------------------------------------------------
+# spring_per_frame tests
+# ---------------------------------------------------------------------------
+
+func test_spring_per_frame_setter_queues_rebuild() -> void:
+	_chart._rebuild_queued = false
+	_chart.spring_per_frame = true
+	assert_bool(_chart._rebuild_queued).is_true()
+
+
+func test_start_spring_2d_sets_running_flag() -> void:
+	_chart._start_spring_2d(SAMPLE_NODES, SAMPLE_EDGES)
+	assert_bool(_chart._spring_running).is_true()
+
+
+func test_start_spring_2d_initialises_all_ids() -> void:
+	_chart._start_spring_2d(SAMPLE_NODES, SAMPLE_EDGES)
+	assert_int(_chart._spring_ids.size()).is_equal(SAMPLE_NODES.size())
+	assert_bool(_chart._spring_ids.has("A")).is_true()
+	assert_bool(_chart._spring_ids.has("B")).is_true()
+	assert_bool(_chart._spring_ids.has("C")).is_true()
+
+
+func test_start_spring_2d_returns_layout_with_all_nodes() -> void:
+	var layout := _chart._start_spring_2d(SAMPLE_NODES, SAMPLE_EDGES)
+	assert_int(layout.size()).is_equal(SAMPLE_NODES.size())
+	assert_bool(layout.has("A")).is_true()
+	assert_bool(layout.has("B")).is_true()
+	assert_bool(layout.has("C")).is_true()

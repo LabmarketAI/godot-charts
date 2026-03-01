@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3 uid="uid://cnbkvrc53h3n5"]
+
+[ext_resource type="PackedScene" uid="uid://bq7x1m2n4k8p" path="res://scenes/main.tscn" id="1_main"]
+[ext_resource type="Script" uid="uid://06e8pnwum5s1" path="res://scenes/main_vr.gd" id="2_vr_script"]
+
+[node name="Main" instance=ExtResource("1_main")]
+script = ExtResource("2_vr_script")
+
+[node name="FPSPlayer" parent="." index="1"]
+process_mode = 4
+visible = false
+
+[node name="XROrigin3D" type="XROrigin3D" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+
+[node name="LeftHand" type="XRController3D" parent="XROrigin3D" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 1.5, -0.3)
+tracker = &"left_hand"
+
+[node name="RightHand" type="XRController3D" parent="XROrigin3D" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 1.5, -0.3)
+tracker = &"right_hand"

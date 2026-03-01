@@ -1,36 +1,170 @@
-[gd_scene load_steps=7 format=3 uid="uid://bq7x1m2n4k8p"]
+[gd_scene load_steps=13 format=3 uid="uid://bq7x1m2n4k8p"]
 
 [ext_resource type="Script" uid="uid://c0df0dadc3i2r" path="res://scenes/main.gd" id="1_bq7x1"]
+[ext_resource type="Script" uid="uid://dsb04qmgdmsu0" path="res://addons/godot-charts/charts/chart_frame_3d.gd" id="2_frame"]
+[ext_resource type="Script" uid="uid://ylvg008k4i3x" path="res://addons/godot-charts/charts/bar_chart_3d.gd" id="3_bar"]
+[ext_resource type="Script" uid="uid://dmim8a0wgf383" path="res://addons/godot-charts/charts/line_chart_3d.gd" id="4_line"]
+[ext_resource type="Script" uid="uid://b4fd1f31657bd" path="res://addons/godot-charts/charts/scatter_chart_3d.gd" id="5_scatter"]
+[ext_resource type="Script" uid="uid://m7f0r8trk5i5" path="res://addons/godot-charts/charts/surface_chart_3d.gd" id="6_surface"]
+[ext_resource type="Script" uid="uid://togvyycieqtl" path="res://addons/godot-charts/charts/histogram_chart_3d.gd" id="7_hist"]
+[ext_resource type="Script" uid="uid://bhhyo2oy5frtf" path="res://addons/godot-charts/charts/graph_network_chart_2d.gd" id="8_gnet2"]
+[ext_resource type="Script" uid="uid://ya67rni4xxxr" path="res://addons/godot-charts/charts/graph_network_chart_3d.gd" id="9_gnet3"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_o5qli"]
-sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
-ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
-
-[sub_resource type="Sky" id="Sky_0wfyh"]
-sky_material = SubResource("ProceduralSkyMaterial_o5qli")
-
-[sub_resource type="Environment" id="Environment_sugp2"]
-background_mode = 2
-sky = SubResource("Sky_0wfyh")
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 1
+background_color = Color(0.1, 0.1, 0.12, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.8, 0.8, 0.9, 1)
+ambient_light_energy = 0.6
 tonemap_mode = 2
 glow_enabled = true
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_o5qli"]
-size = Vector3(10, 0.5, 10)
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(20, 0.01, 20)
 
-[sub_resource type="BoxMesh" id="BoxMesh_0wfyh"]
-size = Vector3(10, 0.5, 10)
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(20, 0.01, 20)
 
 [node name="Main" type="Node3D" unique_id=1989120593]
 script = ExtResource("1_bq7x1")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=210379738]
-environment = SubResource("Environment_sugp2")
+environment = SubResource("Environment_main")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=2092551698]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.868243, 0.496139, 0, -0.496139, 0.868243, 0, 9, 10.5)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1015886009]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=185935099]
-shape = SubResource("BoxShape3D_o5qli")
+shape = SubResource("BoxShape3D_ground")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=975826152]
-mesh = SubResource("BoxMesh_0wfyh")
+mesh = SubResource("BoxMesh_ground")
+
+[node name="Frame0" type="Node3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 1, 7.5)
+script = ExtResource("2_frame")
+size = Vector2(5, 4)
+
+[node name="BarChart3D" type="Node3D" parent="Frame0"]
+script = ExtResource("3_bar")
+title = "Monthly Sales"
+x_label = "Month"
+y_label = "Units"
+data = {"labels": ["Jan", "Feb", "Mar", "Apr"], "datasets": [{"name": "Product A", "values": [120.0, 95.0, 140.0, 180.0]}, {"name": "Product B", "values": [80.0, 110.0, 90.0, 130.0]}]}
+
+[node name="Label3D" type="Label3D" parent="Frame0"]
+position = Vector3(2.5, 4.3, 0.0)
+text = "[1] Bar Chart"
+font_size = 24
+billboard = 1
+
+[node name="Frame1" type="Node3D" parent="."]
+transform = Transform3D(-0.7071068, 0, -0.7071068, 0, 1, 0, 0.7071068, 0, -0.7071068, 5.303301, 1, 5.303301)
+script = ExtResource("2_frame")
+size = Vector2(5, 4)
+
+[node name="LineChart3D" type="Node3D" parent="Frame1"]
+script = ExtResource("4_line")
+title = "Quarterly Revenue"
+x_label = "Quarter"
+y_label = "USD (M)"
+data = {"labels": ["Q1", "Q2", "Q3", "Q4"], "datasets": [{"name": "Revenue", "values": [1.2, 3.5, 2.8, 4.2]}, {"name": "Expenses", "values": [0.9, 1.4, 2.1, 1.9]}]}
+
+[node name="Label3D" type="Label3D" parent="Frame1"]
+position = Vector3(2.5, 4.3, 0.0)
+text = "[2] Line Chart"
+font_size = 24
+billboard = 1
+
+[node name="Frame2" type="Node3D" parent="."]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7.5, 1, 0)
+script = ExtResource("2_frame")
+size = Vector2(5, 4)
+
+[node name="ScatterChart3D" type="Node3D" parent="Frame2"]
+script = ExtResource("5_scatter")
+title = "3-D Point Cloud"
+data = {"datasets": [{"name": "Group A", "points": [Vector3(0.2, 1.3, 0.5), Vector3(0.8, 0.4, 1.1), Vector3(0.5, 0.9, 0.7), Vector3(1.0, 1.5, 0.3)]}, {"name": "Group B", "points": [Vector3(2.0, 0.6, 0.3), Vector3(1.7, 1.2, 1.9), Vector3(1.4, 0.3, 1.5), Vector3(1.9, 1.8, 0.8)]}]}
+
+[node name="Label3D" type="Label3D" parent="Frame2"]
+position = Vector3(2.5, 4.3, 0.0)
+text = "[3] Scatter Plot"
+font_size = 24
+billboard = 1
+
+[node name="Frame3" type="Node3D" parent="."]
+transform = Transform3D(0.7071068, 0, -0.7071068, 0, 1, 0, 0.7071068, 0, 0.7071068, 5.303301, 1, -5.303301)
+script = ExtResource("2_frame")
+size = Vector2(5, 4)
+
+[node name="SurfaceChart3D" type="Node3D" parent="Frame3"]
+script = ExtResource("6_surface")
+title = "sin(x)\u00b7cos(z)"
+grid_cols = 24
+grid_rows = 24
+
+[node name="Label3D" type="Label3D" parent="Frame3"]
+position = Vector3(2.5, 4.3, 0.0)
+text = "[4] Surface Chart"
+font_size = 24
+billboard = 1
+
+[node name="Frame4" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -7.5)
+script = ExtResource("2_frame")
+size = Vector2(5, 4)
+
+[node name="HistogramChart3D" type="Node3D" parent="Frame4"]
+script = ExtResource("7_hist")
+title = "Sample Distribution"
+x_label = "Value"
+y_label = "Count"
+raw_data = [28.0, 33.0, 35.0, 38.0, 40.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 60.0, 62.0, 65.0, 68.0, 72.0]
+n_bins = 8
+
+[node name="Label3D" type="Label3D" parent="Frame4"]
+position = Vector3(2.5, 4.3, 0.0)
+text = "[5] Histogram"
+font_size = 24
+billboard = 1
+
+[node name="Frame5" type="Node3D" parent="."]
+transform = Transform3D(0.7071068, 0, 0.7071068, 0, 1, 0, -0.7071068, 0, 0.7071068, -5.303301, 1, -5.303301)
+script = ExtResource("2_frame")
+size = Vector2(5, 4)
+
+[node name="GraphNetworkChart2D" type="Node3D" parent="Frame5"]
+script = ExtResource("8_gnet2")
+title = "Social Graph"
+layout_mode = 1
+data = {"nodes": [{"id": "alice", "label": "Alice"}, {"id": "bob", "label": "Bob"}, {"id": "carol", "label": "Carol"}, {"id": "dave", "label": "Dave"}, {"id": "eve", "label": "Eve"}], "edges": [{"source": "alice", "target": "bob"}, {"source": "alice", "target": "carol"}, {"source": "bob", "target": "dave"}, {"source": "carol", "target": "dave"}, {"source": "dave", "target": "eve"}, {"source": "eve", "target": "alice"}]}
+
+[node name="Label3D" type="Label3D" parent="Frame5"]
+position = Vector3(2.5, 4.3, 0.0)
+text = "[6] Graph Network 2D"
+font_size = 24
+billboard = 1
+
+[node name="Frame6" type="Node3D" parent="."]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -7.5, 1, 0)
+script = ExtResource("2_frame")
+size = Vector2(5, 4)
+
+[node name="GraphNetworkChart3D" type="Node3D" parent="Frame6"]
+script = ExtResource("9_gnet3")
+title = "3-D Network"
+layout_mode = 1
+data = {"nodes": [{"id": "hub", "label": "Hub"}, {"id": "n1", "label": "N1"}, {"id": "n2", "label": "N2"}, {"id": "n3", "label": "N3"}, {"id": "n4", "label": "N4"}, {"id": "n5", "label": "N5"}, {"id": "n6", "label": "N6"}], "edges": [{"source": "hub", "target": "n1"}, {"source": "hub", "target": "n2"}, {"source": "hub", "target": "n3"}, {"source": "hub", "target": "n4"}, {"source": "hub", "target": "n5"}, {"source": "hub", "target": "n6"}, {"source": "n1", "target": "n2"}, {"source": "n3", "target": "n4"}]}
+
+[node name="Label3D" type="Label3D" parent="Frame6"]
+position = Vector3(2.5, 4.3, 0.0)
+text = "[7] Graph Network 3D"
+font_size = 24
+billboard = 1

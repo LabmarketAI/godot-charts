@@ -1,28 +1,48 @@
 ## Godot Charts — full demo.
 ##
-## Arranges all chart types in a 3-column grid so you can inspect every chart
-## at once.  Press [1]–[7] to jump the camera to a specific chart.
+## Seven chart frames are pre-placed in the scene at octagon positions, each
+## facing inward.  Charts sit 1 unit above the ground plane.
 ##
-## Layout (top view):
-##   col 0        col 1        col 2
-##   BarChart3D   LineChart3D  ScatterChart3D     (row 0, top)
-##   SurfaceChart HistogramChart GraphNet2D       (row 1, middle)
-##   GraphNet3D   —            —                 (row 2, bottom)
+## Layout (top view, 7 of 8 octagon vertices, clockwise from +Z):
+##   slot 0  (  0°) BarChart3D       slot 1  ( 45°) LineChart3D
+##   slot 2  ( 90°) ScatterChart3D   slot 3  (135°) SurfaceChart3D
+##   slot 4  (180°) HistogramChart3D slot 5  (225°) GraphNet2D
+##   slot 6  (270°) GraphNet3D       [315° empty]
+##
+## Press [1]–[7] to snap the camera to that chart's radial viewing position.
 extends Node3D
 
-const FRAME_W := 5.0
-const FRAME_H := 4.0
-const COL_STEP := 6.0   # horizontal spacing between frame centres
-const ROW_STEP := 5.0   # vertical spacing between frame centres
+const FRAME_W        := 5.0
+const FRAME_H        := 4.0
+const OCTAGON_RADIUS := 7.5   # distance from origin to frame anchor
+const CHART_Y        := 1.0   # Y of frame base (1 unit above ground)
+const CAMERA_INSET   := 4.5   # how far inside the octagon the fly-to cam sits
 
-var _camera: Camera3D
-var _frame_centres: Array[Vector3] = []
+# Precomputed octagon anchor positions and Y-rotation angles for all 7 slots.
+# slot angle = slot_index * TAU / 8; rotation.y = angle + PI (inward-facing).
+const _SLOT_ANCHORS = [
+	Vector3(0.0,       1.0,  7.5),       # slot 0  (  0°)
+	Vector3(5.303301,  1.0,  5.303301),   # slot 1  ( 45°)
+	Vector3(7.5,       1.0,  0.0),        # slot 2  ( 90°)
+	Vector3(5.303301,  1.0, -5.303301),   # slot 3  (135°)
+	Vector3(0.0,       1.0, -7.5),        # slot 4  (180°)
+	Vector3(-5.303301, 1.0, -5.303301),   # slot 5  (225°)
+	Vector3(-7.5,      1.0,  0.0),        # slot 6  (270°)
+]
+const _SLOT_ANGLES = [
+	0.0,               # slot 0
+	PI / 4.0,          # slot 1
+	PI / 2.0,          # slot 2
+	3.0 * PI / 4.0,    # slot 3
+	PI,                # slot 4
+	5.0 * PI / 4.0,    # slot 5
+	3.0 * PI / 2.0,    # slot 6
+]
+
+@onready var _camera: Camera3D = $Camera3D
 
 
 func _ready() -> void:
-	_setup_lighting()
-	_build_demos()
-	_setup_camera()
 	_show_hint()
 
 
@@ -32,218 +52,26 @@ func _input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey
 	var k: int = key_event.keycode
 	if k >= KEY_1 and k <= KEY_7:
-		var idx: int = k - KEY_1
-		if idx < _frame_centres.size():
-			_fly_to(_frame_centres[idx])
+		_fly_to(k - KEY_1)
 
 
-# ---------------------------------------------------------------------------
-# Demos
-# ---------------------------------------------------------------------------
+## Snap the camera to the radial viewing position for chart [param idx].
+## The camera sits CAMERA_INSET units inside the octagon on the same radial
+## line as the chart, looking at the centre of its face.
+func _fly_to(idx: int) -> void:
+	var pos   := _SLOT_ANCHORS[idx]
+	var angle := _SLOT_ANGLES[idx]
 
-func _build_demos() -> void:
-	_demo_bar_chart(_col_row(0, 0))
-	_demo_line_chart(_col_row(1, 0))
-	_demo_scatter_chart(_col_row(2, 0))
-	_demo_surface_chart(_col_row(0, 1))
-	_demo_histogram(_col_row(1, 1))
-	_demo_graph_2d(_col_row(2, 1))
-	_demo_graph_3d(_col_row(0, 2))
+	# Camera on the same radial, inset toward the origin.
+	var cam_r   := OCTAGON_RADIUS - CAMERA_INSET
+	var cam_pos := Vector3(sin(angle) * cam_r, CHART_Y + FRAME_H * 0.4, cos(angle) * cam_r)
+	_camera.position = cam_pos
 
-
-func _demo_bar_chart(pos: Vector3) -> void:
-	var frame := _make_frame("Bar Chart", pos)
-	var chart := BarChart3D.new()
-	chart.title   = "Monthly Sales"
-	chart.x_label = "Month"
-	chart.y_label = "Units"
-	chart.data = {
-		"labels":   ["Jan", "Feb", "Mar", "Apr"],
-		"datasets": [
-			{"name": "Product A", "values": [120.0,  95.0, 140.0, 180.0]},
-			{"name": "Product B", "values": [ 80.0, 110.0,  90.0, 130.0]},
-		],
-	}
-	frame.add_child(chart)
-
-
-func _demo_line_chart(pos: Vector3) -> void:
-	var frame := _make_frame("Line Chart", pos)
-	var chart := LineChart3D.new()
-	chart.title   = "Quarterly Revenue"
-	chart.x_label = "Quarter"
-	chart.y_label = "USD (M)"
-	chart.data = {
-		"labels":   ["Q1", "Q2", "Q3", "Q4"],
-		"datasets": [
-			{"name": "Revenue",  "values": [1.2, 3.5, 2.8, 4.2]},
-			{"name": "Expenses", "values": [0.9, 1.4, 2.1, 1.9]},
-		],
-	}
-	frame.add_child(chart)
-
-
-func _demo_scatter_chart(pos: Vector3) -> void:
-	var frame := _make_frame("Scatter Plot", pos)
-	var chart := ScatterChart3D.new()
-	chart.title = "3-D Point Cloud"
-	chart.data = {
-		"datasets": [
-			{
-				"name": "Group A",
-				"points": [
-					Vector3(0.2, 1.3, 0.5), Vector3(0.8, 0.4, 1.1),
-					Vector3(0.5, 0.9, 0.7), Vector3(1.0, 1.5, 0.3),
-				],
-			},
-			{
-				"name": "Group B",
-				"points": [
-					Vector3(2.0, 0.6, 0.3), Vector3(1.7, 1.2, 1.9),
-					Vector3(1.4, 0.3, 1.5), Vector3(1.9, 1.8, 0.8),
-				],
-			},
-		],
-	}
-	frame.add_child(chart)
-
-
-func _demo_surface_chart(pos: Vector3) -> void:
-	var frame := _make_frame("Surface Chart", pos)
-	var chart := SurfaceChart3D.new()
-	chart.title = "sin(x)·cos(z)"
-	chart.surface_function = func(x: float, z: float) -> float:
-		return sin(x * TAU) * cos(z * TAU) * 0.5 + 0.5
-	chart.grid_cols = 24
-	chart.grid_rows = 24
-	frame.add_child(chart)
-
-
-func _demo_histogram(pos: Vector3) -> void:
-	var frame := _make_frame("Histogram", pos)
-	var chart := HistogramChart3D.new()
-	chart.title = "Sample Distribution"
-	chart.x_label = "Value"
-	chart.y_label = "Count"
-	# Simulated normal-ish data around 50
-	chart.raw_data = [
-		28.0, 33.0, 35.0, 38.0, 40.0, 42.0, 43.0, 44.0, 45.0, 46.0,
-		47.0, 48.0, 49.0, 50.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0,
-		56.0, 57.0, 58.0, 60.0, 62.0, 65.0, 68.0, 72.0,
-	]
-	chart.n_bins = 8
-	frame.add_child(chart)
-
-
-func _demo_graph_2d(pos: Vector3) -> void:
-	var frame := _make_frame("Graph Network 2D", pos)
-	var chart := GraphNetworkChart2D.new()
-	chart.title = "Social Graph"
-	chart.layout_mode = 1  # CIRCULAR
-	chart.data = {
-		"nodes": [
-			{"id": "alice",   "label": "Alice"},
-			{"id": "bob",     "label": "Bob"},
-			{"id": "carol",   "label": "Carol"},
-			{"id": "dave",    "label": "Dave"},
-			{"id": "eve",     "label": "Eve"},
-		],
-		"edges": [
-			{"source": "alice", "target": "bob"},
-			{"source": "alice", "target": "carol"},
-			{"source": "bob",   "target": "dave"},
-			{"source": "carol", "target": "dave"},
-			{"source": "dave",  "target": "eve"},
-			{"source": "eve",   "target": "alice"},
-		],
-	}
-	frame.add_child(chart)
-
-
-func _demo_graph_3d(pos: Vector3) -> void:
-	var frame := _make_frame("Graph Network 3D", pos)
-	var chart := GraphNetworkChart3D.new()
-	chart.title = "3-D Network"
-	chart.layout_mode = 1  # CIRCULAR (Fibonacci sphere)
-	chart.data = {
-		"nodes": [
-			{"id": "hub",  "label": "Hub"},
-			{"id": "n1",   "label": "N1"},
-			{"id": "n2",   "label": "N2"},
-			{"id": "n3",   "label": "N3"},
-			{"id": "n4",   "label": "N4"},
-			{"id": "n5",   "label": "N5"},
-			{"id": "n6",   "label": "N6"},
-		],
-		"edges": [
-			{"source": "hub", "target": "n1"},
-			{"source": "hub", "target": "n2"},
-			{"source": "hub", "target": "n3"},
-			{"source": "hub", "target": "n4"},
-			{"source": "hub", "target": "n5"},
-			{"source": "hub", "target": "n6"},
-			{"source": "n1",  "target": "n2"},
-			{"source": "n3",  "target": "n4"},
-		],
-	}
-	frame.add_child(chart)
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-func _col_row(col: int, row: int) -> Vector3:
-	var pos := Vector3(col * COL_STEP, -row * ROW_STEP, 0.0)
-	_frame_centres.append(pos)
-	return pos
-
-
-func _make_frame(label: String, pos: Vector3) -> ChartFrame3D:
-	var frame := ChartFrame3D.new()
-	frame.size = Vector2(FRAME_W, FRAME_H)
-	frame.position = pos
-	add_child(frame)
-	# Small label above the frame (plain Label3D so it works without @tool)
-	var lbl := Label3D.new()
-	lbl.text = "[%d] %s" % [_frame_centres.size(), label]
-	lbl.font_size = 24
-	lbl.position = Vector3(FRAME_W * 0.5, FRAME_H + 0.3, 0.0)
-	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	frame.add_child(lbl)
-	return frame
-
-
-func _setup_camera() -> void:
-	_camera = Camera3D.new()
-	# Position to see the full 3-column, 3-row grid
-	_camera.position = Vector3(COL_STEP, -ROW_STEP, 22.0)
-	_camera.look_at(Vector3(COL_STEP, -ROW_STEP, 0.0))
-	add_child(_camera)
-
-
-func _setup_lighting() -> void:
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.1, 0.1, 0.12)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.8, 0.8, 0.9)
-	env.ambient_light_energy = 0.6
-
-	var wenv := WorldEnvironment.new()
-	wenv.environment = env
-	add_child(wenv)
-
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-45.0, 45.0, 0.0)
-	sun.light_energy = 1.2
-	add_child(sun)
-
-
-func _fly_to(target: Vector3) -> void:
-	# Instant snap — replace with a Tween for a smooth fly-to if desired
-	_camera.position = target + Vector3(FRAME_W * 0.5, FRAME_H * 0.5, 12.0)
-	_camera.look_at(target + Vector3(FRAME_W * 0.5, FRAME_H * 0.5, 0.0))
+	# World-space centre of the frame's visible face.
+	# Frame local +X in world after rotation by (angle + PI): (-cos(angle), 0, sin(angle))
+	var local_x := Vector3(-cos(angle), 0.0, sin(angle))
+	var face_centre := pos + local_x * (FRAME_W * 0.5) + Vector3(0.0, FRAME_H * 0.5, 0.0)
+	_camera.look_at(face_centre, Vector3.UP)
 
 
 func _show_hint() -> void:

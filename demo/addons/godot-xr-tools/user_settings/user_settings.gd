@@ -63,7 +63,7 @@ func reset_to_defaults() -> void:
 	player_height = XRTools.get_player_standard_height()
 	webxr_primary = WebXRPrimary.AUTO
 	webxr_auto_primary = 0
-	haptics_scale = XRToolsRumbleManager.get_default_haptics_scale()
+	haptics_scale = get_default_haptics_scale()
 
 ## Set the player height property
 func set_player_height(new_value : float) -> void:
@@ -220,3 +220,18 @@ func get_adjusted_vector2(p_controller, p_input_action):
 			vector.x *= -1
 
 	return vector
+
+
+## Get the default Haptics Scale value
+func get_default_haptics_scale() -> float:
+	var default = 1.0
+
+	# Check if the project has overridden the addon's default
+	if ProjectSettings.has_setting("godot_xr_tools/input/haptics_scale"):
+		default = ProjectSettings.get_setting("godot_xr_tools/input/haptics_scale")
+
+	if default < 0.0 or default > 1.0:
+		# out of bounds? reset to default
+		default = 1.0
+
+	return default

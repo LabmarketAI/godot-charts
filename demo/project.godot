@@ -22,6 +22,15 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 config/run/main_scene="res://scenes/main.tscn"
 
+[autoload]
+
+XRToolsUserSettings="*uid://bqgb8i74tm0t"
+XRToolsRumbleManager="*uid://by853dk86g1qw"
+
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot-charts/plugin.cfg")
+enabled=PackedStringArray("res://addons/godot-charts/plugin.cfg", "res://addons/godot-xr-tools/plugin.cfg")
+
+[xr]
+
+shaders/enabled=true

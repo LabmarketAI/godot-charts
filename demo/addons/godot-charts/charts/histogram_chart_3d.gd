@@ -78,7 +78,7 @@ func _rebuild() -> void:
 	# Build a bar-chart-compatible dict: one dataset, labels = left bin edges.
 	var labels: Array = []
 	for i in counts.size():
-		labels.append("%.2g" % edges[i])
+		labels.append(str(edges[i]))
 
 	var float_counts: Array = []
 	for c in counts:

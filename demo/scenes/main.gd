@@ -59,8 +59,8 @@ func _input(event: InputEvent) -> void:
 ## The camera sits CAMERA_INSET units inside the octagon on the same radial
 ## line as the chart, looking at the centre of its face.
 func _fly_to(idx: int) -> void:
-	var pos   := _SLOT_ANCHORS[idx]
-	var angle := _SLOT_ANGLES[idx]
+	var pos:   Vector3 = _SLOT_ANCHORS[idx]
+	var angle: float   = _SLOT_ANGLES[idx]
 
 	# Camera on the same radial, inset toward the origin.
 	var cam_r   := OCTAGON_RADIUS - CAMERA_INSET

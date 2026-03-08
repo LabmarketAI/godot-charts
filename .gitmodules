@@ -1,0 +1,3 @@
+[submodule "demo/addons/godot-xr-tools"]
+	path = demo/addons/godot-xr-tools
+	url = https://github.com/GodotVR/godot-xr-tools.git

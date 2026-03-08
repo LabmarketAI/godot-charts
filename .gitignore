@@ -17,5 +17,17 @@ export_credentials.cfg
 data_*/
 mono_crash.*.json
 
+# Compiled native-extension binaries (build artifacts).
+# Regenerate with build_local.ps1 from the godot-desktop-capture repo.
+# NOTE: if these were previously committed, untrack them with:
+#   git rm --cached demo/addons/godot-desktop-capture/bin/*
+demo/addons/godot-desktop-capture/bin/*.dll
+demo/addons/godot-desktop-capture/bin/*.so
+demo/addons/godot-desktop-capture/bin/*.dylib
+# Ancillary MSVC linker outputs that may land next to the DLL
+demo/addons/godot-desktop-capture/bin/*.pdb
+demo/addons/godot-desktop-capture/bin/*.exp
+demo/addons/godot-desktop-capture/bin/*.lib
+
 # Windows temp/lock files written when a native DLL is in use
 ~*.dll

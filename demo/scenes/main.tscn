@@ -1,24 +1,25 @@
-[gd_scene load_steps=5 format=3 uid="uid://bq7x1m2n4k8p"]
+[gd_scene format=3 uid="uid://bq7x1m2n4k8p"]
 
-[ext_resource type="Script" uid="uid://c0df0dadc3i2r" path="res://scenes/main.gd" id="1_main"]
-[ext_resource type="PackedScene" uid="uid://n4p2q7r8s9t0" path="res://scenes/data_room.tscn" id="2_dr"]
-[ext_resource type="Script" path="res://scenes/fps_player.gd" id="3_fps"]
+[ext_resource type="Script" uid="uid://c1acj55v6ysov" path="res://scenes/main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://n4p2q7r8tat0" path="res://scenes/data_room.tscn" id="2_dr"]
+[ext_resource type="Script" uid="uid://doryt82x7erfg" path="res://scenes/fps_player.gd" id="3_fps"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.3
 height = 1.8
 
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=281715422]
 script = ExtResource("1_main")
 
-[node name="DataRoom" parent="." instance=ExtResource("2_dr")]
+[node name="DataRoom" parent="." unique_id=2117450824 instance=ExtResource("2_dr")]
 
-[node name="FPSPlayer" type="CharacterBody3D" parent="."]
+[node name="FPSPlayer" type="CharacterBody3D" parent="." unique_id=151654489]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 5)
 script = ExtResource("3_fps")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="FPSPlayer"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FPSPlayer" unique_id=75445039]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8998505, 0)
 shape = SubResource("CapsuleShape3D_player")
 
-[node name="Camera3D" type="Camera3D" parent="FPSPlayer"]
+[node name="Camera3D" type="Camera3D" parent="FPSPlayer" unique_id=1285719276]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)

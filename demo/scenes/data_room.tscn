@@ -32,10 +32,10 @@ tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(20, 0.01, 20)
+size = Vector3(20, 1.0, 20)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
-size = Vector3(20, 0.01, 20)
+size = Vector3(20, 1.0, 20)
 
 [node name="DataRoom" type="Node3D"]
 
@@ -49,6 +49,9 @@ shadow_enabled = true
 environment = SubResource("Environment_main")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+collision_layer = 1
+collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 shape = SubResource("BoxShape3D_ground")

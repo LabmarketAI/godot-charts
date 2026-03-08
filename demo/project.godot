@@ -24,14 +24,14 @@ config/run/main_scene="res://scenes/main.tscn"
 
 [autoload]
 
-XRToolsUserSettings="*uid://bqgb8i74tm0t"
-XRToolsRumbleManager="*uid://by853dk86g1qw"
+XRToolsUserSettings="*uid://1g5ijvn8qkdi"
+XRToolsRumbleManager="*uid://j517tfnc810c"
 
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot-charts/plugin.cfg", "res://addons/godot-xr-tools/plugin.cfg")
 
 [xr]
-openxr/enabled=true
 
+openxr/enabled=true
 shaders/enabled=true

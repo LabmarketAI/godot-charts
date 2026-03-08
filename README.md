@@ -215,6 +215,15 @@ Features a Godot XR Tools rig for exploring the data room in virtual reality.
 - **Requirements**: Connected headset, OpenXR runtime active (e.g. SteamVR on Windows, WiVRn on Linux).
 - **Controls**: Standard Godot XR Tools mappings (Left thumbstick for movement/turn, Right trigger for teleport).
 
+##### Live Desktop Panel
+
+The data room includes a **live desktop capture panel** (slot 8) powered by the [godot-desktop-capture](https://github.com/LabmarketAI/godot-desktop-capture) GDExtension (vendored at `demo/addons/godot-desktop-capture/`). The panel mirrors the host OS desktop in real time onto a 4.8 × 2.7 m screen in the VR environment.
+
+- **Windows**: uses DXGI Desktop Duplication — no extra dependencies.
+- **Linux**: uses `xdg-desktop-portal` + PipeWire — a portal permission prompt appears on first run; `libpipewire` and `libdbus` are `dlopen`-ed at runtime (not bundled).
+
+The capture starts automatically when the scene runs (`enabled = true`). To change which monitor is captured, edit the `DesktopCaptureTexture` resource on the `DesktopPanel` node in `data_room.tscn` and set `monitor_index`.
+
 *(Note: There are also standalone, minimal examples for each chart type like `surface_chart.tscn` and `graph_network.tscn`. In those specific minimal scenes, press `Space` to toggle surface mode, or `Tab` to cycle node layout modes.)*
 
 ### Troubleshooting local development

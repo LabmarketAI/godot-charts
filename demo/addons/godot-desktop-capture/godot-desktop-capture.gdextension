@@ -1,0 +1,9 @@
+[configuration]
+entry_symbol = "desktop_capture_library_init"
+compatibility_minimum = "4.1"
+
+[libraries]
+linux.debug.x86_64   = "res://addons/godot-desktop-capture/bin/libgodot-desktop-capture.linux.debug.x86_64.so"
+linux.release.x86_64 = "res://addons/godot-desktop-capture/bin/libgodot-desktop-capture.linux.release.x86_64.so"
+windows.debug.x86_64   = "res://addons/godot-desktop-capture/bin/libgodot-desktop-capture.windows.debug.x86_64.dll"
+windows.release.x86_64 = "res://addons/godot-desktop-capture/bin/libgodot-desktop-capture.windows.release.x86_64.dll"

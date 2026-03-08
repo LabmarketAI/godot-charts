@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://n4p2q7r8tat0"]
+[gd_scene load_steps=15 format=3 uid="uid://n4p2q7r8tat0"]
 
 [ext_resource type="Script" uid="uid://dsb04qmgdmsu0" path="res://addons/godot-charts/charts/chart_frame_3d.gd" id="1_frame"]
 [ext_resource type="Script" uid="uid://ylvg008k4i3x" path="res://addons/godot-charts/charts/bar_chart_3d.gd" id="2_bar"]
@@ -8,6 +8,19 @@
 [ext_resource type="Script" uid="uid://togvyycieqtl" path="res://addons/godot-charts/charts/histogram_chart_3d.gd" id="6_hist"]
 [ext_resource type="Script" uid="uid://bhhyo2oy5frtf" path="res://addons/godot-charts/charts/graph_network_chart_2d.gd" id="7_gnet2"]
 [ext_resource type="Script" uid="uid://ya67rni4xxxr" path="res://addons/godot-charts/charts/graph_network_chart_3d.gd" id="8_gnet3"]
+
+[sub_resource type="DesktopCaptureTexture" id="DesktopCaptureTexture_panel"]
+enabled = true
+max_fps = 30
+monitor_index = 0
+capture_cursor = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_panel"]
+shading_mode = 1
+albedo_texture = SubResource("DesktopCaptureTexture_panel")
+
+[sub_resource type="QuadMesh" id="QuadMesh_panel"]
+size = Vector2(4.8, 2.7)
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -288,4 +301,15 @@ chart_size = Vector2(4.7, 3.7)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
 billboard = 1
 text = "[7] Graph Network 3D"
+font_size = 24
+
+[node name="DesktopPanel" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.7071068, 0, 0.7071068, 0, 1, 0, -0.7071068, 0, -0.7071068, -5.303301, 2.5, 5.303301)
+mesh = SubResource("QuadMesh_panel")
+surface_material_override/0 = SubResource("StandardMaterial3D_panel")
+
+[node name="Label3D" type="Label3D" parent="DesktopPanel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.55, 0)
+billboard = 1
+text = "[8] Live Desktop"
 font_size = 24

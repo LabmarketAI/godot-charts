@@ -28,3 +28,26 @@ func _ready() -> void:
 		cam.transform = Transform3D(Basis.IDENTITY, Vector3(0.0, 1.7, 5.0))
 		$XROrigin3D.add_child(cam)
 		cam.make_current()
+
+	_setup_desktop_capture.call_deferred()
+
+func _setup_desktop_capture() -> void:
+	var panel = $DataRoom/DesktopPanel as MeshInstance3D
+	if not panel: return
+	var mat = panel.get_surface_override_material(0) as StandardMaterial3D
+	if not mat: return
+	var tex = mat.albedo_texture
+	if not tex or not tex.has_method("get_available_windows"): return
+	
+	var windows = tex.get_available_windows()
+	print("Available windows for capture:")
+	var target_id = 0
+	for w in windows:
+		var title = str(w["title"])
+		print(" - ", title, " (ID: ", w["id"], ")")
+		if target_id == 0 and title.strip_edges() != "" and title.find("Godot") == -1:
+			target_id = w["id"]
+			
+	if target_id != 0:
+		tex.set("window_id", target_id)
+		print("Auto-selected window ID: ", target_id)

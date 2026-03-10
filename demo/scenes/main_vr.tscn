@@ -2,6 +2,12 @@
 
 [ext_resource type="PackedScene" uid="uid://n4p2q7r8tat0" path="res://scenes/data_room.tscn" id="1_dr"]
 [ext_resource type="Script" uid="uid://06e8pnwum5s1" path="res://scenes/main_vr.gd" id="2_vr_script"]
+[ext_resource type="PackedScene" uid="uid://diyu06cw06syv" path="res://addons/godot-xr-tools/player/player_body.tscn" id="3_body"]
+[ext_resource type="PackedScene" uid="uid://b4kad2kuba1yn" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn" id="4_l_hand"]
+[ext_resource type="PackedScene" uid="uid://l2n30mpbkdyw" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="5_r_hand"]
+[ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_mov"]
+[ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="7_turn"]
+[ext_resource type="PackedScene" uid="uid://fiul51tsyoop" path="res://addons/godot-xr-tools/functions/function_teleport.tscn" id="8_tele"]
 
 [node name="MainVR" type="Node3D" unique_id=1539786815]
 script = ExtResource("2_vr_script")
@@ -9,28 +15,28 @@ script = ExtResource("2_vr_script")
 [node name="DataRoom" parent="." unique_id=1687335496 instance=ExtResource("1_dr")]
 
 [node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=1727367368]
-transform = Transform3D(0.4577498, 0, 0.88908106, 0, 1, 0, -0.88908106, 0, 0.4577498, 0, 4.019981, 0.96153927)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9497476, 5)
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=1427082020]
-transform = Transform3D(0.40124765, -0.17896008, 0.8983171, -0.25429976, 0.9204094, 0.29694828, -0.8799615, -0.34759167, 0.32380274, 0, 1.7000003, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
 
 [node name="LeftHand" type="XRController3D" parent="XROrigin3D" unique_id=343421389]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 1.5, -0.3)
 tracker = &"left_hand"
 
-[node name="LeftHand" parent="XROrigin3D/LeftHand" unique_id=657455381]
+[node name="LeftHand" parent="XROrigin3D/LeftHand" unique_id=657455381 instance=ExtResource("4_l_hand")]
 
-[node name="MovementDirect" parent="XROrigin3D/LeftHand" unique_id=437726764]
+[node name="MovementDirect" parent="XROrigin3D/LeftHand" unique_id=437726764 instance=ExtResource("6_mov")]
 
-[node name="MovementTurn" parent="XROrigin3D/LeftHand" unique_id=979706917]
+[node name="MovementTurn" parent="XROrigin3D/LeftHand" unique_id=979706917 instance=ExtResource("7_turn")]
 
 [node name="RightHand" type="XRController3D" parent="XROrigin3D" unique_id=222926621]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 1.5, -0.3)
 tracker = &"right_hand"
 
-[node name="RightHand" parent="XROrigin3D/RightHand" unique_id=1421417822]
+[node name="RightHand" parent="XROrigin3D/RightHand" unique_id=1421417822 instance=ExtResource("5_r_hand")]
 
-[node name="FunctionTeleport" parent="XROrigin3D/RightHand" unique_id=1737533618]
+[node name="FunctionTeleport" parent="XROrigin3D/RightHand" unique_id=1737533618 instance=ExtResource("8_tele")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1)
 
-[node name="PlayerBody" parent="XROrigin3D" unique_id=525746203]
+[node name="PlayerBody" parent="XROrigin3D" unique_id=525746203 instance=ExtResource("3_body")]

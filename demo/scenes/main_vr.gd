@@ -23,3 +23,8 @@ func _ready() -> void:
 		print("OpenXR initialised — headset active.")
 	else:
 		push_warning("OpenXR not available — headset not connected or runtime not set. See README for VR Quickstart.")
+		# Fall back to a desktop camera so the window is not a blank white screen.
+		var cam := Camera3D.new()
+		cam.transform = Transform3D(Basis.IDENTITY, Vector3(0.0, 1.7, 5.0))
+		$XROrigin3D.add_child(cam)
+		cam.make_current()

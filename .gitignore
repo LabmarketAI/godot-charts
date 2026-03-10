@@ -31,3 +31,6 @@ demo/addons/godot-desktop-capture/bin/*.lib
 
 # Windows temp/lock files written when a native DLL is in use
 ~*.dll
+
+# Python virtual environment
+.venv/

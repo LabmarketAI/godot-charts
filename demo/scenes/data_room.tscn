@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://n4p2q7r8tat0"]
+[gd_scene load_steps=21 format=3 uid="uid://n4p2q7r8tat0"]
 
 [ext_resource type="Script" path="res://addons/godot-charts/charts/chart_frame_3d.gd" id="1_frame"]
 [ext_resource type="Script" path="res://addons/godot-charts/charts/bar_chart_3d.gd" id="2_bar"]
@@ -35,6 +35,38 @@ size = Vector3(20, 1.0, 20)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
 size = Vector3(20, 1.0, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_circuit_wire"]
+albedo_color = Color(0.74, 0.74, 0.8, 1)
+metallic = 0.1
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_circuit_gate"]
+albedo_color = Color(0.25, 0.55, 0.95, 1)
+metallic = 0.12
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_circuit_control"]
+albedo_color = Color(1, 0.75, 0.1, 1)
+metallic = 0.2
+roughness = 0.3
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_circuit_wire"]
+top_radius = 0.02
+bottom_radius = 0.02
+height = 3.8
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_circuit_connector"]
+top_radius = 0.02
+bottom_radius = 0.02
+height = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_circuit_gate"]
+size = Vector3(0.34, 0.34, 0.12)
+
+[sub_resource type="SphereMesh" id="SphereMesh_circuit_control"]
+radius = 0.12
+height = 0.24
 
 [node name="DataRoom" type="Node3D"]
 
@@ -243,66 +275,77 @@ transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -7.5, 1, 0)
 script = ExtResource("1_frame")
 size = Vector2(5, 4)
 
-[node name="GraphNetworkChart3D" type="Node3D" parent="Frame6"]
+[node name="CircuitPreviewStatic" type="Node3D" parent="Frame6"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
-script = ExtResource("7_gnet3")
-data = {
-"edges": [{
-"source": "hub",
-"target": "n1"
-}, {
-"source": "hub",
-"target": "n2"
-}, {
-"source": "hub",
-"target": "n3"
-}, {
-"source": "hub",
-"target": "n4"
-}, {
-"source": "hub",
-"target": "n5"
-}, {
-"source": "hub",
-"target": "n6"
-}, {
-"source": "n1",
-"target": "n2"
-}, {
-"source": "n3",
-"target": "n4"
-}],
-"nodes": [{
-"id": "hub",
-"label": "Hub"
-}, {
-"id": "n1",
-"label": "N1"
-}, {
-"id": "n2",
-"label": "N2"
-}, {
-"id": "n3",
-"label": "N3"
-}, {
-"id": "n4",
-"label": "N4"
-}, {
-"id": "n5",
-"label": "N5"
-}, {
-"id": "n6",
-"label": "N6"
-}]
-}
-layout_mode = 1
-title = "3-D Network"
-chart_size = Vector2(4.7, 3.7)
+
+[node name="QubitWire0" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 2, 0.9, 0)
+mesh = SubResource("CylinderMesh_circuit_wire")
+surface_material_override/0 = SubResource("StandardMaterial3D_circuit_wire")
+
+[node name="QubitWire1" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 2, 1.7, 0)
+mesh = SubResource("CylinderMesh_circuit_wire")
+surface_material_override/0 = SubResource("StandardMaterial3D_circuit_wire")
+
+[node name="GateH" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.9, 0)
+mesh = SubResource("BoxMesh_circuit_gate")
+surface_material_override/0 = SubResource("StandardMaterial3D_circuit_gate")
+
+[node name="GateHLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.9, 0.08)
+billboard = 1
+text = "H"
+font_size = 32
+
+[node name="ControlCX" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.9, 0)
+mesh = SubResource("SphereMesh_circuit_control")
+surface_material_override/0 = SubResource("StandardMaterial3D_circuit_control")
+
+[node name="TargetCX" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.7, 0)
+mesh = SubResource("BoxMesh_circuit_gate")
+surface_material_override/0 = SubResource("StandardMaterial3D_circuit_gate")
+
+[node name="ConnectorCX" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.3, 0)
+mesh = SubResource("CylinderMesh_circuit_connector")
+surface_material_override/0 = SubResource("StandardMaterial3D_circuit_wire")
+
+[node name="GateCXLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.62, 0.08)
+billboard = 1
+text = "CX"
+font_size = 22
+
+[node name="MeasureTop" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.25, 0.9, 0)
+mesh = SubResource("BoxMesh_circuit_gate")
+surface_material_override/0 = SubResource("StandardMaterial3D_circuit_gate")
+
+[node name="MeasureTopLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.25, 0.9, 0.08)
+billboard = 1
+text = "M"
+font_size = 24
+
+[node name="MeasureBottom" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.25, 1.7, 0)
+mesh = SubResource("BoxMesh_circuit_gate")
+surface_material_override/0 = SubResource("StandardMaterial3D_circuit_gate")
+
+[node name="MeasureBottomLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.25, 1.7, 0.08)
+billboard = 1
+text = "M"
+font_size = 24
 
 [node name="Label3D" type="Label3D" parent="Frame6"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
 billboard = 1
-text = "[7] Graph Network 3D"
+text = "[7] Qiskit Circuit 3D"
 font_size = 24
 
 [node name="DesktopPanel" type="MeshInstance3D" parent="."]

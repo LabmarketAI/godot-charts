@@ -6,10 +6,10 @@
 // Press [Escape] to release / recapture the mouse cursor.
 //
 // Layout (top view, 7 of 8 octagon vertices, clockwise from +Z):
-//   slot 0  (  0°) BarChart3D       slot 1  ( 45°) LineChart3D
-//   slot 2  ( 90°) ScatterChart3D   slot 3  (135°) SurfaceChart3D
-//   slot 4  (180°) HistogramChart3D slot 5  (225°) [empty]
-//   slot 6  (270°) GraphNet3D       [315° empty]
+//   slot 0  (  0°) BarChart3D        slot 1  ( 45°) LineChart3D
+//   slot 2  ( 90°) ScatterChart3D    slot 3  (135°) SurfaceChart3D
+//   slot 4  (180°) HistogramChart3D  slot 5  (225°) GraphNetworkChart3D
+//   slot 6  (270°) CircuitChart3D    [315° is DesktopPanel]
 using Godot;
 
 public partial class Main : Node3D
@@ -18,7 +18,7 @@ public partial class Main : Node3D
     private const float OctagonRadius = 7.5f;
     private const float CameraInset   = 4.5f;
 
-    // Precomputed octagon anchor positions and Y-rotation angles for all 7 slots.
+    // Precomputed octagon anchor positions and Y-rotation angles for all 7 chart slots.
     private static readonly Vector3[] SlotAnchors =
     {
         new Vector3( 0f,       1f,  7.5f),       // slot 0  (  0°)

@@ -1,0 +1,42 @@
+{
+  "num_qubits": 2,
+  "ops": [
+    {
+      "id": "h0",
+      "gate": "h",
+      "qubits": [0]
+    },
+    {
+      "id": "cx01",
+      "gate": "cx",
+      "qubits": [0, 1],
+      "deps": ["h0"]
+    },
+    {
+      "id": "measure0",
+      "gate": "measure",
+      "qubits": [0],
+      "deps": ["cx01"]
+    },
+    {
+      "id": "measure1",
+      "gate": "measure",
+      "qubits": [1],
+      "deps": ["cx01"]
+    }
+  ],
+  "edges": [
+    {
+      "source": "h0",
+      "target": "cx01"
+    },
+    {
+      "source": "cx01",
+      "target": "measure0"
+    },
+    {
+      "source": "cx01",
+      "target": "measure1"
+    }
+  ]
+}

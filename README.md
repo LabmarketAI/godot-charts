@@ -213,7 +213,10 @@ Features a standard first-person controller to walk around the chart displays.
 #### 2. VR Demo (`main_vr.tscn`) *[requires OpenXR]*
 Features a Godot XR Tools rig for exploring the data room in virtual reality.
 - **Requirements**: Connected headset, OpenXR runtime active (e.g. SteamVR on Windows, WiVRn on Linux).
+- **External addon dependency**: `godot-xr-tools` is treated as an external addon required by the VR demo. Install it under `demo/addons/godot-xr-tools/` (for example from the official repo or Godot Asset Library).
 - **Controls**: Standard Godot XR Tools mappings (Left thumbstick for movement/turn, Right trigger for teleport).
+
+The local archive `demo/addons/godot-xr-tools.zip` is for convenience during local setup and is intentionally not tracked by git.
 
 ##### Live Desktop Panel
 

@@ -22,50 +22,21 @@ jobs:
           bash scripts/check-demo-addon-sync.sh
 
   unit-tests:
-    name: Unit Tests (Godot ${{ matrix.godot-version }})
+    name: Unit Tests (.NET)
     runs-on: ubuntu-latest
     needs: addon-sync-check
-
-    strategy:
-      fail-fast: false
-      matrix:
-        godot-version: ["4.6"]
 
     steps:
       - name: Checkout addon
         uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          path: src
+          dotnet-version: "8.0.x"
 
-      - name: Build test-harness project
-        run: |
-          mkdir -p addons/godot_charts tests
+      - name: Restore test project
+        run: dotnet restore tests/GodotChartsTests.csproj
 
-          # Addon files live under addons/godot-charts/ in the source repo
-          cp -r src/addons/godot-charts/. addons/godot_charts/
-
-          # Place test suites at the project root so they resolve as res://tests/
-          cp src/tests/*.gd tests/
-
-          # Minimal project.godot — class_name declarations are auto-scanned;
-          # no plugin activation required for GDScript type access.
-          cat > project.godot << 'PEOF'
-          ; Engine configuration file.
-          config_version=5
-
-          [application]
-
-          config/name="Godot Charts Tests"
-          config/features=PackedStringArray("4.6", "Forward Plus")
-          PEOF
-
-      - name: Run GdUnit4 Tests
-        uses: MikeSchulze/gdUnit4-action@v1
-        with:
-          godot-version: ${{ matrix.godot-version }}
-          godot-status: stable
-          version: latest
-          paths: |
-            res://tests
-          report-name: unit-tests-${{ matrix.godot-version }}
-          timeout: 10
+      - name: Run NUnit tests
+        run: dotnet test tests/GodotChartsTests.csproj --configuration Release --verbosity minimal

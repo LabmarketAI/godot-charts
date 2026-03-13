@@ -10,10 +10,10 @@ using QuikGraph.Algorithms;
 namespace GodotCharts;
 
 /// <summary>
-/// Parses a Qiskit-compatible circuit JSON file into a <see cref="CircuitGraph"/>.
+/// Parses Qiskit-compatible circuit JSON into a <see cref="CircuitGraph"/>.
 ///
-/// <b>JSON format</b>
-/// <code>
+/// Supported payload shapes:
+/// 1) Layered format:
 /// {
 ///   "qubits": 5,
 ///   "layers": [
@@ -21,12 +21,26 @@ namespace GodotCharts;
 ///     {"t": 1, "ops": [{"id":"n1","gate":"cx","q":[0,1],"c":[],"params":[]}]}
 ///   ]
 /// }
-/// </code>
 ///
-/// The <c>t</c> field is an optional hint; QuikGraph topological sort is authoritative.
+/// 2) Flat ops with explicit dependency edges:
+/// {
+///   "qubits": 3,
+///   "ops": [
+///     {"id":"a","gate":"h","q":[0]},
+///     {"id":"b","gate":"cx","q":[0,1]}
+///   ],
+///   "edges": [
+///     {"from":"a","to":"b"}
+///   ]
+/// }
+///
+/// The final layer assignment is computed with QuikGraph topological sort.
+/// Provided t values are hints only.
 /// </summary>
 public static class CircuitLoader
 {
+    private readonly record struct RawOp(string Id, string Gate, int[] Qubits, int[] Cbits, float[] Params, int HintLayer);
+
     /// <summary>
     /// Load a circuit from a JSON file.
     /// Accepts <c>res://</c> paths and absolute paths.
@@ -40,7 +54,7 @@ public static class CircuitLoader
 
         if (!File.Exists(absPath))
         {
-            GD.PushWarning($"CircuitLoader: file not found — {path}");
+            GD.PushWarning($"CircuitLoader: file not found - {path}");
             return null;
         }
 
@@ -48,7 +62,7 @@ public static class CircuitLoader
         try { text = File.ReadAllText(absPath); }
         catch (Exception ex)
         {
-            GD.PushWarning($"CircuitLoader: cannot read — {path}: {ex.Message}");
+            GD.PushWarning($"CircuitLoader: cannot read - {path}: {ex.Message}");
             return null;
         }
 
@@ -71,41 +85,20 @@ public static class CircuitLoader
             var root = doc.RootElement;
             int numQubits = root.TryGetProperty("qubits", out var qp) ? qp.GetInt32() : 1;
 
-            // ---- Parse raw ops from layers ----
-            var rawOps = new List<(string id, string gate, int[] q, int[] c, float[] p, int hintT)>();
-            if (root.TryGetProperty("layers", out var layersEl))
-                foreach (var layer in layersEl.EnumerateArray())
-                {
-                    int hintT = layer.TryGetProperty("t", out var tp) ? tp.GetInt32() : 0;
-                    if (!layer.TryGetProperty("ops", out var opsEl)) continue;
-                    foreach (var op in opsEl.EnumerateArray())
-                    {
-                        string id    = op.TryGetProperty("id",     out var idp)     ? idp.GetString() ?? "" : "";
-                        string gate  = op.TryGetProperty("gate",   out var gatep)   ? gatep.GetString() ?? "u" : "u";
-                        int[]  qb    = ParseIntArray(op, "q");
-                        int[]  cb    = ParseIntArray(op, "c");
-                        float[] prm  = ParseFloatArray(op, "params");
-                        rawOps.Add((id, gate, qb, cb, prm, hintT));
-                    }
-                }
+            var rawOps = ParseRawOps(root);
+            if (rawOps.Count == 0)
+            {
+                GD.PushWarning("CircuitLoader: no operations found (expected layers[].ops[] or ops[])");
+                return new CircuitGraph(numQubits, new List<QuantumLayer>(), new List<QuantumOp>());
+            }
 
-            // ---- Build gate-dependency DAG with QuikGraph ----
-            // Two gates are dependent if they act on the same qubit; later gates depend on earlier.
             var graph = new AdjacencyGraph<string, Edge<string>>(allowParallelEdges: false);
-            foreach (var (id, _, _, _, _, _) in rawOps)
-                graph.AddVertex(id);
+            foreach (var op in rawOps)
+                graph.AddVertex(op.Id);
 
-            // Track the last gate touching each qubit
-            var lastOnQubit = new Dictionary<int, string>();
-            foreach (var (id, _, qb, _, _, _) in rawOps)
-                foreach (int q in qb)
-                {
-                    if (lastOnQubit.TryGetValue(q, out string? prev))
-                        graph.AddEdge(new Edge<string>(prev, id));
-                    lastOnQubit[q] = id;
-                }
+            if (!TryAddExplicitEdges(root, rawOps, graph))
+                AddQubitInferredEdges(rawOps, graph);
 
-            // ---- Topological sort → assign layer t ----
             var layerOf = new Dictionary<string, int>();
             foreach (string id in graph.TopologicalSort())
             {
@@ -116,9 +109,10 @@ public static class CircuitLoader
                 layerOf[id] = maxPred + 1;
             }
 
-            // ---- Build final QuantumOps ----
             var allOps = rawOps
-                .Select(r => new QuantumOp(r.id, r.gate, r.q, r.c, r.p, layerOf.GetValueOrDefault(r.id, r.hintT)))
+                .Select(r => new QuantumOp(r.Id, r.Gate, r.Qubits, r.Cbits, r.Params, layerOf.GetValueOrDefault(r.Id, r.HintLayer)))
+                .OrderBy(op => op.Layer)
+                .ThenBy(op => op.Id)
                 .ToList();
 
             var layerGroups = allOps
@@ -131,9 +125,84 @@ public static class CircuitLoader
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
+    private static List<RawOp> ParseRawOps(JsonElement root)
+    {
+        var rawOps = new List<RawOp>();
+
+        if (root.TryGetProperty("layers", out var layersEl))
+        {
+            foreach (var layer in layersEl.EnumerateArray())
+            {
+                int hintT = layer.TryGetProperty("t", out var tp) ? tp.GetInt32() : 0;
+                if (!layer.TryGetProperty("ops", out var opsEl)) continue;
+                foreach (var op in opsEl.EnumerateArray())
+                    rawOps.Add(ParseOp(op, hintT, rawOps.Count));
+            }
+            return rawOps;
+        }
+
+        if (root.TryGetProperty("ops", out var flatOpsEl))
+        {
+            foreach (var op in flatOpsEl.EnumerateArray())
+            {
+                int hintT = op.TryGetProperty("t", out var tp) ? tp.GetInt32() : 0;
+                rawOps.Add(ParseOp(op, hintT, rawOps.Count));
+            }
+        }
+
+        return rawOps;
+    }
+
+    private static RawOp ParseOp(JsonElement op, int hintT, int ordinal)
+    {
+        string id = op.TryGetProperty("id", out var idp) ? idp.GetString() ?? string.Empty : string.Empty;
+        if (string.IsNullOrWhiteSpace(id)) id = $"op{ordinal}";
+
+        string gate = op.TryGetProperty("gate", out var gatep) ? gatep.GetString() ?? "u" : "u";
+        int[] qb = ParseIntArray(op, "q");
+        int[] cb = ParseIntArray(op, "c");
+        float[] prm = ParseFloatArray(op, "params");
+        return new RawOp(id, gate, qb, cb, prm, hintT);
+    }
+
+    private static bool TryAddExplicitEdges(JsonElement root, List<RawOp> rawOps, AdjacencyGraph<string, Edge<string>> graph)
+    {
+        if (!root.TryGetProperty("edges", out var edgesEl)) return false;
+
+        var validIds = rawOps.Select(op => op.Id).ToHashSet();
+
+        foreach (var edgeEl in edgesEl.EnumerateArray())
+        {
+            if (!edgeEl.TryGetProperty("from", out var fromEl) || !edgeEl.TryGetProperty("to", out var toEl))
+                continue;
+
+            var from = fromEl.GetString() ?? string.Empty;
+            var to = toEl.GetString() ?? string.Empty;
+
+            if (from.Length == 0 || to.Length == 0) continue;
+            if (from == to) continue;
+            if (!validIds.Contains(from) || !validIds.Contains(to)) continue;
+
+            graph.AddEdge(new Edge<string>(from, to));
+        }
+
+        return graph.EdgeCount > 0;
+    }
+
+    private static void AddQubitInferredEdges(List<RawOp> rawOps, AdjacencyGraph<string, Edge<string>> graph)
+    {
+        var lastOnQubit = new Dictionary<int, string>();
+
+        foreach (var op in rawOps)
+        {
+            foreach (int q in op.Qubits)
+            {
+                if (lastOnQubit.TryGetValue(q, out string? prev))
+                    graph.AddEdge(new Edge<string>(prev, op.Id));
+                lastOnQubit[q] = op.Id;
+            }
+        }
+    }
 
     private static int[] ParseIntArray(JsonElement el, string prop)
     {

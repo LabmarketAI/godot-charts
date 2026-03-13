@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <!-- Disable default Compile glob so we can control exactly which files are included -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="4.2.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="QuikGraph" Version="2.5.0" />
+  </ItemGroup>
+
+  <!-- Test files in this directory -->
+  <ItemGroup>
+    <Compile Include="TestChartBinner.cs" />
+    <Compile Include="TestCircuitLoader.cs" />
+    <!-- Godot type stubs so source files compile without a Godot SDK reference -->
+    <Compile Include="GodotStubs.cs" />
+  </ItemGroup>
+
+  <!--
+    Source files from the addon that have no Godot node/GodotObject dependencies.
+    Godot-dependent chart classes require GdUnit4 running inside the Godot editor.
+  -->
+  <ItemGroup>
+    <Compile Include="../addons/godot-charts/utils/ChartBinner.cs" />
+    <Compile Include="../addons/godot-charts/circuits/CircuitData.cs" />
+    <Compile Include="../addons/godot-charts/circuits/CircuitLoader.cs" />
+  </ItemGroup>
+
+</Project>

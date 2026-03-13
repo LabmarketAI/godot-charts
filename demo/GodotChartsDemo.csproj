@@ -1,0 +1,20 @@
+<Project Sdk="Godot.NET.Sdk/4.6.1">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="QuikGraph" Version="2.5.0" />
+    <PackageReference Include="Microsoft.Msagl" Version="1.1.6" />
+    <PackageReference Include="Microsoft.Msagl.Drawing" Version="1.1.6" />
+  </ItemGroup>
+
+  <!-- Include C# addon sources from the repo-level addons directory. -->
+  <ItemGroup>
+    <Compile Include="../addons/godot-charts/**/*.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://e8m3n1q7k4p2"]
 
-[ext_resource type="Script" path="res://scenes/scatter_chart.gd" id="1_e8m3n"]
+[ext_resource type="Script" path="res://scenes/ScatterChart.cs" id="1_e8m3n"]
 
 [node name="ScatterChartDemo" type="Node3D"]
 script = ExtResource("1_e8m3n")

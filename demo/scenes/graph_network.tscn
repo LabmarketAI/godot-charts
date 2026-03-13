@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://h7n3p1q8k2m4"]
 
-[ext_resource type="Script" path="res://scenes/graph_network.gd" id="1_h7n3p"]
+[ext_resource type="Script" path="res://scenes/GraphNetwork.cs" id="1_h7n3p"]
 
 [node name="GraphNetworkDemo" type="Node3D"]
 script = ExtResource("1_h7n3p")

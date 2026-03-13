@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c1x9p4r7m2n3"]
 
-[ext_resource type="Script" path="res://scenes/bar_chart.gd" id="1_c1x9p"]
+[ext_resource type="Script" path="res://scenes/BarChart.cs" id="1_c1x9p"]
 
 [node name="BarChartDemo" type="Node3D"]
 script = ExtResource("1_c1x9p")

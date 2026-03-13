@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://g4q1m7p3n6r8"]
 
-[ext_resource type="Script" path="res://scenes/histogram.gd" id="1_g4q1m"]
+[ext_resource type="Script" path="res://scenes/Histogram.cs" id="1_g4q1m"]
 
 [node name="HistogramDemo" type="Node3D"]
 script = ExtResource("1_g4q1m")

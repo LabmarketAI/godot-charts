@@ -14,7 +14,6 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 *.md text eol=lf
-
 # Binary files
 *.png binary
 *.jpg binary
@@ -23,7 +22,6 @@
 *.svg binary
 *.icns binary
 *.exe binary
-
 # Files to exclude from Asset Library ZIP downloads
 tests/           export-ignore
 demo/            export-ignore
@@ -32,3 +30,5 @@ install.sh       export-ignore
 .gitignore       export-ignore
 .gitattributes   export-ignore
 README.md        export-ignore
+demo/assets/*.blend filter=lfs diff=lfs merge=lfs -text
+demo/assets/*.blend1 filter=lfs diff=lfs merge=lfs -text

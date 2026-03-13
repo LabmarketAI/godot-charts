@@ -18,9 +18,14 @@ config/name="Godot Charts Demo"
 config/description="Interactive demo of all Godot Charts chart types."
 config/version="1.0.0"
 run/main_scene="uid://bq7x1m2n4k8p"
-config/features=PackedStringArray("4.7", "C#", "Forward Plus")
+config/features=PackedStringArray("4.6", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 config/run/main_scene="res://scenes/main.tscn"
+
+[autoload]
+
+XRToolsUserSettings="*res://addons/godot-xr-tools/user_settings/user_settings.gd"
+XRToolsRumbleManager="*res://addons/godot-xr-tools/rumble/rumble_manager.gd"
 
 [dotnet]
 

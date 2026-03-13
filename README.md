@@ -131,21 +131,20 @@ This repository contains **two copies** of the addon to maintain the distributab
 - **`addons/godot-charts/`** — Primary addon source (what gets distributed)
 - **`demo/addons/godot-charts/`** — Copy used by the demo project
 
-**Local developers should only edit in `addons/godot-charts/`.**  
-The demo copy is kept automatically in sync via CI/CD, so changes you make to the primary addon are reflected in the demo after each push.
+**Local developers should only edit in `addons/godot-charts/`.**
+The demo addon copy must match the primary addon source.
 
-**How sync works:**
-1. You edit files in `addons/godot-charts/` locally
-2. You commit and push your changes
-3. GitHub Actions runs `scripts/sync-demo-addon.sh` to copy updated files to `demo/addons/godot-charts/`
-4. The sync commit is automatically created and pushed
-5. Everyone pulls the synced changes
+**How sync works now:**
+1. Edit files in `addons/godot-charts/`.
+2. Run `bash scripts/sync-demo-addon.sh` (or `powershell ./scripts/sync-demo-addon.ps1` on Windows).
+3. Commit both source and demo addon changes together.
+4. CI runs `scripts/check-demo-addon-sync.sh` and fails if folders drift.
 
 This ensures:
-- ✅ Single source of truth (primary addon location)
-- ✅ No manual sync required from developers
-- ✅ Demo always uses the latest addon code
-- ✅ Clean separation between distributable and demo code
+- Single source of truth (primary addon location)
+- Demo always uses the latest addon code
+- Drift is caught automatically in pull requests
+- No hidden auto-commit behavior from CI
 
 ### Installing addon updates in development
 
@@ -227,7 +226,7 @@ The data room includes a **live desktop capture panel** (slot 8) powered by the 
 
 The capture starts automatically when the scene runs (`enabled = true`). To change which monitor is captured, edit the `DesktopCaptureTexture` resource on the `DesktopPanel` node in `data_room.tscn` and set `monitor_index`.
 
-*(Note: There are also standalone, minimal examples for each chart type like `surface_chart.tscn` and `graph_network.tscn`. In those specific minimal scenes, press `Space` to toggle surface mode, or `Tab` to cycle node layout modes.)*
+*(Note: There are also standalone, minimal examples for each chart type like `surface_chart.tscn`, `graph_network.tscn`, and `qiskit_circuit.tscn`. In those specific minimal scenes, press `Space` to toggle surface mode, or `Tab` to cycle node layout modes.)*
 
 ### Troubleshooting local development
 

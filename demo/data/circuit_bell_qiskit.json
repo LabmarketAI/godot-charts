@@ -1,0 +1,24 @@
+{
+  "qubits": 2,
+  "layers": [
+    {
+      "t": 0,
+      "ops": [
+        { "id": "n0", "gate": "h", "q": [0], "c": [], "params": [] }
+      ]
+    },
+    {
+      "t": 1,
+      "ops": [
+        { "id": "n1", "gate": "cx", "q": [0, 1], "c": [], "params": [] }
+      ]
+    },
+    {
+      "t": 2,
+      "ops": [
+        { "id": "n2", "gate": "measure", "q": [0], "c": [0], "params": [] },
+        { "id": "n3", "gate": "measure", "q": [1], "c": [1], "params": [] }
+      ]
+    }
+  ]
+}

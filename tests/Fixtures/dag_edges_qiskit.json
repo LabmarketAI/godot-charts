@@ -1,0 +1,12 @@
+{
+  "qubits": 2,
+  "ops": [
+    { "id": "a", "gate": "h", "q": [0], "c": [], "params": [] },
+    { "id": "b", "gate": "cx", "q": [0, 1], "c": [], "params": [] },
+    { "id": "c", "gate": "measure", "q": [1], "c": [0], "params": [] }
+  ],
+  "edges": [
+    { "from": "a", "to": "b" },
+    { "from": "b", "to": "c" }
+  ]
+}

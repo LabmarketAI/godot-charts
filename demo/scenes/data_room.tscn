@@ -1,13 +1,14 @@
 [gd_scene format=3 uid="uid://n4p2q7r8tat0"]
 
-[ext_resource type="Script" path="res://addons/godot-charts/charts/ChartFrame3D.cs" id="1_frame"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/BarChart3D.cs" id="2_bar"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/LineChart3D.cs" id="3_line"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/ScatterChart3D.cs" id="4_scatter"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/SurfaceChart3D.cs" id="5_surface"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/HistogramChart3D.cs" id="6_hist"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/GraphNetworkChart3D.cs" id="7_gnet3"]
-[ext_resource type="PackedScene" uid="uid://dakqhrhjqcgia" path="res://assets/Data-Room-v1.blend" id="8_lsx6p"]
+[ext_resource type="Script" uid="uid://ckjvc6am1ja1p" path="res://addons/godot-charts/charts/ChartFrame3D.cs" id="1_frame"]
+[ext_resource type="Script" uid="uid://dr57q0ba74kih" path="res://addons/godot-charts/charts/BarChart3D.cs" id="2_bar"]
+[ext_resource type="Script" uid="uid://cbg4fl37f6vkm" path="res://addons/godot-charts/charts/LineChart3D.cs" id="3_line"]
+[ext_resource type="Script" uid="uid://dtpje0y4v2qi0" path="res://addons/godot-charts/charts/ScatterChart3D.cs" id="4_scatter"]
+[ext_resource type="Script" uid="uid://df8arlbrhknrx" path="res://addons/godot-charts/charts/SurfaceChart3D.cs" id="5_surface"]
+[ext_resource type="Script" uid="uid://cat0d833wprcf" path="res://addons/godot-charts/charts/HistogramChart3D.cs" id="6_hist"]
+[ext_resource type="Script" uid="uid://b12fe4pgk3mp" path="res://addons/godot-charts/charts/GraphNetworkChart3D.cs" id="7_gnet3"]
+[ext_resource type="PackedScene" uid="uid://b37vns1d5d4ot" path="res://assets/BackPanel.glb" id="8_27won"]
+[ext_resource type="PackedScene" uid="uid://b5idwuogdwy3u" path="res://assets/Floor.glb" id="9_vde67"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -60,9 +61,6 @@ max_fps = 30
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_panel"]
 albedo_texture = SubResource("DesktopCaptureTexture_panel")
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_walkable_floor"]
-size = Vector3(24, 1, 24)
-
 [node name="DataRoom" type="Node3D" unique_id=620340148]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=386849547]
@@ -74,36 +72,24 @@ shadow_enabled = true
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=223033495]
 environment = SubResource("Environment_main")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=439271995]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-collision_layer = 1
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1019177449]
-shape = SubResource("BoxShape3D_walkable_floor")
-
 [node name="Frame0" type="Node3D" parent="." unique_id=356831631]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6.666319, 0.67087865, 12.093829)
 script = ExtResource("1_frame")
-size = Vector2(5, 4)
 
 [node name="BarChart3D" type="Node3D" parent="Frame0" unique_id=1670049321]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("2_bar")
-data = {
+Data = {
 "datasets": [{
-"name": "Product A",
-"values": [120.0, 95.0, 140.0, 180.0]
+"name": "Alpha",
+"values": [3.0, 5.0, 2.0, 4.0]
 }, {
-"name": "Product B",
-"values": [80.0, 110.0, 90.0, 130.0]
+"name": "Beta",
+"values": [1.5, 3.0, 4.5, 2.5]
 }],
-"labels": ["Jan", "Feb", "Mar", "Apr"]
+"labels": ["A", "B", "C", "D"]
 }
-title = "Monthly Sales"
-x_label = "Month"
-y_label = "Units"
-chart_size = Vector2(4.7, 3.7)
+ChartSize = Vector2(3.7, 2.7)
 
 [node name="Label3D" type="Label3D" parent="Frame0" unique_id=1456659471]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
@@ -114,25 +100,21 @@ font_size = 24
 [node name="Frame1" type="Node3D" parent="." unique_id=1513762675]
 transform = Transform3D(-0.7071068, 0, -0.7071068, 0, 1, 0, 0.7071068, 0, -0.7071068, 5.303301, 1, 5.303301)
 script = ExtResource("1_frame")
-size = Vector2(5, 4)
 
 [node name="LineChart3D" type="Node3D" parent="Frame1" unique_id=722142774]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("3_line")
-data = {
+Data = {
 "datasets": [{
 "name": "Revenue",
-"values": [1.2, 3.5, 2.8, 4.2]
+"values": [1.2, 2.8, 2.3, 3.9, 3.1, 4.5]
 }, {
 "name": "Expenses",
-"values": [0.9, 1.4, 2.1, 1.9]
+"values": [0.9, 1.4, 2.0, 1.7, 2.4, 2.2]
 }],
-"labels": ["Q1", "Q2", "Q3", "Q4"]
+"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
 }
-title = "Quarterly Revenue"
-x_label = "Quarter"
-y_label = "USD (M)"
-chart_size = Vector2(4.7, 3.7)
+ChartSize = Vector2(3.7, 2.7)
 
 [node name="Label3D" type="Label3D" parent="Frame1" unique_id=1137076375]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
@@ -143,22 +125,20 @@ font_size = 24
 [node name="Frame2" type="Node3D" parent="." unique_id=1284225601]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7.5, 1, 0)
 script = ExtResource("1_frame")
-size = Vector2(5, 4)
 
 [node name="ScatterChart3D" type="Node3D" parent="Frame2" unique_id=1085933029]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("4_scatter")
-data = {
+Data = {
 "datasets": [{
-"name": "Group A",
-"points": [Vector3(0.2, 1.3, 0.5), Vector3(0.8, 0.4, 1.1), Vector3(0.5, 0.9, 0.7), Vector3(1, 1.5, 0.3)]
+"name": "Cluster A",
+"points": [Vector3(0.26571825, 1.4885486, 0.51746154), Vector3(1.4122597, 0.65196925, 0.35039854), Vector3(0.11943849, 1.6134431, 1.283527), Vector3(1.1741511, 1.2439624, 1.3989435), Vector3(0.8392536, 1.9612494, 1.0102962), Vector3(0.40548125, 1.777679, 0.9137779), Vector3(1.2453684, 0.74215496, 0.5063261), Vector3(1.3100291, 1.5752801, 1.1238146), Vector3(0.76234055, 0.63441896, 0.35776967), Vector3(0.55066955, 1.2846655, 0.26228192), Vector3(0.77328455, 1.557228, 0.15657303), Vector3(0.86100125, 0.78544474, 0.791378), Vector3(0.8901902, 1.4555608, 1.3353243), Vector3(0.88850605, 1.232324, 0.8918905), Vector3(1.2601237, 0.5281752, 1.4969517), Vector3(0.8997432, 0.8100511, 1.0364778), Vector3(0.5888469, 1.508269, 1.3570035), Vector3(0.39325315, 0.9622216, 0.93952054), Vector3(1.1017534, 1.0810363, 0.7665666), Vector3(0.35831484, 0.8027388, 1.4599504), Vector3(0.86176413, 1.3542084, 1.4717263), Vector3(1.4589592, 1.2323787, 0.2137937), Vector3(1.3995892, 1.2806932, 1.2630613), Vector3(0.923797, 0.7465416, 0.6075858), Vector3(0.2985001, 0.7987483, 0.44068706), Vector3(0.8156104, 0.5868888, 0.9814999), Vector3(1.1417031, 1.4370131, 1.1959857), Vector3(0.16450928, 0.769779, 0.8061073), Vector3(0.2006369, 0.5171827, 0.4913983), Vector3(0.74166864, 1.5877349, 0.92357385), Vector3(0.15433499, 1.0917363, 1.4958094), Vector3(0.68503577, 1.8380817, 0.9048719), Vector3(1.4829229, 1.7751355, 1.3804405), Vector3(1.3057652, 0.808466, 0.9227725), Vector3(0.16806456, 1.6417868, 0.75982696), Vector3(0.3831128, 1.0700393, 0.13616478), Vector3(1.4434854, 1.1629834, 0.28841403), Vector3(0.9664137, 1.990633, 0.12767139), Vector3(0.22457206, 1.0940175, 1.3644627), Vector3(0.22272623, 1.295681, 0.89124954)]
 }, {
-"name": "Group B",
-"points": [Vector3(2, 0.6, 0.3), Vector3(1.7, 1.2, 1.9), Vector3(1.4, 0.3, 1.5), Vector3(1.9, 1.8, 0.8)]
+"name": "Cluster B",
+"points": [Vector3(1.056395, 0.9118879, 1.2402092), Vector3(2.4526684, 0.07116953, 1.0860803), Vector3(1.689647, 0.7799877, 1.3917582), Vector3(2.0863986, 0.7938429, 1.3380907), Vector3(1.6646355, 0.5753638, 1.5761174), Vector3(1.9265983, 0.922782, 2.2748628), Vector3(2.0971065, 0.089816645, 1.6644335), Vector3(1.243619, 0.6792073, 1.5958279), Vector3(1.1204308, 0.8943402, 1.5984408), Vector3(2.452893, 0.61178005, 1.273994), Vector3(2.0857706, 0.84327734, 1.8230405), Vector3(1.9235222, 0.31713825, 1.2967342), Vector3(1.4285328, 0.019391572, 1.2050083), Vector3(1.8172797, 0.75319844, 1.7735043), Vector3(2.394528, 1.0221747, 1.574598), Vector3(1.9383804, 0.2436561, 1.5048182), Vector3(1.6749551, 0.5214428, 2.0048904), Vector3(2.278607, 0.042057447, 2.000515), Vector3(2.2100303, 0.03171719, 1.2586488), Vector3(2.307096, 0.9808648, 1.5834291), Vector3(1.7718529, 0.45983905, 2.3769171), Vector3(1.3645557, 0.13241242, 2.3086138), Vector3(1.3317318, 0.34692726, 1.2225922), Vector3(1.9178532, 0.17926061, 1.9851055), Vector3(2.4636948, 0.3506603, 1.9079157), Vector3(1.539639, 0.026576996, 2.2185712), Vector3(1.230143, 0.57816446, 2.0773158), Vector3(1.8352945, 1.1155696, 2.1298423), Vector3(1.9758443, 0.7888884, 1.4969585), Vector3(1.8532879, 0.4400934, 2.1433043), Vector3(1.7631159, 1.1681062, 1.8138455), Vector3(1.6255096, 0.42689332, 1.623136), Vector3(2.229758, 1.1510036, 1.477704), Vector3(1.5653498, 0.15444879, 1.8366575), Vector3(2.1948502, 1.089912, 2.458118), Vector3(1.456742, 0.16763252, 1.5717113), Vector3(1.3907278, 0.45669475, 1.6131538), Vector3(2.2064672, 0.64239866, 1.9142474), Vector3(2.3403258, 0.135416, 2.2166889), Vector3(1.6627128, 0.06897868, 1.6812137)]
 }]
 }
-title = "3-D Point Cloud"
-chart_size = Vector2(4.7, 3.7)
+ChartSize = Vector2(3.7, 2.7)
 
 [node name="Label3D" type="Label3D" parent="Frame2" unique_id=388829343]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
@@ -169,16 +149,13 @@ font_size = 24
 [node name="Frame3" type="Node3D" parent="." unique_id=730927488]
 transform = Transform3D(0.7071068, 0, -0.7071068, 0, 1, 0, 0.7071068, 0, 0.7071068, 5.303301, 1, -5.303301)
 script = ExtResource("1_frame")
-size = Vector2(5, 4)
 
 [node name="SurfaceChart3D" type="Node3D" parent="Frame3" unique_id=834878822]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("5_surface")
-surface_function = Callable()
-grid_cols = 24
-grid_rows = 24
-title = "sin(x)·cos(z)"
-chart_size = Vector2(4.7, 3.7)
+GridCols = 24
+GridRows = 24
+ChartSize = Vector2(3.7, 2.7)
 
 [node name="Label3D" type="Label3D" parent="Frame3" unique_id=1815130503]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
@@ -189,17 +166,11 @@ font_size = 24
 [node name="Frame4" type="Node3D" parent="." unique_id=1126957404]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -7.5)
 script = ExtResource("1_frame")
-size = Vector2(5, 4)
 
 [node name="HistogramChart3D" type="Node3D" parent="Frame4" unique_id=1797880176]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("6_hist")
-raw_data = Array[float]([28.0, 33.0, 35.0, 38.0, 40.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 60.0, 62.0, 65.0, 68.0, 72.0])
-n_bins = 8
-title = "Sample Distribution"
-x_label = "Value"
-y_label = "Count"
-chart_size = Vector2(4.7, 3.7)
+ChartSize = Vector2(3.7, 2.7)
 
 [node name="Label3D" type="Label3D" parent="Frame4" unique_id=1836484896]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
@@ -210,51 +181,69 @@ font_size = 24
 [node name="Frame5" type="Node3D" parent="." unique_id=1990475432]
 transform = Transform3D(0.7071068, 0, 0.7071068, 0, 1, 0, -0.7071068, 0, 0.7071068, -5.303301, 1, -5.303301)
 script = ExtResource("1_frame")
-size = Vector2(5, 4)
 
 [node name="GraphNetworkChart3D" type="Node3D" parent="Frame5" unique_id=217827023]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("7_gnet3")
-data = {
+Data = {
 "edges": [{
-"source": "alice",
-"target": "bob"
+"directed": true,
+"source": "A",
+"target": "B"
 }, {
-"source": "alice",
-"target": "carol"
+"directed": true,
+"source": "A",
+"target": "C"
 }, {
-"source": "bob",
-"target": "dave"
+"directed": true,
+"source": "B",
+"target": "E"
 }, {
-"source": "carol",
-"target": "dave"
+"source": "C",
+"target": "D"
 }, {
-"source": "dave",
-"target": "eve"
-}, {
-"source": "eve",
-"target": "alice"
+"directed": true,
+"source": "D",
+"target": "E"
 }],
 "nodes": [{
-"id": "alice",
-"label": "Alice"
+"id": "A",
+"label": "Alpha",
+"type": "source",
+"x": 0.0,
+"y": 0.0,
+"z": 0.0
 }, {
-"id": "bob",
-"label": "Bob"
+"id": "B",
+"label": "Beta",
+"type": "node",
+"x": 1.0,
+"y": 0.5,
+"z": 0.5
 }, {
-"id": "carol",
-"label": "Carol"
+"id": "C",
+"label": "Gamma",
+"type": "node",
+"x": 0.5,
+"y": 1.0,
+"z": 0.2
 }, {
-"id": "dave",
-"label": "Dave"
+"id": "D",
+"label": "Delta",
+"type": "node",
+"x": 0.2,
+"y": 0.5,
+"z": 1.0
 }, {
-"id": "eve",
-"label": "Eve"
+"id": "E",
+"label": "Epsilon",
+"type": "sink",
+"x": 0.8,
+"y": 0.2,
+"z": 0.8
 }]
 }
-layout_mode = 1
-title = "Social Graph"
-chart_size = Vector2(4.7, 3.7)
+ChartSize = Vector2(3.7, 2.7)
 
 [node name="Label3D" type="Label3D" parent="Frame5" unique_id=731845111]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
@@ -265,7 +254,6 @@ font_size = 24
 [node name="Frame6" type="Node3D" parent="." unique_id=1666704957]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -7.5, 1, 0)
 script = ExtResource("1_frame")
-size = Vector2(5, 4)
 
 [node name="CircuitPreviewStatic" type="Node3D" parent="Frame6" unique_id=1578988961]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
@@ -350,6 +338,7 @@ billboard = 1
 text = "[8] Live Desktop"
 font_size = 24
 
-[node name="Data-Room-v1" parent="." unique_id=990775271 instance=ExtResource("8_lsx6p")]
+[node name="BackPanel" parent="." unique_id=1070415017 instance=ExtResource("8_27won")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.288111, 0, -24.561382)
 
-[editable path="Data-Room-v1"]
+[node name="Floor" parent="." unique_id=1727187514 instance=ExtResource("9_vde67")]

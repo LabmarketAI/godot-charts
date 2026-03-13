@@ -19,7 +19,7 @@
 
   <!-- Include C# addon sources from the repo-level addons directory. -->
   <ItemGroup>
-    <Compile Include="../addons/godot-charts/**/*.cs" />
+    <Compile Include="addons/godot-charts/**/*.cs" />
   </ItemGroup>
 
 </Project>

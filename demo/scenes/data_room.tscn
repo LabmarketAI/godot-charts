@@ -1,25 +1,13 @@
-[gd_scene load_steps=21 format=3 uid="uid://n4p2q7r8tat0"]
+[gd_scene format=3 uid="uid://n4p2q7r8tat0"]
 
-[ext_resource type="Script" path="res://addons/godot-charts/charts/chart_frame_3d.gd" id="1_frame"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/bar_chart_3d.gd" id="2_bar"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/line_chart_3d.gd" id="3_line"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/scatter_chart_3d.gd" id="4_scatter"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/surface_chart_3d.gd" id="5_surface"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/histogram_chart_3d.gd" id="6_hist"]
-[ext_resource type="Script" path="res://addons/godot-charts/charts/graph_network_chart_3d.gd" id="7_gnet3"]
-
-[sub_resource type="DesktopCaptureTexture" id="DesktopCaptureTexture_panel"]
-enabled = true
-max_fps = 30
-monitor_index = 0
-capture_cursor = true
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_panel"]
-shading_mode = 1
-albedo_texture = SubResource("DesktopCaptureTexture_panel")
-
-[sub_resource type="QuadMesh" id="QuadMesh_panel"]
-size = Vector2(4.8, 2.7)
+[ext_resource type="Script" path="res://addons/godot-charts/charts/ChartFrame3D.cs" id="1_frame"]
+[ext_resource type="Script" path="res://addons/godot-charts/charts/BarChart3D.cs" id="2_bar"]
+[ext_resource type="Script" path="res://addons/godot-charts/charts/LineChart3D.cs" id="3_line"]
+[ext_resource type="Script" path="res://addons/godot-charts/charts/ScatterChart3D.cs" id="4_scatter"]
+[ext_resource type="Script" path="res://addons/godot-charts/charts/SurfaceChart3D.cs" id="5_surface"]
+[ext_resource type="Script" path="res://addons/godot-charts/charts/HistogramChart3D.cs" id="6_hist"]
+[ext_resource type="Script" path="res://addons/godot-charts/charts/GraphNetworkChart3D.cs" id="7_gnet3"]
+[ext_resource type="PackedScene" uid="uid://dakqhrhjqcgia" path="res://assets/Data-Room-v1.blend" id="8_lsx6p"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -30,72 +18,76 @@ ambient_light_energy = 0.6
 tonemap_mode = 2
 glow_enabled = true
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(20, 1.0, 20)
-
-[sub_resource type="BoxMesh" id="BoxMesh_ground"]
-size = Vector3(20, 1.0, 20)
+[sub_resource type="CylinderMesh" id="CylinderMesh_circuit_wire"]
+top_radius = 0.02
+bottom_radius = 0.02
+height = 3.8
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_circuit_wire"]
 albedo_color = Color(0.74, 0.74, 0.8, 1)
 metallic = 0.1
 roughness = 0.45
 
+[sub_resource type="BoxMesh" id="BoxMesh_circuit_gate"]
+size = Vector3(0.34, 0.34, 0.12)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_circuit_gate"]
 albedo_color = Color(0.25, 0.55, 0.95, 1)
 metallic = 0.12
 roughness = 0.35
+
+[sub_resource type="SphereMesh" id="SphereMesh_circuit_control"]
+radius = 0.12
+height = 0.24
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_circuit_control"]
 albedo_color = Color(1, 0.75, 0.1, 1)
 metallic = 0.2
 roughness = 0.3
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_circuit_wire"]
-top_radius = 0.02
-bottom_radius = 0.02
-height = 3.8
-
 [sub_resource type="CylinderMesh" id="CylinderMesh_circuit_connector"]
 top_radius = 0.02
 bottom_radius = 0.02
 height = 0.8
 
-[sub_resource type="BoxMesh" id="BoxMesh_circuit_gate"]
-size = Vector3(0.34, 0.34, 0.12)
+[sub_resource type="QuadMesh" id="QuadMesh_panel"]
+size = Vector2(4.8, 2.7)
 
-[sub_resource type="SphereMesh" id="SphereMesh_circuit_control"]
-radius = 0.12
-height = 0.24
+[sub_resource type="DesktopCaptureTexture" id="DesktopCaptureTexture_panel"]
+enabled = true
+max_fps = 30
 
-[node name="DataRoom" type="Node3D"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_panel"]
+albedo_texture = SubResource("DesktopCaptureTexture_panel")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[sub_resource type="BoxShape3D" id="BoxShape3D_walkable_floor"]
+size = Vector3(24, 1, 24)
+
+[node name="DataRoom" type="Node3D" unique_id=620340148]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=386849547]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 1.6135974, 0)
 light_color = Color(0.4506024, 0.6884674, 0.97673804, 1)
 light_energy = 0.5
 shadow_enabled = true
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=223033495]
 environment = SubResource("Environment_main")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=439271995]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
-shape = SubResource("BoxShape3D_ground")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1019177449]
+shape = SubResource("BoxShape3D_walkable_floor")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
-mesh = SubResource("BoxMesh_ground")
-
-[node name="Frame0" type="Node3D" parent="."]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 1, 7.5)
+[node name="Frame0" type="Node3D" parent="." unique_id=356831631]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6.666319, 0.67087865, 12.093829)
 script = ExtResource("1_frame")
 size = Vector2(5, 4)
 
-[node name="BarChart3D" type="Node3D" parent="Frame0"]
+[node name="BarChart3D" type="Node3D" parent="Frame0" unique_id=1670049321]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("2_bar")
 data = {
@@ -113,18 +105,18 @@ x_label = "Month"
 y_label = "Units"
 chart_size = Vector2(4.7, 3.7)
 
-[node name="Label3D" type="Label3D" parent="Frame0"]
+[node name="Label3D" type="Label3D" parent="Frame0" unique_id=1456659471]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
 billboard = 1
 text = "[1] Bar Chart"
 font_size = 24
 
-[node name="Frame1" type="Node3D" parent="."]
+[node name="Frame1" type="Node3D" parent="." unique_id=1513762675]
 transform = Transform3D(-0.7071068, 0, -0.7071068, 0, 1, 0, 0.7071068, 0, -0.7071068, 5.303301, 1, 5.303301)
 script = ExtResource("1_frame")
 size = Vector2(5, 4)
 
-[node name="LineChart3D" type="Node3D" parent="Frame1"]
+[node name="LineChart3D" type="Node3D" parent="Frame1" unique_id=722142774]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("3_line")
 data = {
@@ -142,18 +134,18 @@ x_label = "Quarter"
 y_label = "USD (M)"
 chart_size = Vector2(4.7, 3.7)
 
-[node name="Label3D" type="Label3D" parent="Frame1"]
+[node name="Label3D" type="Label3D" parent="Frame1" unique_id=1137076375]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
 billboard = 1
 text = "[2] Line Chart"
 font_size = 24
 
-[node name="Frame2" type="Node3D" parent="."]
+[node name="Frame2" type="Node3D" parent="." unique_id=1284225601]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 7.5, 1, 0)
 script = ExtResource("1_frame")
 size = Vector2(5, 4)
 
-[node name="ScatterChart3D" type="Node3D" parent="Frame2"]
+[node name="ScatterChart3D" type="Node3D" parent="Frame2" unique_id=1085933029]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("4_scatter")
 data = {
@@ -168,18 +160,18 @@ data = {
 title = "3-D Point Cloud"
 chart_size = Vector2(4.7, 3.7)
 
-[node name="Label3D" type="Label3D" parent="Frame2"]
+[node name="Label3D" type="Label3D" parent="Frame2" unique_id=388829343]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
 billboard = 1
 text = "[3] Scatter Plot"
 font_size = 24
 
-[node name="Frame3" type="Node3D" parent="."]
+[node name="Frame3" type="Node3D" parent="." unique_id=730927488]
 transform = Transform3D(0.7071068, 0, -0.7071068, 0, 1, 0, 0.7071068, 0, 0.7071068, 5.303301, 1, -5.303301)
 script = ExtResource("1_frame")
 size = Vector2(5, 4)
 
-[node name="SurfaceChart3D" type="Node3D" parent="Frame3"]
+[node name="SurfaceChart3D" type="Node3D" parent="Frame3" unique_id=834878822]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("5_surface")
 surface_function = Callable()
@@ -188,18 +180,18 @@ grid_rows = 24
 title = "sin(x)·cos(z)"
 chart_size = Vector2(4.7, 3.7)
 
-[node name="Label3D" type="Label3D" parent="Frame3"]
+[node name="Label3D" type="Label3D" parent="Frame3" unique_id=1815130503]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
 billboard = 1
 text = "[4] Surface Chart"
 font_size = 24
 
-[node name="Frame4" type="Node3D" parent="."]
+[node name="Frame4" type="Node3D" parent="." unique_id=1126957404]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -7.5)
 script = ExtResource("1_frame")
 size = Vector2(5, 4)
 
-[node name="HistogramChart3D" type="Node3D" parent="Frame4"]
+[node name="HistogramChart3D" type="Node3D" parent="Frame4" unique_id=1797880176]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("6_hist")
 raw_data = Array[float]([28.0, 33.0, 35.0, 38.0, 40.0, 42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 60.0, 62.0, 65.0, 68.0, 72.0])
@@ -209,18 +201,18 @@ x_label = "Value"
 y_label = "Count"
 chart_size = Vector2(4.7, 3.7)
 
-[node name="Label3D" type="Label3D" parent="Frame4"]
+[node name="Label3D" type="Label3D" parent="Frame4" unique_id=1836484896]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
 billboard = 1
 text = "[5] Histogram"
 font_size = 24
 
-[node name="Frame5" type="Node3D" parent="."]
+[node name="Frame5" type="Node3D" parent="." unique_id=1990475432]
 transform = Transform3D(0.7071068, 0, 0.7071068, 0, 1, 0, -0.7071068, 0, 0.7071068, -5.303301, 1, -5.303301)
 script = ExtResource("1_frame")
 size = Vector2(5, 4)
 
-[node name="GraphNetworkChart3D" type="Node3D" parent="Frame5"]
+[node name="GraphNetworkChart3D" type="Node3D" parent="Frame5" unique_id=217827023]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 script = ExtResource("7_gnet3")
 data = {
@@ -264,97 +256,100 @@ layout_mode = 1
 title = "Social Graph"
 chart_size = Vector2(4.7, 3.7)
 
-[node name="Label3D" type="Label3D" parent="Frame5"]
+[node name="Label3D" type="Label3D" parent="Frame5" unique_id=731845111]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
 billboard = 1
 text = "[6] Graph Network 3D"
 font_size = 24
 
-[node name="Frame6" type="Node3D" parent="."]
+[node name="Frame6" type="Node3D" parent="." unique_id=1666704957]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -7.5, 1, 0)
 script = ExtResource("1_frame")
 size = Vector2(5, 4)
 
-[node name="CircuitPreviewStatic" type="Node3D" parent="Frame6"]
+[node name="CircuitPreviewStatic" type="Node3D" parent="Frame6" unique_id=1578988961]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.15, 0.005)
 
-[node name="QubitWire0" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="QubitWire0" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic" unique_id=1704722904]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 2, 0.9, 0)
 mesh = SubResource("CylinderMesh_circuit_wire")
 surface_material_override/0 = SubResource("StandardMaterial3D_circuit_wire")
 
-[node name="QubitWire1" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="QubitWire1" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic" unique_id=1850580807]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 2, 1.7, 0)
 mesh = SubResource("CylinderMesh_circuit_wire")
 surface_material_override/0 = SubResource("StandardMaterial3D_circuit_wire")
 
-[node name="GateH" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="GateH" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic" unique_id=528167184]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.9, 0)
 mesh = SubResource("BoxMesh_circuit_gate")
 surface_material_override/0 = SubResource("StandardMaterial3D_circuit_gate")
 
-[node name="GateHLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="GateHLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic" unique_id=1454423073]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.9, 0.08)
 billboard = 1
 text = "H"
-font_size = 32
 
-[node name="ControlCX" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="ControlCX" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic" unique_id=2047124500]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.9, 0)
 mesh = SubResource("SphereMesh_circuit_control")
 surface_material_override/0 = SubResource("StandardMaterial3D_circuit_control")
 
-[node name="TargetCX" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="TargetCX" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic" unique_id=1278447801]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.7, 0)
 mesh = SubResource("BoxMesh_circuit_gate")
 surface_material_override/0 = SubResource("StandardMaterial3D_circuit_gate")
 
-[node name="ConnectorCX" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="ConnectorCX" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic" unique_id=524120871]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.3, 0)
 mesh = SubResource("CylinderMesh_circuit_connector")
 surface_material_override/0 = SubResource("StandardMaterial3D_circuit_wire")
 
-[node name="GateCXLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="GateCXLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic" unique_id=263006254]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.62, 0.08)
 billboard = 1
 text = "CX"
 font_size = 22
 
-[node name="MeasureTop" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="MeasureTop" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic" unique_id=77817543]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.25, 0.9, 0)
 mesh = SubResource("BoxMesh_circuit_gate")
 surface_material_override/0 = SubResource("StandardMaterial3D_circuit_gate")
 
-[node name="MeasureTopLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="MeasureTopLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic" unique_id=1075541482]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.25, 0.9, 0.08)
 billboard = 1
 text = "M"
 font_size = 24
 
-[node name="MeasureBottom" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="MeasureBottom" type="MeshInstance3D" parent="Frame6/CircuitPreviewStatic" unique_id=2050591793]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.25, 1.7, 0)
 mesh = SubResource("BoxMesh_circuit_gate")
 surface_material_override/0 = SubResource("StandardMaterial3D_circuit_gate")
 
-[node name="MeasureBottomLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic"]
+[node name="MeasureBottomLabel" type="Label3D" parent="Frame6/CircuitPreviewStatic" unique_id=2085051676]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.25, 1.7, 0.08)
 billboard = 1
 text = "M"
 font_size = 24
 
-[node name="Label3D" type="Label3D" parent="Frame6"]
+[node name="Label3D" type="Label3D" parent="Frame6" unique_id=2015394912]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.3, 0)
 billboard = 1
 text = "[7] Qiskit Circuit 3D"
 font_size = 24
 
-[node name="DesktopPanel" type="MeshInstance3D" parent="."]
-transform = Transform3D(-0.7071068, 0, 0.7071068, 0, 1, 0, -0.7071068, 0, -0.7071068, -5.303301, 2.5, 5.303301)
+[node name="DesktopPanel" type="MeshInstance3D" parent="." unique_id=170149257]
+transform = Transform3D(1, 0, 0, 0, 0.86602527, 0.5, 0, -0.49999994, 0.8660254, -0.15060139, 2.3215733, -14.76646)
 mesh = SubResource("QuadMesh_panel")
 surface_material_override/0 = SubResource("StandardMaterial3D_panel")
 
-[node name="Label3D" type="Label3D" parent="DesktopPanel"]
+[node name="Label3D" type="Label3D" parent="DesktopPanel" unique_id=229132711]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.55, 0)
 billboard = 1
 text = "[8] Live Desktop"
 font_size = 24
+
+[node name="Data-Room-v1" parent="." unique_id=990775271 instance=ExtResource("8_lsx6p")]
+
+[editable path="Data-Room-v1"]

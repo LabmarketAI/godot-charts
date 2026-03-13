@@ -7,9 +7,24 @@ on:
     branches: [main]
 
 jobs:
+  addon-sync-check:
+    name: Addon Sync Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout addon
+        uses: actions/checkout@v4
+        with:
+          path: src
+
+      - name: Verify addons are synchronized
+        run: |
+          cd src
+          bash scripts/check-demo-addon-sync.sh
+
   unit-tests:
     name: Unit Tests (Godot ${{ matrix.godot-version }})
     runs-on: ubuntu-latest
+    needs: addon-sync-check
 
     strategy:
       fail-fast: false
@@ -22,11 +37,6 @@ jobs:
         with:
           path: src
 
-      # GdUnit4 needs a proper Godot project at the workspace root with the
-      # addon installed under addons/godot_charts/.  We build this structure
-      # from the checked-out source rather than committing a project.godot to
-      # the addon repo (which would cause Godot to treat the addon directory
-      # as a sub-project and break class_name registration in parent projects).
       - name: Build test-harness project
         run: |
           mkdir -p addons/godot_charts tests

@@ -32,6 +32,12 @@ func _enable_plugin() -> void:
 		null
 	)
 	add_custom_type(
+		"GraphNetworkDataSource",
+		"Resource",
+		preload("utils/graph_network_data_source.gd"),
+		null
+	)
+	add_custom_type(
 		"ChartFrame3D",
 		"Node3D",
 		preload("charts/chart_frame_3d.gd"),
@@ -74,21 +80,15 @@ func _enable_plugin() -> void:
 		null
 	)
 	add_custom_type(
-		"GraphNetworkDataSource",
-		"Resource",
-		preload("utils/graph_network_data_source.gd"),
-		null
-	)
-	add_custom_type(
-		"GraphNetworkChart2D",
-		"Node3D",
-		preload("charts/graph_network_chart_2d.gd"),
-		null
-	)
-	add_custom_type(
 		"GraphNetworkChart3D",
 		"Node3D",
 		preload("charts/graph_network_chart_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"CircuitChart3D",
+		"Node3D",
+		preload("circuits/circuit_chart_3d.gd"),
 		null
 	)
 
@@ -106,5 +106,5 @@ func _disable_plugin() -> void:
 	remove_custom_type("ScatterChart3D")
 	remove_custom_type("SurfaceChart3D")
 	remove_custom_type("HistogramChart3D")
-	remove_custom_type("GraphNetworkChart2D")
 	remove_custom_type("GraphNetworkChart3D")
+	remove_custom_type("CircuitChart3D")

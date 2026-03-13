@@ -4,12 +4,17 @@
     <TargetFramework>net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="QuikGraph" Version="2.5.0" />
     <PackageReference Include="Microsoft.Msagl" Version="1.1.6" />
     <PackageReference Include="Microsoft.Msagl.Drawing" Version="1.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="scenes/*.cs" />
   </ItemGroup>
 
   <!-- Include C# addon sources from the repo-level addons directory. -->

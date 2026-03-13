@@ -214,7 +214,12 @@ Features a standard first-person controller to walk around the chart displays.
 Features a Godot XR Tools rig for exploring the data room in virtual reality.
 - **Requirements**: Connected headset, OpenXR runtime active (e.g. SteamVR on Windows, WiVRn on Linux).
 - **External addon dependency**: `godot-xr-tools` is treated as an external addon required by the VR demo. Install it under `demo/addons/godot-xr-tools/` (for example from the official repo or Godot Asset Library).
-- **Controls**: Standard Godot XR Tools mappings (Left thumbstick for movement/turn, Right trigger for teleport).
+- **Quest keyboard passthrough (optional)**: The demo now depends on `godot-openxr-vendors` (submodule at `demo/addons/godot-openxr-vendors/`) to expose Meta keyboard tracking support.
+- **Controls**: Standard Godot XR Tools mappings (Left thumbstick for movement/turn, Right trigger for teleport). Press `B/Y` to toggle the keyboard passthrough window when supported.
+
+Keyboard passthrough behavior:
+- On Quest runtimes exposing `XR_FB_keyboard_tracking`, `main_vr.tscn` starts keyboard tracking automatically so the physical keyboard can appear via passthrough.
+- On non-Meta runtimes (for example ALVR/WiVRn PC runtimes), the feature is a silent no-op.
 
 The local archive `demo/addons/godot-xr-tools.zip` is for convenience during local setup and is intentionally not tracked by git.
 

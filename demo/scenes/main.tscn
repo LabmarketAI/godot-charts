@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://bq7x1m2n4k8p"]
 
-[ext_resource type="Script" uid="uid://c1acj55v6ysov" path="res://scenes/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scenes/Main.cs" id="1_main"]
 [ext_resource type="PackedScene" uid="uid://n4p2q7r8tat0" path="res://scenes/data_room.tscn" id="2_dr"]
-[ext_resource type="Script" uid="uid://doryt82x7erfg" path="res://scenes/fps_player.gd" id="3_fps"]
+[ext_resource type="Script" path="res://scenes/FpsPlayer.cs" id="3_fps"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.3

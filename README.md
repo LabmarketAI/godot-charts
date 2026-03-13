@@ -221,6 +221,15 @@ Keyboard passthrough behavior:
 - On Quest runtimes exposing `XR_FB_keyboard_tracking`, `main_vr.tscn` starts keyboard tracking automatically so the physical keyboard can appear via passthrough.
 - On non-Meta runtimes (for example ALVR/WiVRn PC runtimes), the feature is a silent no-op.
 
+Upstream references (passthrough and keyboard tracking context):
+- `godot_openxr_vendors` keyboard-related request: [#77](https://github.com/GodotVR/godot_openxr_vendors/issues/77)
+- `godot_openxr_vendors` passthrough issues: [#465](https://github.com/GodotVR/godot_openxr_vendors/issues/465), [#239](https://github.com/GodotVR/godot_openxr_vendors/issues/239), [#190](https://github.com/GodotVR/godot_openxr_vendors/issues/190)
+- `godot-xr-tools` passthrough/MR issues: [#552](https://github.com/GodotVR/godot-xr-tools/issues/552), [#562](https://github.com/GodotVR/godot-xr-tools/issues/562)
+- Core Godot OpenXR passthrough reference: [godotengine/godot#81338](https://github.com/godotengine/godot/issues/81338)
+
+Current status note:
+- In the tested `godot_openxr_vendors` line, no `XRFbKeyboardTrackingExtension` wrapper class is exposed to Godot scripts, so keyboard-window passthrough is not currently available through that class path.
+
 The local archive `demo/addons/godot-xr-tools.zip` is for convenience during local setup and is intentionally not tracked by git.
 
 ##### Live Desktop Panel

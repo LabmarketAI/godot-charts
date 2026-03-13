@@ -1,3 +1,4 @@
 [submodule "demo/addons/godot-openxr-vendors"]
 	path = demo/addons/godot-openxr-vendors
 	url = https://github.com/GodotVR/godot_openxr_vendors.git
+	ignore = untracked

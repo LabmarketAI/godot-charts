@@ -37,3 +37,12 @@ demo/addons/godot-xr-tools.zip
 
 # Python virtual environment
 .venv/
+
+# .NET build artifacts from test runs
+tests/obj/
+
+# Local issue/PR draft notes
+.close_*.md
+.pr*_body.md
+.issue*_*.md
+.priority_note.md

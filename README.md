@@ -226,7 +226,7 @@ The data room includes a **live desktop capture panel** (slot 8) powered by the 
 
 The capture starts automatically when the scene runs (`enabled = true`). To change which monitor is captured, edit the `DesktopCaptureTexture` resource on the `DesktopPanel` node in `data_room.tscn` and set `monitor_index`.
 
-*(Note: There are also standalone, minimal examples for each chart type like `surface_chart.tscn` and `graph_network.tscn`. In those specific minimal scenes, press `Space` to toggle surface mode, or `Tab` to cycle node layout modes.)*
+*(Note: There are also standalone, minimal examples for each chart type like `surface_chart.tscn`, `graph_network.tscn`, and `qiskit_circuit.tscn`. In those specific minimal scenes, press `Space` to toggle surface mode, or `Tab` to cycle node layout modes.)*
 
 ### Troubleshooting local development
 

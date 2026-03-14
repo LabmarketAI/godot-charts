@@ -17,14 +17,23 @@ using Godot;
 public partial class MainVr : Node3D
 {
 	private const string KeyboardPassthroughToggleAction = "by_button";
+	private const string ToggleConsoleAction = "toggle_diegetic_console";
+	private const bool DefaultConsoleVisible = false;
+	private static readonly Vector3 ConsoleSpawnPosition = new(0.25f, 1.5f, -1.6f);
+	private static readonly Vector3 ConsoleSpawnRotation = new(0f, Mathf.DegToRad(-12f), 0f);
 
 	private GodotObject _keyboardTrackingExtension;
 	private bool _keyboardTrackingAvailable;
 	private bool _keyboardPassthroughEnabled;
 	private bool _loggedMissingKeyboardSupport;
+	private WorkspaceStateService _workspaceService;
+	private ConsoleRoot _consoleRoot;
 
 	public override void _Ready()
 	{
+		EnsureConsoleAction();
+		SetupWorkspaceAndConsole();
+
 		var openxr = XRServer.FindInterface("OpenXR");
 		if (openxr != null && openxr.Initialize())
 		{
@@ -48,8 +57,54 @@ public partial class MainVr : Node3D
 		CallDeferred(MethodName.SetupDesktopCapture);
 	}
 
+	private void EnsureConsoleAction()
+	{
+		if (!InputMap.HasAction(ToggleConsoleAction))
+			InputMap.AddAction(ToggleConsoleAction);
+
+		foreach (InputEvent ev in InputMap.ActionGetEvents(ToggleConsoleAction))
+		{
+			if (ev is InputEventKey key && key.Keycode == Key.F1)
+				return;
+		}
+
+		var keyEvent = new InputEventKey
+		{
+			Keycode = Key.F1,
+			PhysicalKeycode = Key.F1,
+		};
+		InputMap.ActionAddEvent(ToggleConsoleAction, keyEvent);
+	}
+
+	private void SetupWorkspaceAndConsole()
+	{
+		_workspaceService = new WorkspaceStateService { Name = "WorkspaceStateService" };
+		AddChild(_workspaceService);
+
+		var packed = GD.Load<PackedScene>("res://scenes/console_root.tscn");
+		_consoleRoot = packed.Instantiate<ConsoleRoot>();
+		_consoleRoot.Name = "ConsoleRoot";
+		_consoleRoot.Position = ConsoleSpawnPosition;
+		_consoleRoot.Rotation = ConsoleSpawnRotation;
+		AddChild(_consoleRoot);
+		_consoleRoot.BindWorkspaceService(_workspaceService);
+
+		if (_workspaceService.ActiveWorkspaceProfile.TryGetValue("console_visible", out var storedVisible))
+			_consoleRoot.SetConsoleVisible(storedVisible.AsBool());
+		else
+			_consoleRoot.SetConsoleVisible(DefaultConsoleVisible);
+	}
+
 	public override void _Input(InputEvent @event)
 	{
+		if (@event.IsActionPressed(ToggleConsoleAction))
+		{
+			_consoleRoot.ToggleConsole();
+			_workspaceService.SaveActiveWorkspace(_consoleRoot.IsConsoleVisible);
+			GetViewport().SetInputAsHandled();
+			return;
+		}
+
 		if (!_keyboardTrackingAvailable)
 		{
 			if (@event.IsActionPressed(KeyboardPassthroughToggleAction) && !_loggedMissingKeyboardSupport)

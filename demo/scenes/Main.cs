@@ -14,6 +14,10 @@ using Godot;
 
 public partial class Main : Node3D
 {
+    private const string ToggleConsoleAction = "toggle_diegetic_console";
+    private const bool DefaultConsoleVisible = false;
+    private static readonly Vector3 ConsoleSpawnPosition = new(0f, 1.65f, -2.35f);
+
     private const float FrameH        = 4f;
     private const float OctagonRadius = 7.5f;
     private const float CameraInset   = 4.5f;
@@ -42,12 +46,53 @@ public partial class Main : Node3D
     };
 
     private FpsPlayer _player = null!;
+    private WorkspaceStateService _workspaceService = null!;
+    private ConsoleRoot _consoleRoot = null!;
 
     public override void _Ready()
     {
         _player = GetNode<FpsPlayer>("FPSPlayer");
+        EnsureConsoleAction();
+        SetupWorkspaceAndConsole();
         ShowHint();
         CallDeferred(MethodName.SetupDesktopCapture);
+    }
+
+    private void EnsureConsoleAction()
+    {
+        if (!InputMap.HasAction(ToggleConsoleAction))
+            InputMap.AddAction(ToggleConsoleAction);
+
+        foreach (InputEvent ev in InputMap.ActionGetEvents(ToggleConsoleAction))
+        {
+            if (ev is InputEventKey key && key.Keycode == Key.F1)
+                return;
+        }
+
+        var keyEvent = new InputEventKey
+        {
+            Keycode = Key.F1,
+            PhysicalKeycode = Key.F1,
+        };
+        InputMap.ActionAddEvent(ToggleConsoleAction, keyEvent);
+    }
+
+    private void SetupWorkspaceAndConsole()
+    {
+        _workspaceService = new WorkspaceStateService { Name = "WorkspaceStateService" };
+        AddChild(_workspaceService);
+
+        var packed = GD.Load<PackedScene>("res://scenes/console_root.tscn");
+        _consoleRoot = packed.Instantiate<ConsoleRoot>();
+        _consoleRoot.Name = "ConsoleRoot";
+        _consoleRoot.Position = ConsoleSpawnPosition;
+        AddChild(_consoleRoot);
+        _consoleRoot.BindWorkspaceService(_workspaceService);
+
+        if (_workspaceService.ActiveWorkspaceProfile.TryGetValue("console_visible", out var storedVisible))
+            _consoleRoot.SetConsoleVisible(storedVisible.AsBool());
+        else
+            _consoleRoot.SetConsoleVisible(DefaultConsoleVisible);
     }
 
     private void SetupDesktopCapture()
@@ -81,6 +126,14 @@ public partial class Main : Node3D
 
     public override void _Input(InputEvent @event)
     {
+        if (@event.IsActionPressed(ToggleConsoleAction))
+        {
+            _consoleRoot.ToggleConsole();
+            _workspaceService.SaveActiveWorkspace(_consoleRoot.IsConsoleVisible);
+            GetViewport().SetInputAsHandled();
+            return;
+        }
+
         if (@event is not InputEventKey key || !key.Pressed) return;
         int k = (int)key.Keycode;
         if (k >= (int)Key.Key1 && k <= (int)Key.Key7)

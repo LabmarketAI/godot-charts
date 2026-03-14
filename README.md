@@ -208,14 +208,25 @@ Features a standard first-person controller to walk around the chart displays.
 - `W` `A` `S` `D` (or Arrows): Walk and strafe
 - **Mouse**: Look around
 - `1` – `7`: Instantly teleport to the viewing position for a specific chart
+- `F1`: Toggle the diegetic console panel (Phase 1 scaffold)
 - `Escape`: Toggle mouse capture (release or hide cursor)
+
+Diegetic console workspace persistence:
+- Workspaces are saved under `user://workspaces/`
+- The active workspace is remembered between runs
+- The console defaults to **hidden** on first run (`F1` to open)
 
 #### 2. VR Demo (`main_vr.tscn`) *[requires OpenXR]*
 Features a Godot XR Tools rig for exploring the data room in virtual reality.
 - **Requirements**: Connected headset, OpenXR runtime active (e.g. SteamVR on Windows, WiVRn on Linux).
 - **External addon dependency**: `godot-xr-tools` is treated as an external addon required by the VR demo. Install it under `demo/addons/godot-xr-tools/` (for example from the official repo or Godot Asset Library).
 - **Quest keyboard passthrough (optional)**: The demo now depends on `godot-openxr-vendors` (submodule at `demo/addons/godot-openxr-vendors/`) to expose Meta keyboard tracking support.
-- **Controls**: Standard Godot XR Tools mappings (Left thumbstick for movement/turn, Right trigger for teleport). Press `B/Y` to toggle the keyboard passthrough window when supported.
+- **Controls**: Standard Godot XR Tools mappings (Left thumbstick for movement/turn, Right trigger for teleport). Press `B/Y` to toggle the keyboard passthrough window when supported. Press `F1` to toggle the diegetic console scaffold.
+
+Diegetic console workspace persistence:
+- Workspaces are saved under `user://workspaces/`
+- The active workspace is remembered between runs
+- The console defaults to **hidden** on first run (`F1` to open)
 
 Keyboard passthrough behavior:
 - On Quest runtimes exposing `XR_FB_keyboard_tracking`, `main_vr.tscn` starts keyboard tracking automatically so the physical keyboard can appear via passthrough.

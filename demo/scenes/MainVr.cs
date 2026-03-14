@@ -22,12 +22,12 @@ public partial class MainVr : Node3D
 	private static readonly Vector3 ConsoleSpawnPosition = new(0.25f, 1.5f, -1.6f);
 	private static readonly Vector3 ConsoleSpawnRotation = new(0f, Mathf.DegToRad(-12f), 0f);
 
-	private GodotObject _keyboardTrackingExtension;
+	private GodotObject? _keyboardTrackingExtension;
 	private bool _keyboardTrackingAvailable;
 	private bool _keyboardPassthroughEnabled;
 	private bool _loggedMissingKeyboardSupport;
-	private WorkspaceStateService _workspaceService;
-	private ConsoleRoot _consoleRoot;
+	private WorkspaceStateService? _workspaceService;
+	private ConsoleRoot? _consoleRoot;
 
 	public override void _Ready()
 	{
@@ -99,8 +99,10 @@ public partial class MainVr : Node3D
 	{
 		if (@event.IsActionPressed(ToggleConsoleAction))
 		{
-			_consoleRoot.ToggleConsole();
-			_workspaceService.SaveActiveWorkspace(_consoleRoot.IsConsoleVisible);
+			if (_consoleRoot != null)
+				_consoleRoot.ToggleConsole();
+			if (_workspaceService != null && _consoleRoot != null)
+				_workspaceService.SaveActiveWorkspace(_consoleRoot.IsConsoleVisible);
 			GetViewport().SetInputAsHandled();
 			return;
 		}

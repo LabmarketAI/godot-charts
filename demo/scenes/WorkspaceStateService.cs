@@ -35,11 +35,26 @@ public partial class WorkspaceStateService : Node
 			requested = "default";
 		}
 
-		if (!LoadWorkspace(requested))
+		if (!LoadWorkspace(requested) && !RecoverWithFreshDefault())
 		{
-			CreateWorkspace("default");
-			LoadWorkspace("default");
+			GD.PushWarning("Workspace bootstrap failed; continuing with empty in-memory workspace state.");
+			ActiveWorkspaceName = "";
+			ActiveWorkspaceProfile = new Dictionary();
 		}
+	}
+
+	private bool RecoverWithFreshDefault()
+	{
+		const string fallbackName = "default";
+		var fallbackPath = WorkspaceFilePath(fallbackName);
+
+		if (FileAccess.FileExists(fallbackPath))
+			DirAccess.RemoveAbsolute(fallbackPath);
+
+		if (!CreateWorkspace(fallbackName))
+			return false;
+
+		return LoadWorkspace(fallbackName);
 	}
 
 	public string[] ListWorkspaceNames()

@@ -113,12 +113,13 @@ public partial class WorkspaceStateService : Node
 		return true;
 	}
 
-	public bool SaveActiveWorkspace(bool consoleVisible)
+	public bool SaveActiveWorkspace(bool? consoleVisible = null)
 	{
 		if (string.IsNullOrEmpty(ActiveWorkspaceName))
 			return false;
 
-		ActiveWorkspaceProfile["console_visible"] = consoleVisible;
+		if (consoleVisible.HasValue)
+			ActiveWorkspaceProfile["console_visible"] = consoleVisible.Value;
 		ActiveWorkspaceProfile["updated_utc"] = DateTime.UtcNow.ToString("o");
 		return WriteProfile(ActiveWorkspaceName, ActiveWorkspaceProfile);
 	}

@@ -27,6 +27,7 @@ public partial class MainVr : Node3D
 	private bool _keyboardPassthroughEnabled;
 	private bool _loggedMissingKeyboardSupport;
 	private WorkspaceStateService? _workspaceService;
+	private FrameOrchestrationService? _frameService;
 	private ConsoleRoot? _consoleRoot;
 
 	public override void _Ready()
@@ -81,6 +82,10 @@ public partial class MainVr : Node3D
 		_workspaceService = new WorkspaceStateService { Name = "WorkspaceStateService" };
 		AddChild(_workspaceService);
 
+		_frameService = new FrameOrchestrationService { Name = "FrameOrchestrationService" };
+		AddChild(_frameService);
+		_frameService.Initialize(GetNode<Node3D>("DataRoom"), _workspaceService);
+
 		var packed = GD.Load<PackedScene>("res://scenes/console_root.tscn");
 		_consoleRoot = packed.Instantiate<ConsoleRoot>();
 		_consoleRoot.Name = "ConsoleRoot";
@@ -88,6 +93,8 @@ public partial class MainVr : Node3D
 		_consoleRoot.Rotation = ConsoleSpawnRotation;
 		AddChild(_consoleRoot);
 		_consoleRoot.BindWorkspaceService(_workspaceService);
+		if (_frameService != null)
+			_consoleRoot.BindFrameService(_frameService);
 
 		if (_workspaceService.ActiveWorkspaceProfile.TryGetValue("console_visible", out var storedVisible))
 			_consoleRoot.SetConsoleVisible(storedVisible.AsBool());

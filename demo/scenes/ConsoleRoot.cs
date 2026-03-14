@@ -4,8 +4,12 @@ using Godot;
 public partial class ConsoleRoot : Node3D
 {
 	private WorkspaceStateService? _workspaceService;
+	private FrameOrchestrationService? _frameService;
 	private SubViewport? _subViewport;
 	private OptionButton? _workspacePicker;
+	private OptionButton? _framePicker;
+	private OptionButton? _chartTypePicker;
+	private OptionButton? _sizePresetPicker;
 	private Label? _statusLabel;
 
 	public bool IsConsoleVisible => Visible;
@@ -22,6 +26,13 @@ public partial class ConsoleRoot : Node3D
 		_workspaceService.WorkspaceLoaded += OnWorkspaceLoaded;
 		_workspaceService.WorkspaceListChanged += RefreshWorkspaceList;
 		RefreshWorkspaceList();
+	}
+
+	public void BindFrameService(FrameOrchestrationService service)
+	{
+		_frameService = service;
+		_frameService.RuntimeFramesChanged += RefreshFrameList;
+		RefreshFrameList();
 	}
 
 	public void ToggleConsole()
@@ -99,6 +110,47 @@ public partial class ConsoleRoot : Node3D
 		deleteBtn.Pressed += OnDeleteWorkspacePressed;
 		row.AddChild(deleteBtn);
 
+		column.AddChild(new HSeparator());
+		column.AddChild(new Label { Text = "Runtime Frames" });
+
+		var frameRow = new HBoxContainer();
+		frameRow.AddThemeConstantOverride("separation", 8);
+		column.AddChild(frameRow);
+
+		_framePicker = new OptionButton();
+		frameRow.AddChild(_framePicker);
+
+		_chartTypePicker = new OptionButton();
+		foreach (var chartType in FrameOrchestrationService.SupportedChartTypes)
+			_chartTypePicker.AddItem(chartType);
+		frameRow.AddChild(_chartTypePicker);
+
+		_sizePresetPicker = new OptionButton();
+		foreach (var sizePreset in FrameOrchestrationService.SupportedSizePresets)
+			_sizePresetPicker.AddItem(sizePreset);
+		_sizePresetPicker.Select(1); // medium
+		frameRow.AddChild(_sizePresetPicker);
+
+		var frameActionRow = new HBoxContainer();
+		frameActionRow.AddThemeConstantOverride("separation", 8);
+		column.AddChild(frameActionRow);
+
+		var createFrameBtn = new Button { Text = "Create Frame" };
+		createFrameBtn.Pressed += OnCreateFramePressed;
+		frameActionRow.AddChild(createFrameBtn);
+
+		var applyChartBtn = new Button { Text = "Set Chart" };
+		applyChartBtn.Pressed += OnSetChartPressed;
+		frameActionRow.AddChild(applyChartBtn);
+
+		var applySizeBtn = new Button { Text = "Set Size" };
+		applySizeBtn.Pressed += OnSetSizePressed;
+		frameActionRow.AddChild(applySizeBtn);
+
+		var deleteFrameBtn = new Button { Text = "Delete Frame" };
+		deleteFrameBtn.Pressed += OnDeleteFramePressed;
+		frameActionRow.AddChild(deleteFrameBtn);
+
 		column.AddChild(new Label
 		{
 			Text = "F1 toggles this panel. Workspace persistence is active in user://workspaces.",
@@ -145,6 +197,25 @@ public partial class ConsoleRoot : Node3D
 		_workspacePicker.Select(selected);
 	}
 
+	private void RefreshFrameList()
+	{
+		if (_frameService == null || _framePicker == null)
+			return;
+
+		_framePicker.Clear();
+		var profiles = _frameService.ListRuntimeFrameProfiles();
+		for (var i = 0; i < profiles.Count; i++)
+		{
+			var profile = profiles[i];
+			var id = profile.TryGetValue("id", out var idVariant) ? idVariant.AsString() : $"frame-{i}";
+			var chart = profile.TryGetValue("chart_type", out var chartVariant) ? chartVariant.AsString() : "bar";
+			_framePicker.AddItem($"{id} ({chart})");
+		}
+
+		if (_framePicker.ItemCount > 0)
+			_framePicker.Select(0);
+	}
+
 	private void OnWorkspaceLoaded(string name)
 	{
 		if (_statusLabel != null)
@@ -186,5 +257,60 @@ public partial class ConsoleRoot : Node3D
 		if (string.IsNullOrEmpty(current))
 			return;
 		_workspaceService.DeleteWorkspace(current);
+	}
+
+	private void OnCreateFramePressed()
+	{
+		if (_frameService == null || _chartTypePicker == null || _sizePresetPicker == null)
+			return;
+
+		var chartType = _chartTypePicker.GetItemText(_chartTypePicker.Selected);
+		var sizePreset = _sizePresetPicker.GetItemText(_sizePresetPicker.Selected);
+		if (_frameService.CreateFrame(chartType, sizePreset))
+			_statusLabel!.Text = $"Created frame ({chartType}, {sizePreset})";
+	}
+
+	private void OnSetChartPressed()
+	{
+		if (_frameService == null || _framePicker == null || _chartTypePicker == null)
+			return;
+		if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+			return;
+
+		var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+		var chartType = _chartTypePicker.GetItemText(_chartTypePicker.Selected);
+		if (_frameService.SetFrameChartType(frameId, chartType))
+			_statusLabel!.Text = $"Set {frameId} to {chartType}";
+	}
+
+	private void OnSetSizePressed()
+	{
+		if (_frameService == null || _framePicker == null || _sizePresetPicker == null)
+			return;
+		if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+			return;
+
+		var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+		var sizePreset = _sizePresetPicker.GetItemText(_sizePresetPicker.Selected);
+		if (_frameService.SetFrameSizePreset(frameId, sizePreset))
+			_statusLabel!.Text = $"Set {frameId} size to {sizePreset}";
+	}
+
+	private void OnDeleteFramePressed()
+	{
+		if (_frameService == null || _framePicker == null)
+			return;
+		if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+			return;
+
+		var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+		if (_frameService.DeleteFrame(frameId))
+			_statusLabel!.Text = $"Deleted {frameId}";
+	}
+
+	private static string ExtractFrameId(string pickerText)
+	{
+		var idx = pickerText.IndexOf(" (", StringComparison.Ordinal);
+		return idx > 0 ? pickerText[..idx] : pickerText;
 	}
 }

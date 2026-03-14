@@ -47,6 +47,7 @@ public partial class Main : Node3D
 
     private FpsPlayer _player = null!;
     private WorkspaceStateService _workspaceService = null!;
+    private FrameOrchestrationService _frameService = null!;
     private ConsoleRoot _consoleRoot = null!;
 
     public override void _Ready()
@@ -82,12 +83,17 @@ public partial class Main : Node3D
         _workspaceService = new WorkspaceStateService { Name = "WorkspaceStateService" };
         AddChild(_workspaceService);
 
+        _frameService = new FrameOrchestrationService { Name = "FrameOrchestrationService" };
+        AddChild(_frameService);
+        _frameService.Initialize(GetNode<Node3D>("DataRoom"), _workspaceService);
+
         var packed = GD.Load<PackedScene>("res://scenes/console_root.tscn");
         _consoleRoot = packed.Instantiate<ConsoleRoot>();
         _consoleRoot.Name = "ConsoleRoot";
         _consoleRoot.Position = ConsoleSpawnPosition;
         AddChild(_consoleRoot);
         _consoleRoot.BindWorkspaceService(_workspaceService);
+        _consoleRoot.BindFrameService(_frameService);
 
         if (_workspaceService.ActiveWorkspaceProfile.TryGetValue("console_visible", out var storedVisible))
             _consoleRoot.SetConsoleVisible(storedVisible.AsBool());

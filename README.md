@@ -215,6 +215,8 @@ Diegetic console workspace persistence:
 - Workspaces are saved under `user://workspaces/`
 - The active workspace is remembered between runs
 - The console defaults to **hidden** on first run (`F1` to open)
+- Phase 2 scaffold: use the console to create/delete runtime frames, set chart type, and apply size presets
+- Runtime frame transforms and chart assignments are saved with the active workspace profile
 
 #### 2. VR Demo (`main_vr.tscn`) *[requires OpenXR]*
 Features a Godot XR Tools rig for exploring the data room in virtual reality.
@@ -227,6 +229,8 @@ Diegetic console workspace persistence:
 - Workspaces are saved under `user://workspaces/`
 - The active workspace is remembered between runs
 - The console defaults to **hidden** on first run (`F1` to open)
+- Phase 2 scaffold: use the console to create/delete runtime frames, set chart type, and apply size presets
+- Runtime frame transforms and chart assignments are saved with the active workspace profile
 
 Keyboard passthrough behavior:
 - On Quest runtimes exposing `XR_FB_keyboard_tracking`, `main_vr.tscn` starts keyboard tracking automatically so the physical keyboard can appear via passthrough.

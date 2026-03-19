@@ -158,6 +158,27 @@ public class TestCircuitLoader
         Assert.That(cg.AllOps[0].Layer, Is.EqualTo(0));
     }
 
+        [Test]
+        public void Parse_FlatOpsWithCyclicEdges_ReturnsNull()
+        {
+                const string json = """
+                {
+                    "qubits": 2,
+                    "ops": [
+                        {"id":"a","gate":"h","q":[0]},
+                        {"id":"b","gate":"cx","q":[0,1]}
+                    ],
+                    "edges": [
+                        {"from":"a","to":"b"},
+                        {"from":"b","to":"a"}
+                    ]
+                }
+                """;
+
+                var cg = CircuitLoader.Parse(json);
+                Assert.That(cg, Is.Null);
+        }
+
     private static string ReadFixture(string name)
     {
         var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "Fixtures", name);

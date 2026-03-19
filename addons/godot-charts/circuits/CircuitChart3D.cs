@@ -143,12 +143,19 @@ public partial class CircuitChart3D : Chart3D
     public void ShowLayer(int t)
     {
         foreach (var (node, layer) in _gateNodes)
-            if (node is MeshInstance3D mi)
-            {
-                float alpha = t < 0 || layer == t ? 1f : 0.15f;
-                if (mi.MaterialOverride is StandardMaterial3D mat)
-                    mat.AlbedoColor = new Color(mat.AlbedoColor, alpha);
-            }
+        {
+            float alpha = t < 0 || layer == t ? 1f : 0.15f;
+            ApplyAlphaRecursive(node, alpha);
+        }
+    }
+
+    private static void ApplyAlphaRecursive(Node node, float alpha)
+    {
+        if (node is MeshInstance3D mi && mi.MaterialOverride is StandardMaterial3D mat)
+            mat.AlbedoColor = new Color(mat.AlbedoColor, alpha);
+
+        foreach (var child in node.GetChildren())
+            ApplyAlphaRecursive(child, alpha);
     }
 
     // -------------------------------------------------------------------------

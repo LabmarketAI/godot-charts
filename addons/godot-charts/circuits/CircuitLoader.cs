@@ -99,8 +99,19 @@ public static class CircuitLoader
             if (!TryAddExplicitEdges(root, rawOps, graph))
                 AddQubitInferredEdges(rawOps, graph);
 
+            List<string> topoOrder;
+            try
+            {
+                topoOrder = graph.TopologicalSort().ToList();
+            }
+            catch (Exception ex)
+            {
+                GD.PushWarning($"CircuitLoader: cyclic or invalid dependency graph: {ex.Message}");
+                return null;
+            }
+
             var layerOf = new Dictionary<string, int>();
-            foreach (string id in graph.TopologicalSort())
+            foreach (string id in topoOrder)
             {
                 int maxPred = -1;
                 foreach (var edge in graph.Edges)

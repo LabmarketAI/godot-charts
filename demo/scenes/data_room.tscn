@@ -12,7 +12,7 @@
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
-background_color = Color(0.1, 0.1, 0.12, 1)
+background_color = Color(0.4600764, 0.9797395, 0.6366237, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.8, 0.8, 0.9, 1)
 ambient_light_energy = 0.6
@@ -147,7 +147,7 @@ text = "[3] Scatter Plot"
 font_size = 24
 
 [node name="Frame3" type="Node3D" parent="." unique_id=730927488]
-transform = Transform3D(0.7071068, 0, -0.7071068, 0, 1, 0, 0.7071068, 0, 0.7071068, 5.303301, 1, -5.303301)
+transform = Transform3D(-0.2045986, 0, -0.978846, 0, 1, 0, 0.978846, 0, -0.2045986, 7.297739, 1, -6.6518683)
 script = ExtResource("1_frame")
 
 [node name="SurfaceChart3D" type="Node3D" parent="Frame3" unique_id=834878822]
@@ -164,7 +164,7 @@ text = "[4] Surface Chart"
 font_size = 24
 
 [node name="Frame4" type="Node3D" parent="." unique_id=1126957404]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -7.5)
+transform = Transform3D(0.8818801, 0, -0.4714737, 0, 1, 0, 0.4714737, 0, 0.8818801, 4.8720956, 1, -13.176363)
 script = ExtResource("1_frame")
 
 [node name="HistogramChart3D" type="Node3D" parent="Frame4" unique_id=1797880176]
@@ -179,7 +179,7 @@ text = "[5] Histogram"
 font_size = 24
 
 [node name="Frame5" type="Node3D" parent="." unique_id=1990475432]
-transform = Transform3D(0.7071068, 0, 0.7071068, 0, 1, 0, -0.7071068, 0, 0.7071068, -5.303301, 1, -5.303301)
+transform = Transform3D(0.7071068, 0, 0.7071068, 0, 1, 0, -0.7071068, 0, 0.7071068, -8.034121, 1, -9.76497)
 script = ExtResource("1_frame")
 
 [node name="GraphNetworkChart3D" type="Node3D" parent="Frame5" unique_id=217827023]
@@ -328,7 +328,7 @@ text = "[7] Qiskit Circuit 3D"
 font_size = 24
 
 [node name="DesktopPanel" type="MeshInstance3D" parent="." unique_id=170149257]
-transform = Transform3D(1, 0, 0, 0, 0.86602527, 0.5, 0, -0.49999994, 0.8660254, -0.15060139, 2.3215733, -14.76646)
+transform = Transform3D(1, 0, 0, 0, 0.9895131, -0.14444265, 0, 0.14444257, 0.9895132, -0.15060139, 3.254024, -14.76646)
 mesh = SubResource("QuadMesh_panel")
 surface_material_override/0 = SubResource("StandardMaterial3D_panel")
 
@@ -339,6 +339,9 @@ text = "[8] Live Desktop"
 font_size = 24
 
 [node name="BackPanel" parent="." unique_id=1070415017 instance=ExtResource("8_27won")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.288111, 0, -24.561382)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.0191345, 6.2909756, -16.854315)
 
 [node name="Floor" parent="." unique_id=1727187514 instance=ExtResource("9_vde67")]
+
+[node name="BackPanel2" parent="." unique_id=430435509 instance=ExtResource("8_27won")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.7245464, 6.256605, -16.824055)

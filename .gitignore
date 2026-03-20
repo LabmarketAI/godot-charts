@@ -40,6 +40,8 @@ demo/addons/godot-xr-tools.zip
 
 # .NET build artifacts from test runs
 tests/obj/
+tests/bin/
+tests/TestResults/
 
 # Local issue/PR draft notes
 .close_*.md

@@ -219,8 +219,11 @@ Diegetic console workspace persistence:
 - Workspaces are saved under `user://workspaces/`
 - The active workspace is remembered between runs
 - The console defaults to **hidden** on first run (`F1` to open)
-- Phase 2 scaffold: use the console to create/delete runtime frames, set chart type, and apply size presets
-- Runtime frame transforms and chart assignments are saved with the active workspace profile
+- Phase 4 scaffold: use the console to create/delete runtime frames, set chart type/size, set frame visual presets, choose per-frame binding mode (`demo_static` or `demo_stream`), and apply environment presets (`daylight`, `studio`, `night`)
+- Desktop runtime frames (`chart_type = desktop`) can be assigned to specific host windows so multiple in-world frames can show different applications simultaneously
+- Runtime frame transforms, chart assignments, binding modes, frame presets, and desktop window selections are saved with the active workspace profile
+- Console now surfaces environment-application status (ready/partial/missing nodes) when applying presets
+- Environment presets now attempt HDRI sky assets first from `res://assets/hdri/{daylight|studio|night}.{hdr|exr|ktx}` and fall back to color sky when assets are unavailable
 
 #### 2. VR Demo (`main_vr.tscn`) *[requires OpenXR]*
 Features a Godot XR Tools rig for exploring the data room in virtual reality.
@@ -233,8 +236,11 @@ Diegetic console workspace persistence:
 - Workspaces are saved under `user://workspaces/`
 - The active workspace is remembered between runs
 - The console defaults to **hidden** on first run (`F1` to open)
-- Phase 2 scaffold: use the console to create/delete runtime frames, set chart type, and apply size presets
-- Runtime frame transforms and chart assignments are saved with the active workspace profile
+- Phase 4 scaffold: use the console to create/delete runtime frames, set chart type/size, set frame visual presets, choose per-frame binding mode (`demo_static` or `demo_stream`), and apply environment presets (`daylight`, `studio`, `night`)
+- Desktop runtime frames (`chart_type = desktop`) can be assigned to specific host windows so multiple in-world frames can show different applications simultaneously
+- Runtime frame transforms, chart assignments, binding modes, frame presets, and desktop window selections are saved with the active workspace profile
+- Console now surfaces environment-application status (ready/partial/missing nodes) when applying presets
+- Environment presets now attempt HDRI sky assets first from `res://assets/hdri/{daylight|studio|night}.{hdr|exr|ktx}` and fall back to color sky when assets are unavailable
 
 Keyboard passthrough behavior:
 - On Quest runtimes exposing `XR_FB_keyboard_tracking`, `main_vr.tscn` starts keyboard tracking automatically so the physical keyboard can appear via passthrough.

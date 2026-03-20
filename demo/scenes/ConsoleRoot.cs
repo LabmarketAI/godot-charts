@@ -3,339 +3,582 @@ using Godot;
 
 public partial class ConsoleRoot : Node3D
 {
-	private const string XrViewportScenePath = "res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn";
+private const string XrViewportScenePath = "res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn";
 
-	public bool PreferXrInteraction { get; set; }
+public bool PreferXrInteraction { get; set; }
 
-	private WorkspaceStateService? _workspaceService;
-	private FrameOrchestrationService? _frameService;
-	private SubViewport? _subViewport;
-	private Node3D? _xrViewportHost;
-	private OptionButton? _workspacePicker;
-	private OptionButton? _framePicker;
-	private OptionButton? _chartTypePicker;
-	private OptionButton? _sizePresetPicker;
-	private Label? _statusLabel;
+private WorkspaceStateService? _workspaceService;
+private FrameOrchestrationService? _frameService;
+private DataBindingService? _bindingService;
+private SubViewport? _subViewport;
+private Node3D? _xrViewportHost;
+private OptionButton? _workspacePicker;
+private OptionButton? _framePicker;
+private OptionButton? _chartTypePicker;
+private OptionButton? _sizePresetPicker;
+private OptionButton? _bindingKindPicker;
+private OptionButton? _framePresetPicker;
+private OptionButton? _windowPicker;
+private OptionButton? _environmentPresetPicker;
+private Label? _statusLabel;
+private Label? _environmentStatusLabel;
 
-	public bool IsConsoleVisible => Visible;
+public bool IsConsoleVisible => Visible;
 
-	public override void _Ready()
-	{
-		BuildPanel();
-		Visible = false;
-	}
+public override void _Ready()
+{
+BuildPanel();
+Visible = false;
+}
 
-	public void BindWorkspaceService(WorkspaceStateService service)
-	{
-		_workspaceService = service;
-		_workspaceService.WorkspaceLoaded += OnWorkspaceLoaded;
-		_workspaceService.WorkspaceListChanged += RefreshWorkspaceList;
-		RefreshWorkspaceList();
-	}
+public void BindWorkspaceService(WorkspaceStateService service)
+{
+_workspaceService = service;
+_workspaceService.WorkspaceLoaded += OnWorkspaceLoaded;
+_workspaceService.WorkspaceListChanged += RefreshWorkspaceList;
+RefreshWorkspaceList();
+}
 
-	public void BindFrameService(FrameOrchestrationService service)
-	{
-		_frameService = service;
-		_frameService.RuntimeFramesChanged += RefreshFrameList;
-		RefreshFrameList();
-	}
+public void BindFrameService(FrameOrchestrationService service)
+{
+_frameService = service;
+_frameService.RuntimeFramesChanged += RefreshFrameList;
+RefreshFrameList();
+}
 
-	public void ToggleConsole()
-	{
-		SetConsoleVisible(!Visible);
-	}
+public void BindBindingService(DataBindingService service)
+{
+_bindingService = service;
+_bindingService.FrameBindingsChanged += RefreshFrameControlsForCurrentSelection;
+RefreshFrameControlsForCurrentSelection();
+}
 
-	public void SetConsoleVisible(bool show)
-	{
-		Visible = show;
-		if (_statusLabel != null)
-			_statusLabel.Text = show ? "Console: Visible" : "Console: Hidden";
-	}
+public void ToggleConsole()
+{
+SetConsoleVisible(!Visible);
+}
 
-	private void BuildPanel()
-	{
-		if (PreferXrInteraction && FileAccess.FileExists(XrViewportScenePath))
-		{
-			var packed = GD.Load<PackedScene>(XrViewportScenePath);
-			_xrViewportHost = packed.Instantiate<Node3D>();
-			_xrViewportHost.Name = "ConsoleViewportHost";
-			_xrViewportHost.Set("screen_size", new Vector2(1.8f, 1.1f));
-			_xrViewportHost.Set("viewport_size", new Vector2(1024f, 640f));
-			_xrViewportHost.Set("input_keyboard", true);
-			_xrViewportHost.Set("input_gamepad", false);
-			AddChild(_xrViewportHost);
+public void SetConsoleVisible(bool show)
+{
+Visible = show;
+if (_statusLabel != null)
+_statusLabel.Text = show ? "Console: Visible" : "Console: Hidden";
+}
 
-			_subViewport = _xrViewportHost.GetNodeOrNull<SubViewport>("Viewport");
-		}
+private void BuildPanel()
+{
+if (PreferXrInteraction && FileAccess.FileExists(XrViewportScenePath))
+{
+var packed = GD.Load<PackedScene>(XrViewportScenePath);
+_xrViewportHost = packed.Instantiate<Node3D>();
+_xrViewportHost.Name = "ConsoleViewportHost";
+_xrViewportHost.Set("screen_size", new Vector2(1.8f, 1.1f));
+_xrViewportHost.Set("viewport_size", new Vector2(1024f, 640f));
+_xrViewportHost.Set("input_keyboard", true);
+_xrViewportHost.Set("input_gamepad", false);
+AddChild(_xrViewportHost);
 
-		if (_subViewport == null)
-		{
-			_subViewport = new SubViewport
-			{
-				Name = "ConsoleViewport",
-				Size = new Vector2I(1024, 640),
-				TransparentBg = false,
-				Disable3D = true,
-				RenderTargetUpdateMode = SubViewport.UpdateMode.WhenVisible,
-				RenderTargetClearMode = SubViewport.ClearMode.Always,
-			};
-			AddChild(_subViewport);
-		}
+_subViewport = _xrViewportHost.GetNodeOrNull<SubViewport>("Viewport");
+}
 
-		var uiRoot = new ColorRect
-		{
-			Color = new Color(0.05f, 0.06f, 0.08f, 0.95f),
-			CustomMinimumSize = new Vector2(1024, 640),
-			Size = new Vector2(1024, 640),
-		};
-		_subViewport.AddChild(uiRoot);
+if (_subViewport == null)
+{
+_subViewport = new SubViewport
+{
+Name = "ConsoleViewport",
+Size = new Vector2I(1024, 640),
+TransparentBg = false,
+Disable3D = true,
+RenderTargetUpdateMode = SubViewport.UpdateMode.WhenVisible,
+RenderTargetClearMode = SubViewport.ClearMode.Always,
+};
+AddChild(_subViewport);
+}
 
-		var margin = new MarginContainer
-		{
-			OffsetLeft = 24,
-			OffsetTop = 24,
-			OffsetRight = 1000,
-			OffsetBottom = 616,
-		};
-		uiRoot.AddChild(margin);
+var uiRoot = new ColorRect
+{
+Color = new Color(0.05f, 0.06f, 0.08f, 0.95f),
+CustomMinimumSize = new Vector2(1024, 640),
+Size = new Vector2(1024, 640),
+};
+_subViewport.AddChild(uiRoot);
 
-		var column = new VBoxContainer();
-		column.AddThemeConstantOverride("separation", 10);
-		margin.AddChild(column);
+var margin = new MarginContainer
+{
+OffsetLeft = 24,
+OffsetTop = 24,
+OffsetRight = 1000,
+OffsetBottom = 616,
+};
+uiRoot.AddChild(margin);
 
-		column.AddChild(new Label
-		{
-			Text = "Diegetic Console (Phase 1 scaffold)",
-			ThemeTypeVariation = "HeaderSmall",
-		});
+var column = new VBoxContainer();
+column.AddThemeConstantOverride("separation", 10);
+margin.AddChild(column);
 
-		_statusLabel = new Label { Text = "Console: Hidden" };
-		column.AddChild(_statusLabel);
+column.AddChild(new Label
+{
+Text = "Diegetic Console (Phase 4 scaffold)",
+ThemeTypeVariation = "HeaderSmall",
+});
 
-		var row = new HBoxContainer();
-		row.AddThemeConstantOverride("separation", 8);
-		column.AddChild(row);
+_statusLabel = new Label { Text = "Console: Hidden" };
+column.AddChild(_statusLabel);
 
-		_workspacePicker = new OptionButton();
-		_workspacePicker.ItemSelected += OnWorkspaceSelected;
-		row.AddChild(_workspacePicker);
+_environmentStatusLabel = new Label { Text = "Environment: pending" };
+column.AddChild(_environmentStatusLabel);
 
-		var newBtn = new Button { Text = "New" };
-		newBtn.Pressed += OnNewWorkspacePressed;
-		row.AddChild(newBtn);
+var row = new HBoxContainer();
+row.AddThemeConstantOverride("separation", 8);
+column.AddChild(row);
 
-		var saveBtn = new Button { Text = "Save" };
-		saveBtn.Pressed += OnSaveWorkspacePressed;
-		row.AddChild(saveBtn);
+_workspacePicker = new OptionButton();
+_workspacePicker.ItemSelected += OnWorkspaceSelected;
+row.AddChild(_workspacePicker);
 
-		var deleteBtn = new Button { Text = "Delete" };
-		deleteBtn.Pressed += OnDeleteWorkspacePressed;
-		row.AddChild(deleteBtn);
+var newBtn = new Button { Text = "New" };
+newBtn.Pressed += OnNewWorkspacePressed;
+row.AddChild(newBtn);
 
-		column.AddChild(new HSeparator());
-		column.AddChild(new Label { Text = "Runtime Frames" });
+var saveBtn = new Button { Text = "Save" };
+saveBtn.Pressed += OnSaveWorkspacePressed;
+row.AddChild(saveBtn);
 
-		var frameRow = new HBoxContainer();
-		frameRow.AddThemeConstantOverride("separation", 8);
-		column.AddChild(frameRow);
+var deleteBtn = new Button { Text = "Delete" };
+deleteBtn.Pressed += OnDeleteWorkspacePressed;
+row.AddChild(deleteBtn);
 
-		_framePicker = new OptionButton();
-		frameRow.AddChild(_framePicker);
+column.AddChild(new HSeparator());
+column.AddChild(new Label { Text = "Runtime Frames" });
 
-		_chartTypePicker = new OptionButton();
-		foreach (var chartType in FrameOrchestrationService.SupportedChartTypes)
-			_chartTypePicker.AddItem(chartType);
-		frameRow.AddChild(_chartTypePicker);
+var frameRow = new HBoxContainer();
+frameRow.AddThemeConstantOverride("separation", 8);
+column.AddChild(frameRow);
 
-		_sizePresetPicker = new OptionButton();
-		foreach (var sizePreset in FrameOrchestrationService.SupportedSizePresets)
-			_sizePresetPicker.AddItem(sizePreset);
-		_sizePresetPicker.Select(1); // medium
-		frameRow.AddChild(_sizePresetPicker);
+_framePicker = new OptionButton();
+_framePicker.ItemSelected += OnFrameSelected;
+frameRow.AddChild(_framePicker);
 
-		var frameActionRow = new HBoxContainer();
-		frameActionRow.AddThemeConstantOverride("separation", 8);
-		column.AddChild(frameActionRow);
+_chartTypePicker = new OptionButton();
+foreach (var chartType in FrameOrchestrationService.SupportedChartTypes)
+_chartTypePicker.AddItem(chartType);
+frameRow.AddChild(_chartTypePicker);
 
-		var createFrameBtn = new Button { Text = "Create Frame" };
-		createFrameBtn.Pressed += OnCreateFramePressed;
-		frameActionRow.AddChild(createFrameBtn);
+_sizePresetPicker = new OptionButton();
+foreach (var sizePreset in FrameOrchestrationService.SupportedSizePresets)
+_sizePresetPicker.AddItem(sizePreset);
+_sizePresetPicker.Select(1); // medium
+frameRow.AddChild(_sizePresetPicker);
 
-		var applyChartBtn = new Button { Text = "Set Chart" };
-		applyChartBtn.Pressed += OnSetChartPressed;
-		frameActionRow.AddChild(applyChartBtn);
+_bindingKindPicker = new OptionButton();
+foreach (var bindingKind in DataBindingService.SupportedBindingKinds)
+_bindingKindPicker.AddItem(bindingKind);
+frameRow.AddChild(_bindingKindPicker);
 
-		var applySizeBtn = new Button { Text = "Set Size" };
-		applySizeBtn.Pressed += OnSetSizePressed;
-		frameActionRow.AddChild(applySizeBtn);
+_framePresetPicker = new OptionButton();
+foreach (var framePreset in DataBindingService.SupportedFramePresets)
+_framePresetPicker.AddItem(framePreset);
+frameRow.AddChild(_framePresetPicker);
 
-		var deleteFrameBtn = new Button { Text = "Delete Frame" };
-		deleteFrameBtn.Pressed += OnDeleteFramePressed;
-		frameActionRow.AddChild(deleteFrameBtn);
+var frameActionRow = new HBoxContainer();
+frameActionRow.AddThemeConstantOverride("separation", 8);
+column.AddChild(frameActionRow);
 
-		column.AddChild(new Label
-		{
-			Text = "F1 toggles this panel. Workspace persistence is active in user://workspaces.",
-		});
+var createFrameBtn = new Button { Text = "Create Frame" };
+createFrameBtn.Pressed += OnCreateFramePressed;
+frameActionRow.AddChild(createFrameBtn);
 
-		if (_xrViewportHost == null)
-		{
-			var panelMesh = new QuadMesh
-			{
-				Size = new Vector2(1.8f, 1.1f),
-			};
-			var panelMaterial = new StandardMaterial3D
-			{
-				AlbedoTexture = _subViewport.GetTexture(),
-				ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-				CullMode = BaseMaterial3D.CullModeEnum.Disabled,
-				Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
-			};
+var applyChartBtn = new Button { Text = "Set Chart" };
+applyChartBtn.Pressed += OnSetChartPressed;
+frameActionRow.AddChild(applyChartBtn);
 
-			var panel = new MeshInstance3D
-			{
-				Name = "ConsolePanel",
-				Mesh = panelMesh,
-				MaterialOverride = panelMaterial,
-			};
-			AddChild(panel);
-		}
-	}
+var applySizeBtn = new Button { Text = "Set Size" };
+applySizeBtn.Pressed += OnSetSizePressed;
+frameActionRow.AddChild(applySizeBtn);
 
-	private void RefreshWorkspaceList()
-	{
-		if (_workspaceService == null || _workspacePicker == null)
-			return;
+var deleteFrameBtn = new Button { Text = "Delete Frame" };
+deleteFrameBtn.Pressed += OnDeleteFramePressed;
+frameActionRow.AddChild(deleteFrameBtn);
 
-		_workspacePicker.Clear();
-		var names = _workspaceService.ListWorkspaceNames();
-		for (var i = 0; i < names.Length; i++)
-			_workspacePicker.AddItem(names[i]);
+var applyBindingBtn = new Button { Text = "Set Binding" };
+applyBindingBtn.Pressed += OnSetBindingPressed;
+frameActionRow.AddChild(applyBindingBtn);
 
-		if (names.Length == 0)
-			return;
+var applyPresetBtn = new Button { Text = "Set Preset" };
+applyPresetBtn.Pressed += OnSetFramePresetPressed;
+frameActionRow.AddChild(applyPresetBtn);
 
-		var active = _workspaceService.ActiveWorkspaceName;
-		var selected = Array.IndexOf(names, active);
-		if (selected < 0)
-			selected = 0;
-		_workspacePicker.Select(selected);
-	}
+var windowRow = new HBoxContainer();
+windowRow.AddThemeConstantOverride("separation", 8);
+column.AddChild(windowRow);
 
-	private void RefreshFrameList()
-	{
-		if (_frameService == null || _framePicker == null)
-			return;
+_windowPicker = new OptionButton();
+windowRow.AddChild(_windowPicker);
 
-		_framePicker.Clear();
-		var profiles = _frameService.ListRuntimeFrameProfiles();
-		for (var i = 0; i < profiles.Count; i++)
-		{
-			var profile = profiles[i];
-			var id = profile.TryGetValue("id", out var idVariant) ? idVariant.AsString() : $"frame-{i}";
-			var chart = profile.TryGetValue("chart_type", out var chartVariant) ? chartVariant.AsString() : "bar";
-			_framePicker.AddItem($"{id} ({chart})");
-		}
+var refreshWindowsBtn = new Button { Text = "Refresh Windows" };
+refreshWindowsBtn.Pressed += OnRefreshWindowsPressed;
+windowRow.AddChild(refreshWindowsBtn);
 
-		if (_framePicker.ItemCount > 0)
-			_framePicker.Select(0);
-	}
+var applyWindowBtn = new Button { Text = "Set Window" };
+applyWindowBtn.Pressed += OnSetDesktopWindowPressed;
+windowRow.AddChild(applyWindowBtn);
 
-	private void OnWorkspaceLoaded(string name)
-	{
-		if (_statusLabel != null)
-			_statusLabel.Text = $"Active workspace: {name}";
-		RefreshWorkspaceList();
-	}
+var environmentRow = new HBoxContainer();
+environmentRow.AddThemeConstantOverride("separation", 8);
+column.AddChild(environmentRow);
 
-	private void OnWorkspaceSelected(long index)
-	{
-		if (_workspaceService == null || _workspacePicker == null)
-			return;
-		if (index < 0 || index >= _workspacePicker.ItemCount)
-			return;
-		var name = _workspacePicker.GetItemText((int)index);
-		_workspaceService.LoadWorkspace(name);
-	}
+_environmentPresetPicker = new OptionButton();
+foreach (var environmentPreset in DataBindingService.SupportedEnvironmentPresets)
+_environmentPresetPicker.AddItem(environmentPreset);
+environmentRow.AddChild(_environmentPresetPicker);
 
-	private void OnNewWorkspacePressed()
-	{
-		if (_workspaceService == null)
-			return;
-		var name = $"workspace-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
-		if (_workspaceService.CreateWorkspace(name))
-			_workspaceService.LoadWorkspace(name);
-	}
+var applyEnvironmentBtn = new Button { Text = "Set Environment" };
+applyEnvironmentBtn.Pressed += OnSetEnvironmentPresetPressed;
+environmentRow.AddChild(applyEnvironmentBtn);
 
-	private void OnSaveWorkspacePressed()
-	{
-		_workspaceService?.SaveActiveWorkspace(Visible);
-		if (_statusLabel != null && _workspaceService != null)
-			_statusLabel.Text = $"Saved workspace: {_workspaceService.ActiveWorkspaceName}";
-	}
+column.AddChild(new Label
+{
+Text = "F1 toggles this panel. Workspace persistence is active in user://workspaces.",
+});
 
-	private void OnDeleteWorkspacePressed()
-	{
-		if (_workspaceService == null)
-			return;
-		var current = _workspaceService.ActiveWorkspaceName;
-		if (string.IsNullOrEmpty(current))
-			return;
-		_workspaceService.DeleteWorkspace(current);
-	}
+if (_xrViewportHost == null)
+{
+var panelMesh = new QuadMesh
+{
+Size = new Vector2(1.8f, 1.1f),
+};
+var panelMaterial = new StandardMaterial3D
+{
+AlbedoTexture = _subViewport.GetTexture(),
+ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+CullMode = BaseMaterial3D.CullModeEnum.Disabled,
+Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+};
 
-	private void OnCreateFramePressed()
-	{
-		if (_frameService == null || _chartTypePicker == null || _sizePresetPicker == null)
-			return;
+var panel = new MeshInstance3D
+{
+Name = "ConsolePanel",
+Mesh = panelMesh,
+MaterialOverride = panelMaterial,
+};
+AddChild(panel);
+}
+}
 
-		var chartType = _chartTypePicker.GetItemText(_chartTypePicker.Selected);
-		var sizePreset = _sizePresetPicker.GetItemText(_sizePresetPicker.Selected);
-		if (_frameService.CreateFrame(chartType, sizePreset))
-			_statusLabel!.Text = $"Created frame ({chartType}, {sizePreset})";
-	}
+private void RefreshWorkspaceList()
+{
+if (_workspaceService == null || _workspacePicker == null)
+return;
 
-	private void OnSetChartPressed()
-	{
-		if (_frameService == null || _framePicker == null || _chartTypePicker == null)
-			return;
-		if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
-			return;
+_workspacePicker.Clear();
+var names = _workspaceService.ListWorkspaceNames();
+for (var i = 0; i < names.Length; i++)
+_workspacePicker.AddItem(names[i]);
 
-		var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
-		var chartType = _chartTypePicker.GetItemText(_chartTypePicker.Selected);
-		if (_frameService.SetFrameChartType(frameId, chartType))
-			_statusLabel!.Text = $"Set {frameId} to {chartType}";
-	}
+if (names.Length == 0)
+return;
 
-	private void OnSetSizePressed()
-	{
-		if (_frameService == null || _framePicker == null || _sizePresetPicker == null)
-			return;
-		if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
-			return;
+var active = _workspaceService.ActiveWorkspaceName;
+var selected = Array.IndexOf(names, active);
+if (selected < 0)
+selected = 0;
+_workspacePicker.Select(selected);
+}
 
-		var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
-		var sizePreset = _sizePresetPicker.GetItemText(_sizePresetPicker.Selected);
-		if (_frameService.SetFrameSizePreset(frameId, sizePreset))
-			_statusLabel!.Text = $"Set {frameId} size to {sizePreset}";
-	}
+private void RefreshFrameList()
+{
+if (_frameService == null || _framePicker == null)
+return;
 
-	private void OnDeleteFramePressed()
-	{
-		if (_frameService == null || _framePicker == null)
-			return;
-		if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
-			return;
+_framePicker.Clear();
+var profiles = _frameService.ListRuntimeFrameProfiles();
+for (var i = 0; i < profiles.Count; i++)
+{
+var profile = profiles[i];
+var id = profile.TryGetValue("id", out var idVariant) ? idVariant.AsString() : $"frame-{i}";
+var chart = profile.TryGetValue("chart_type", out var chartVariant) ? chartVariant.AsString() : "bar";
+_framePicker.AddItem($"{id} ({chart})");
+}
 
-		var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
-		if (_frameService.DeleteFrame(frameId))
-			_statusLabel!.Text = $"Deleted {frameId}";
-	}
+if (_framePicker.ItemCount > 0)
+_framePicker.Select(0);
 
-	private static string ExtractFrameId(string pickerText)
-	{
-		var idx = pickerText.IndexOf(" (", StringComparison.Ordinal);
-		return idx > 0 ? pickerText[..idx] : pickerText;
-	}
+RefreshFrameControlsForCurrentSelection();
+}
+
+private void RefreshFrameControlsForCurrentSelection()
+{
+RefreshBindingSelectionForCurrentFrame();
+RefreshFramePresetSelectionForCurrentFrame();
+RefreshDesktopWindows();
+RefreshEnvironmentSelection();
+}
+
+private void RefreshEnvironmentSelection()
+{
+if (_bindingService == null || _environmentPresetPicker == null)
+return;
+
+var preset = _bindingService.GetEnvironmentPreset();
+for (var i = 0; i < _environmentPresetPicker.ItemCount; i++)
+{
+if (_environmentPresetPicker.GetItemText(i) == preset)
+{
+_environmentPresetPicker.Select(i);
+return;
+}
+
+if (_environmentStatusLabel != null)
+_environmentStatusLabel.Text = $"Environment: {_bindingService.GetEnvironmentStatus()}";
+}
+}
+
+private void RefreshBindingSelectionForCurrentFrame()
+{
+if (_bindingService == null || _framePicker == null || _bindingKindPicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var bindingKind = _bindingService.GetBindingKind(frameId);
+for (var i = 0; i < _bindingKindPicker.ItemCount; i++)
+{
+if (_bindingKindPicker.GetItemText(i) == bindingKind)
+{
+_bindingKindPicker.Select(i);
+return;
+}
+}
+}
+
+private void RefreshFramePresetSelectionForCurrentFrame()
+{
+if (_bindingService == null || _framePicker == null || _framePresetPicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var framePreset = _bindingService.GetFramePreset(frameId);
+for (var i = 0; i < _framePresetPicker.ItemCount; i++)
+{
+if (_framePresetPicker.GetItemText(i) == framePreset)
+{
+_framePresetPicker.Select(i);
+return;
+}
+}
+}
+
+private void RefreshDesktopWindows()
+{
+if (_bindingService == null || _windowPicker == null || _framePicker == null || _frameService == null)
+return;
+
+_windowPicker.Clear();
+_windowPicker.AddItem("(auto)");
+_windowPicker.SetItemMetadata(0, 0L);
+
+var windows = _bindingService.ListDesktopWindows();
+for (var i = 0; i < windows.Count; i++)
+{
+var window = windows[i];
+var windowId = window.TryGetValue("id", out var idVariant) ? idVariant.AsInt64() : 0;
+var title = window.TryGetValue("title", out var titleVariant) ? titleVariant.AsString() : "";
+if (windowId <= 0)
+continue;
+
+var safeTitle = string.IsNullOrWhiteSpace(title) ? "(untitled)" : title;
+_windowPicker.AddItem($"{safeTitle} [{windowId}]");
+_windowPicker.SetItemMetadata(_windowPicker.ItemCount - 1, windowId);
+}
+
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var chartType = _frameService.GetFrameChartType(frameId);
+var selectedWindow = _bindingService.GetDesktopWindowForFrame(frameId);
+
+var selectedIndex = 0;
+for (var i = 0; i < _windowPicker.ItemCount; i++)
+{
+if (_windowPicker.GetItemMetadata(i).AsInt64() == selectedWindow)
+{
+selectedIndex = i;
+break;
+}
+}
+_windowPicker.Select(selectedIndex);
+_windowPicker.Disabled = chartType != "desktop";
+}
+
+private void OnWorkspaceLoaded(string name)
+{
+if (_statusLabel != null)
+_statusLabel.Text = $"Active workspace: {name}";
+RefreshWorkspaceList();
+}
+
+private void OnWorkspaceSelected(long index)
+{
+if (_workspaceService == null || _workspacePicker == null)
+return;
+if (index < 0 || index >= _workspacePicker.ItemCount)
+return;
+var name = _workspacePicker.GetItemText((int)index);
+_workspaceService.LoadWorkspace(name);
+}
+
+private void OnFrameSelected(long _index)
+{
+RefreshFrameControlsForCurrentSelection();
+}
+
+private void OnNewWorkspacePressed()
+{
+if (_workspaceService == null)
+return;
+var name = $"workspace-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
+if (_workspaceService.CreateWorkspace(name))
+_workspaceService.LoadWorkspace(name);
+}
+
+private void OnSaveWorkspacePressed()
+{
+_workspaceService?.SaveActiveWorkspace(Visible);
+if (_statusLabel != null && _workspaceService != null)
+_statusLabel.Text = $"Saved workspace: {_workspaceService.ActiveWorkspaceName}";
+}
+
+private void OnDeleteWorkspacePressed()
+{
+if (_workspaceService == null)
+return;
+var current = _workspaceService.ActiveWorkspaceName;
+if (string.IsNullOrEmpty(current))
+return;
+_workspaceService.DeleteWorkspace(current);
+}
+
+private void OnCreateFramePressed()
+{
+if (_frameService == null || _chartTypePicker == null || _sizePresetPicker == null)
+return;
+
+var chartType = _chartTypePicker.GetItemText(_chartTypePicker.Selected);
+var sizePreset = _sizePresetPicker.GetItemText(_sizePresetPicker.Selected);
+if (_frameService.CreateFrame(chartType, sizePreset))
+_statusLabel!.Text = $"Created frame ({chartType}, {sizePreset})";
+}
+
+private void OnSetChartPressed()
+{
+if (_frameService == null || _framePicker == null || _chartTypePicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var chartType = _chartTypePicker.GetItemText(_chartTypePicker.Selected);
+if (_frameService.SetFrameChartType(frameId, chartType))
+_statusLabel!.Text = $"Set {frameId} to {chartType}";
+
+RefreshDesktopWindows();
+}
+
+private void OnSetSizePressed()
+{
+if (_frameService == null || _framePicker == null || _sizePresetPicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var sizePreset = _sizePresetPicker.GetItemText(_sizePresetPicker.Selected);
+if (_frameService.SetFrameSizePreset(frameId, sizePreset))
+_statusLabel!.Text = $"Set {frameId} size to {sizePreset}";
+}
+
+private void OnDeleteFramePressed()
+{
+if (_frameService == null || _framePicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+if (_frameService.DeleteFrame(frameId))
+_statusLabel!.Text = $"Deleted {frameId}";
+}
+
+private void OnSetBindingPressed()
+{
+if (_bindingService == null || _framePicker == null || _bindingKindPicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var bindingKind = _bindingKindPicker.GetItemText(_bindingKindPicker.Selected);
+if (_bindingService.SetBindingKind(frameId, bindingKind))
+_statusLabel!.Text = $"Set {frameId} binding to {bindingKind}";
+}
+
+private void OnSetFramePresetPressed()
+{
+if (_bindingService == null || _framePicker == null || _framePresetPicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var framePreset = _framePresetPicker.GetItemText(_framePresetPicker.Selected);
+if (_bindingService.SetFramePreset(frameId, framePreset))
+_statusLabel!.Text = $"Set {frameId} preset to {framePreset}";
+}
+
+private void OnRefreshWindowsPressed()
+{
+RefreshDesktopWindows();
+if (_statusLabel != null)
+_statusLabel.Text = "Refreshed desktop window list";
+}
+
+private void OnSetDesktopWindowPressed()
+{
+if (_bindingService == null || _framePicker == null || _windowPicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+if (_windowPicker.Selected < 0 || _windowPicker.Selected >= _windowPicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var windowId = _windowPicker.GetItemMetadata(_windowPicker.Selected).AsInt64();
+if (_bindingService.SetDesktopWindowForFrame(frameId, windowId))
+{
+var label = windowId > 0 ? windowId.ToString() : "auto";
+_statusLabel!.Text = $"Set {frameId} desktop window to {label}";
+}
+}
+
+private void OnSetEnvironmentPresetPressed()
+{
+if (_bindingService == null || _environmentPresetPicker == null)
+return;
+if (_environmentPresetPicker.Selected < 0 || _environmentPresetPicker.Selected >= _environmentPresetPicker.ItemCount)
+return;
+
+var environmentPreset = _environmentPresetPicker.GetItemText(_environmentPresetPicker.Selected);
+if (_bindingService.SetEnvironmentPreset(environmentPreset))
+_statusLabel!.Text = $"Applied environment preset: {environmentPreset}";
+}
+
+private static string ExtractFrameId(string pickerText)
+{
+var idx = pickerText.IndexOf(" (", StringComparison.Ordinal);
+return idx > 0 ? pickerText[..idx] : pickerText;
+}
 }

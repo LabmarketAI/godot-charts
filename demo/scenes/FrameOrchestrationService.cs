@@ -20,7 +20,7 @@ public partial class FrameOrchestrationService : Node
 
 	public static readonly string[] SupportedChartTypes =
 	{
-		"bar", "line", "scatter", "surface", "histogram", "network", "circuit",
+		"bar", "line", "scatter", "surface", "histogram", "network", "circuit", "desktop",
 	};
 
 	public static readonly string[] SupportedSizePresets =
@@ -52,6 +52,25 @@ public partial class FrameOrchestrationService : Node
 			profiles.Add(BuildFrameProfile(id, _framesById[id]));
 		}
 		return profiles;
+	}
+
+	public bool TryGetFrame(string frameId, out ChartFrame3D frame)
+	{
+		if (_framesById.TryGetValue(frameId, out var found))
+		{
+			frame = found;
+			return true;
+		}
+
+		frame = null!;
+		return false;
+	}
+
+	public string GetFrameChartType(string frameId)
+	{
+		if (!_framesById.TryGetValue(frameId, out var frame))
+			return "bar";
+		return DetectChartType(frame);
 	}
 
 	public bool CreateFrame(string chartType, string sizePreset)
@@ -248,8 +267,19 @@ public partial class FrameOrchestrationService : Node
 				continue;
 			}
 
-			if (child is Node node && node.Name == "RuntimeChart")
+			if (child is Node node && (node.Name == "RuntimeChart" || node.Name == "RuntimeDesktopView"))
 				node.QueueFree();
+		}
+
+		if (chartType == "desktop")
+		{
+			var desktopView = new RuntimeDesktopFrameView
+			{
+				Name = "RuntimeDesktopView",
+			};
+			desktopView.BindFrame(frame);
+			frame.AddChild(desktopView);
+			return;
 		}
 
 		Node3D chart = chartType switch
@@ -269,17 +299,7 @@ public partial class FrameOrchestrationService : Node
 
 	private static Dictionary BuildFrameProfile(string frameId, ChartFrame3D frame)
 	{
-		var chartType = "bar";
-		foreach (var child in frame.GetChildren())
-		{
-			if (child is BarChart3D) chartType = "bar";
-			else if (child is LineChart3D) chartType = "line";
-			else if (child is ScatterChart3D) chartType = "scatter";
-			else if (child is SurfaceChart3D) chartType = "surface";
-			else if (child is HistogramChart3D) chartType = "histogram";
-			else if (child is GraphNetworkChart3D) chartType = "network";
-			else if (child is CircuitChart3D) chartType = "circuit";
-		}
+		var chartType = DetectChartType(frame);
 
 		return new Dictionary
 		{
@@ -290,6 +310,23 @@ public partial class FrameOrchestrationService : Node
 			{ "position", SerializeVector3(frame.Position) },
 			{ "rotation_degrees", SerializeVector3(frame.RotationDegrees) },
 		};
+	}
+
+	private static string DetectChartType(ChartFrame3D frame)
+	{
+		var chartType = "bar";
+		foreach (var child in frame.GetChildren())
+		{
+			if (child is BarChart3D) chartType = "bar";
+			else if (child is LineChart3D) chartType = "line";
+			else if (child is ScatterChart3D) chartType = "scatter";
+			else if (child is SurfaceChart3D) chartType = "surface";
+			else if (child is HistogramChart3D) chartType = "histogram";
+			else if (child is GraphNetworkChart3D) chartType = "network";
+			else if (child is CircuitChart3D) chartType = "circuit";
+			else if (child is RuntimeDesktopFrameView) chartType = "desktop";
+		}
+		return chartType;
 	}
 
 	private static string PresetForSize(Vector2 size)

@@ -29,6 +29,7 @@ public partial class MainVr : Node3D
 	private bool _loggedMissingKeyboardSupport;
 	private WorkspaceStateService? _workspaceService;
 	private FrameOrchestrationService? _frameService;
+	private DataBindingService? _bindingService;
 	private ConsoleRoot? _consoleRoot;
 	private XRController3D? _leftController;
 	private XRController3D? _rightController;
@@ -96,6 +97,10 @@ public partial class MainVr : Node3D
 		AddChild(_frameService);
 		_frameService.Initialize(GetNode<Node3D>("DataRoom"), _workspaceService);
 
+		_bindingService = new DataBindingService { Name = "DataBindingService" };
+		AddChild(_bindingService);
+		_bindingService.Initialize(_frameService, _workspaceService, GetNode<Node3D>("DataRoom"));
+
 		var packed = GD.Load<PackedScene>("res://scenes/console_root.tscn");
 		_consoleRoot = packed.Instantiate<ConsoleRoot>();
 		_consoleRoot.Name = "ConsoleRoot";
@@ -106,6 +111,8 @@ public partial class MainVr : Node3D
 		_consoleRoot.BindWorkspaceService(_workspaceService);
 		if (_frameService != null)
 			_consoleRoot.BindFrameService(_frameService);
+		if (_bindingService != null)
+			_consoleRoot.BindBindingService(_bindingService);
 
 		if (_workspaceService.ActiveWorkspaceProfile.TryGetValue("console_visible", out var storedVisible))
 			_consoleRoot.SetConsoleVisible(storedVisible.AsBool());

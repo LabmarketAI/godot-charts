@@ -3,6 +3,10 @@
 A **3D plotting addon for Godot 4**, inspired by [matplotlib](https://matplotlib.org) and [Chart.js](https://www.chartjs.org).
 Add beautiful, interactive 3D charts to any Godot project with a few lines of GDScript.
 
+**Discord** Chats on the Godot XR Server here: https://discord.gg/nrEbaVFD
+
+**ITCH.io** For videos and releases: https://buddha-314.itch.io/godot-immersive-charting 
+
 ---
 
 ## Chart types

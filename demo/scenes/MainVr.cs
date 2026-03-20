@@ -16,7 +16,8 @@ using Godot;
 
 public partial class MainVr : Node3D
 {
-	private const string KeyboardPassthroughToggleAction = "by_button";
+	private const string KeyboardPassthroughToggleAction = "menu_button";
+	private const string ConsoleToggleButtonAction = "by_button";
 	private const string ToggleConsoleAction = "toggle_diegetic_console";
 	private const bool DefaultConsoleVisible = false;
 	private static readonly Vector3 ConsoleSpawnPosition = new(0.25f, 1.5f, -1.6f);
@@ -29,11 +30,15 @@ public partial class MainVr : Node3D
 	private WorkspaceStateService? _workspaceService;
 	private FrameOrchestrationService? _frameService;
 	private ConsoleRoot? _consoleRoot;
+	private XRController3D? _leftController;
+	private XRController3D? _rightController;
+	private bool _consoleToggleHeld;
 
 	public override void _Ready()
 	{
 		EnsureConsoleAction();
 		SetupWorkspaceAndConsole();
+		ResolveControllers();
 
 		var openxr = XRServer.FindInterface("OpenXR");
 		if (openxr != null && openxr.Initialize())
@@ -56,6 +61,11 @@ public partial class MainVr : Node3D
 
 		SetupKeyboardPassthrough();
 		CallDeferred(MethodName.SetupDesktopCapture);
+	}
+
+	public override void _Process(double delta)
+	{
+		HandleControllerConsoleToggle();
 	}
 
 	private void EnsureConsoleAction()
@@ -89,6 +99,7 @@ public partial class MainVr : Node3D
 		var packed = GD.Load<PackedScene>("res://scenes/console_root.tscn");
 		_consoleRoot = packed.Instantiate<ConsoleRoot>();
 		_consoleRoot.Name = "ConsoleRoot";
+		_consoleRoot.PreferXrInteraction = true;
 		_consoleRoot.Position = ConsoleSpawnPosition;
 		_consoleRoot.Rotation = ConsoleSpawnRotation;
 		AddChild(_consoleRoot);
@@ -106,10 +117,7 @@ public partial class MainVr : Node3D
 	{
 		if (@event.IsActionPressed(ToggleConsoleAction))
 		{
-			if (_consoleRoot != null)
-				_consoleRoot.ToggleConsole();
-			if (_workspaceService != null && _consoleRoot != null)
-				_workspaceService.SaveActiveWorkspace(_consoleRoot.IsConsoleVisible);
+			ToggleConsoleAndPersist();
 			GetViewport().SetInputAsHandled();
 			return;
 		}
@@ -225,5 +233,41 @@ public partial class MainVr : Node3D
 			tex.Set("window_id", targetId);
 			GD.Print($"Auto-selected window ID: {targetId}");
 		}
+	}
+
+	private void ResolveControllers()
+	{
+		_leftController = GetNodeOrNull<XRController3D>("XROrigin3D/LeftHand");
+		_rightController = GetNodeOrNull<XRController3D>("XROrigin3D/RightHand");
+	}
+
+	private void HandleControllerConsoleToggle()
+	{
+		if (!GetViewport().UseXR)
+			return;
+
+		if (_leftController == null && _rightController == null)
+			ResolveControllers();
+
+		var pressed = IsConsoleToggleButtonPressed();
+		if (pressed && !_consoleToggleHeld)
+			ToggleConsoleAndPersist();
+
+		_consoleToggleHeld = pressed;
+	}
+
+	private bool IsConsoleToggleButtonPressed()
+	{
+		var leftPressed = _leftController != null && _leftController.IsButtonPressed(ConsoleToggleButtonAction);
+		var rightPressed = _rightController != null && _rightController.IsButtonPressed(ConsoleToggleButtonAction);
+		return leftPressed || rightPressed;
+	}
+
+	private void ToggleConsoleAndPersist()
+	{
+		if (_consoleRoot != null)
+			_consoleRoot.ToggleConsole();
+		if (_workspaceService != null && _consoleRoot != null)
+			_workspaceService.SaveActiveWorkspace(_consoleRoot.IsConsoleVisible);
 	}
 }

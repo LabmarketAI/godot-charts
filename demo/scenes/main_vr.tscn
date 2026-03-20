@@ -8,6 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_mov"]
 [ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="7_turn"]
 [ext_resource type="PackedScene" uid="uid://fiul51tsyoop" path="res://addons/godot-xr-tools/functions/function_teleport.tscn" id="8_tele"]
+[ext_resource type="PackedScene" path="res://scenes/wristwatch_console_hints.tscn" id="9_watch"]
+[ext_resource type="PackedScene" uid="uid://cqhw276realc" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="10_pointer"]
 
 [node name="MainVR" type="Node3D" unique_id=1539786815]
 script = ExtResource("2_vr_script")
@@ -25,6 +27,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 1.5, -0.3)
 tracker = &"left_hand"
 
 [node name="LeftHand" parent="XROrigin3D/LeftHand" unique_id=657455381 instance=ExtResource("4_l_hand")]
+
+[node name="WristwatchConsoleHints" parent="XROrigin3D/LeftHand" instance=ExtResource("9_watch")]
+
+[node name="FunctionPointer" parent="XROrigin3D/LeftHand" instance=ExtResource("10_pointer")]
 
 [node name="MovementDirect" parent="XROrigin3D/LeftHand" unique_id=437726764 instance=ExtResource("6_mov")]
 

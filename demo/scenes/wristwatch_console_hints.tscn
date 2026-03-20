@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/WristwatchConsoleHints.cs" id="1_script"]
+
+[node name="WristwatchConsoleHints" type="Node3D"]
+script = ExtResource("1_script")
+transform = Transform3D(0.813798, 0.44097, 0.378522, -0.469847, 0.882748, -0.00889295, -0.34202, -0.17101, 0.92388, 0.028, 0.035, -0.045)

@@ -3,9 +3,14 @@ using Godot;
 
 public partial class ConsoleRoot : Node3D
 {
+	private const string XrViewportScenePath = "res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn";
+
+	public bool PreferXrInteraction { get; set; }
+
 	private WorkspaceStateService? _workspaceService;
 	private FrameOrchestrationService? _frameService;
 	private SubViewport? _subViewport;
+	private Node3D? _xrViewportHost;
 	private OptionButton? _workspacePicker;
 	private OptionButton? _framePicker;
 	private OptionButton? _chartTypePicker;
@@ -49,16 +54,33 @@ public partial class ConsoleRoot : Node3D
 
 	private void BuildPanel()
 	{
-		_subViewport = new SubViewport
+		if (PreferXrInteraction && FileAccess.FileExists(XrViewportScenePath))
 		{
-			Name = "ConsoleViewport",
-			Size = new Vector2I(1024, 640),
-			TransparentBg = false,
-			Disable3D = true,
-			RenderTargetUpdateMode = SubViewport.UpdateMode.WhenVisible,
-			RenderTargetClearMode = SubViewport.ClearMode.Always,
-		};
-		AddChild(_subViewport);
+			var packed = GD.Load<PackedScene>(XrViewportScenePath);
+			_xrViewportHost = packed.Instantiate<Node3D>();
+			_xrViewportHost.Name = "ConsoleViewportHost";
+			_xrViewportHost.Set("screen_size", new Vector2(1.8f, 1.1f));
+			_xrViewportHost.Set("viewport_size", new Vector2(1024f, 640f));
+			_xrViewportHost.Set("input_keyboard", true);
+			_xrViewportHost.Set("input_gamepad", false);
+			AddChild(_xrViewportHost);
+
+			_subViewport = _xrViewportHost.GetNodeOrNull<SubViewport>("Viewport");
+		}
+
+		if (_subViewport == null)
+		{
+			_subViewport = new SubViewport
+			{
+				Name = "ConsoleViewport",
+				Size = new Vector2I(1024, 640),
+				TransparentBg = false,
+				Disable3D = true,
+				RenderTargetUpdateMode = SubViewport.UpdateMode.WhenVisible,
+				RenderTargetClearMode = SubViewport.ClearMode.Always,
+			};
+			AddChild(_subViewport);
+		}
 
 		var uiRoot = new ColorRect
 		{
@@ -156,25 +178,28 @@ public partial class ConsoleRoot : Node3D
 			Text = "F1 toggles this panel. Workspace persistence is active in user://workspaces.",
 		});
 
-		var panelMesh = new QuadMesh
+		if (_xrViewportHost == null)
 		{
-			Size = new Vector2(1.8f, 1.1f),
-		};
-		var panelMaterial = new StandardMaterial3D
-		{
-			AlbedoTexture = _subViewport.GetTexture(),
-			ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-			CullMode = BaseMaterial3D.CullModeEnum.Disabled,
-			Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
-		};
+			var panelMesh = new QuadMesh
+			{
+				Size = new Vector2(1.8f, 1.1f),
+			};
+			var panelMaterial = new StandardMaterial3D
+			{
+				AlbedoTexture = _subViewport.GetTexture(),
+				ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+				CullMode = BaseMaterial3D.CullModeEnum.Disabled,
+				Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+			};
 
-		var panel = new MeshInstance3D
-		{
-			Name = "ConsolePanel",
-			Mesh = panelMesh,
-			MaterialOverride = panelMaterial,
-		};
-		AddChild(panel);
+			var panel = new MeshInstance3D
+			{
+				Name = "ConsolePanel",
+				Mesh = panelMesh,
+				MaterialOverride = panelMaterial,
+			};
+			AddChild(panel);
+		}
 	}
 
 	private void RefreshWorkspaceList()

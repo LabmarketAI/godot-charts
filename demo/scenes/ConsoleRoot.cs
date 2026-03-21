@@ -26,6 +26,7 @@ private Label? _statusLabel;
 private Label? _environmentStatusLabel;
 private Label? _desktopSourceStatusLabel;
 private Label? _moveModeStatusLabel;
+private Label? _placementStatusLabel;
 
 public bool IsConsoleVisible => Visible;
 
@@ -145,6 +146,9 @@ column.AddChild(_desktopSourceStatusLabel);
 _moveModeStatusLabel = new Label { Text = "Move mode: off" };
 column.AddChild(_moveModeStatusLabel);
 
+_placementStatusLabel = new Label { Text = "Placement: idle" };
+column.AddChild(_placementStatusLabel);
+
 var row = new HBoxContainer();
 row.AddThemeConstantOverride("separation", 8);
 column.AddChild(row);
@@ -201,9 +205,10 @@ var frameActionRow = new HBoxContainer();
 frameActionRow.AddThemeConstantOverride("separation", 8);
 column.AddChild(frameActionRow);
 
-var createFrameBtn = new Button { Text = "Create Frame" };
-createFrameBtn.Pressed += OnCreateFramePressed;
-frameActionRow.AddChild(createFrameBtn);
+var cancelPlacementBtn = new Button { Text = "Cancel Placement" };
+cancelPlacementBtn.TooltipText = "Cancel pending chart placement mode.";
+cancelPlacementBtn.Pressed += OnCancelPlacementPressed;
+frameActionRow.AddChild(cancelPlacementBtn);
 
 var applyChartBtn = new Button { Text = "Set Chart" };
 applyChartBtn.Pressed += OnSetChartPressed;
@@ -224,6 +229,20 @@ frameActionRow.AddChild(applyBindingBtn);
 var applyPresetBtn = new Button { Text = "Set Preset" };
 applyPresetBtn.Pressed += OnSetFramePresetPressed;
 frameActionRow.AddChild(applyPresetBtn);
+
+column.AddChild(new Label { Text = "Create Charts (Widgets)" });
+var chartWidgetRow = new HFlowContainer();
+chartWidgetRow.AddThemeConstantOverride("h_separation", 8);
+chartWidgetRow.AddThemeConstantOverride("v_separation", 8);
+column.AddChild(chartWidgetRow);
+
+foreach (var chartType in FrameOrchestrationService.SupportedChartTypes)
+{
+var widget = new Button { Text = chartType };
+widget.TooltipText = $"Place a {chartType} frame: point with right hand, hold right grip to drag, release to set location.";
+widget.Pressed += () => OnChartWidgetPressed(chartType);
+chartWidgetRow.AddChild(widget);
+}
 
 var moveActionRow = new HBoxContainer();
 moveActionRow.AddThemeConstantOverride("separation", 8);
@@ -362,6 +381,7 @@ RefreshFramePresetSelectionForCurrentFrame();
 RefreshDesktopWindows();
 RefreshEnvironmentSelection();
 RefreshMoveModeStatus();
+RefreshPlacementStatus();
 }
 
 private void RefreshMoveModeStatus()
@@ -374,6 +394,17 @@ if (string.IsNullOrWhiteSpace(activeFrame))
 _moveModeStatusLabel.Text = "Move mode: off";
 else
 _moveModeStatusLabel.Text = $"Move mode: {activeFrame}";
+}
+
+private void RefreshPlacementStatus()
+{
+if (_frameService == null || _placementStatusLabel == null)
+return;
+
+if (_frameService.IsChartPlacementActive())
+_placementStatusLabel.Text = $"Placement: {_frameService.GetPlacementChartType()} (right grip to place)";
+else
+_placementStatusLabel.Text = "Placement: idle";
 }
 
 private void RefreshEnvironmentSelection()
@@ -567,15 +598,27 @@ return;
 _workspaceService.DeleteWorkspace(current);
 }
 
-private void OnCreateFramePressed()
+private void OnChartWidgetPressed(string chartType)
 {
-if (_frameService == null || _chartTypePicker == null || _sizePresetPicker == null)
+if (_frameService == null || _sizePresetPicker == null)
 return;
 
-var chartType = _chartTypePicker.GetItemText(_chartTypePicker.Selected);
 var sizePreset = _sizePresetPicker.GetItemText(_sizePresetPicker.Selected);
-if (_frameService.CreateFrame(chartType, sizePreset))
-_statusLabel!.Text = $"Created frame ({chartType}, {sizePreset})";
+_frameService.BeginChartPlacement(chartType, sizePreset);
+if (_statusLabel != null)
+_statusLabel.Text = $"Placement armed: {chartType}. Hold right grip in VR to drag/place.";
+RefreshPlacementStatus();
+}
+
+private void OnCancelPlacementPressed()
+{
+if (_frameService == null)
+return;
+
+_frameService.CancelChartPlacement();
+if (_statusLabel != null)
+_statusLabel.Text = "Placement cancelled.";
+RefreshPlacementStatus();
 }
 
 private void OnSetChartPressed()

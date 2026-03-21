@@ -18,6 +18,8 @@ public partial class FrameOrchestrationService : Node
 	private Node3D? _runtimeContainer;
 	private WorkspaceStateService? _workspaceService;
 	private string _moveModeFrameId = "";
+	private string _placementChartType = "";
+	private string _placementSizePreset = "medium";
 
 	public static readonly string[] SupportedChartTypes =
 	{
@@ -94,6 +96,34 @@ public partial class FrameOrchestrationService : Node
 		return true;
 	}
 
+	public bool BeginChartPlacement(string chartType, string sizePreset = "medium")
+	{
+		_placementChartType = NormalizeChartType(chartType);
+		_placementSizePreset = NormalizeSizePreset(sizePreset);
+		return true;
+	}
+
+	public void CancelChartPlacement()
+	{
+		_placementChartType = "";
+		_placementSizePreset = "medium";
+	}
+
+	public string GetPlacementChartType()
+	{
+		return _placementChartType;
+	}
+
+	public string GetPlacementSizePreset()
+	{
+		return _placementSizePreset;
+	}
+
+	public bool IsChartPlacementActive()
+	{
+		return !string.IsNullOrWhiteSpace(_placementChartType);
+	}
+
 	public bool SetFrameTransform(string frameId, Vector3 position, Vector3 rotationDegrees, bool persist = true)
 	{
 		if (!_framesById.TryGetValue(frameId, out var frame))
@@ -129,8 +159,13 @@ public partial class FrameOrchestrationService : Node
 
 	public bool CreateFrame(string chartType, string sizePreset)
 	{
+		return !string.IsNullOrWhiteSpace(CreateFrameAndReturnId(chartType, sizePreset));
+	}
+
+	public string CreateFrameAndReturnId(string chartType, string sizePreset)
+	{
 		if (_runtimeContainer == null)
-			return false;
+			return "";
 
 		chartType = NormalizeChartType(chartType);
 		sizePreset = NormalizeSizePreset(sizePreset);
@@ -150,7 +185,12 @@ public partial class FrameOrchestrationService : Node
 		SetFrameChartType(id, chartType, persist: false);
 		PersistWorkspaceFrames();
 		EmitSignal(SignalName.RuntimeFramesChanged);
-		return true;
+		return id;
+	}
+
+	public static Vector2 GetFrameSizeForPreset(string sizePreset)
+	{
+		return SizeForPreset(sizePreset);
 	}
 
 	public bool DeleteFrame(string frameId)

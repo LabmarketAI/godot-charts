@@ -17,6 +17,7 @@ public partial class FrameOrchestrationService : Node
 	private Node3D? _dataRoom;
 	private Node3D? _runtimeContainer;
 	private WorkspaceStateService? _workspaceService;
+	private string _moveModeFrameId = "";
 
 	public static readonly string[] SupportedChartTypes =
 	{
@@ -73,6 +74,59 @@ public partial class FrameOrchestrationService : Node
 		return DetectChartType(frame);
 	}
 
+	public string GetMoveModeFrameId()
+	{
+		return _moveModeFrameId;
+	}
+
+	public bool SetMoveModeFrame(string frameId)
+	{
+		if (string.IsNullOrWhiteSpace(frameId))
+		{
+			_moveModeFrameId = "";
+			return true;
+		}
+
+		if (!_framesById.ContainsKey(frameId))
+			return false;
+
+		_moveModeFrameId = frameId;
+		return true;
+	}
+
+	public bool SetFrameTransform(string frameId, Vector3 position, Vector3 rotationDegrees, bool persist = true)
+	{
+		if (!_framesById.TryGetValue(frameId, out var frame))
+			return false;
+
+		frame.Position = position;
+		frame.RotationDegrees = rotationDegrees;
+
+		if (persist)
+		{
+			PersistWorkspaceFrames();
+			EmitSignal(SignalName.RuntimeFramesChanged);
+		}
+
+		return true;
+	}
+
+	public bool TranslateFrame(string frameId, Vector3 delta, bool persist = true)
+	{
+		if (!_framesById.TryGetValue(frameId, out var frame))
+			return false;
+
+		return SetFrameTransform(frameId, frame.Position + delta, frame.RotationDegrees, persist);
+	}
+
+	public bool RotateFrameDegrees(string frameId, Vector3 deltaDegrees, bool persist = true)
+	{
+		if (!_framesById.TryGetValue(frameId, out var frame))
+			return false;
+
+		return SetFrameTransform(frameId, frame.Position, frame.RotationDegrees + deltaDegrees, persist);
+	}
+
 	public bool CreateFrame(string chartType, string sizePreset)
 	{
 		if (_runtimeContainer == null)
@@ -105,6 +159,8 @@ public partial class FrameOrchestrationService : Node
 			return false;
 
 		_framesById.Remove(frameId);
+		if (_moveModeFrameId == frameId)
+			_moveModeFrameId = "";
 		frame.QueueFree();
 		PersistWorkspaceFrames();
 		EmitSignal(SignalName.RuntimeFramesChanged);

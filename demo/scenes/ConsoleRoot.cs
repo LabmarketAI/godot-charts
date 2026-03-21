@@ -25,6 +25,7 @@ private OptionButton? _environmentPresetPicker;
 private Label? _statusLabel;
 private Label? _environmentStatusLabel;
 private Label? _desktopSourceStatusLabel;
+private Label? _moveModeStatusLabel;
 
 public bool IsConsoleVisible => Visible;
 
@@ -70,9 +71,9 @@ _statusLabel.Text = show ? "Console: Visible" : "Console: Hidden";
 
 private void BuildPanel()
 {
-		var useXrViewportHost = PreferXrInteraction
-			&& ProjectSettings.HasSetting("diegetic_console/use_xr_viewport_host")
-			&& ProjectSettings.GetSetting("diegetic_console/use_xr_viewport_host").AsBool();
+		var useXrViewportHost = PreferXrInteraction;
+		if (ProjectSettings.HasSetting("diegetic_console/use_xr_viewport_host"))
+			useXrViewportHost = ProjectSettings.GetSetting("diegetic_console/use_xr_viewport_host").AsBool();
 
 		if (useXrViewportHost && FileAccess.FileExists(XrViewportScenePath))
 {
@@ -140,6 +141,9 @@ column.AddChild(_environmentStatusLabel);
 
 _desktopSourceStatusLabel = new Label { Text = "Desktop source: pending" };
 column.AddChild(_desktopSourceStatusLabel);
+
+_moveModeStatusLabel = new Label { Text = "Move mode: off" };
+column.AddChild(_moveModeStatusLabel);
 
 var row = new HBoxContainer();
 row.AddThemeConstantOverride("separation", 8);
@@ -220,6 +224,30 @@ frameActionRow.AddChild(applyBindingBtn);
 var applyPresetBtn = new Button { Text = "Set Preset" };
 applyPresetBtn.Pressed += OnSetFramePresetPressed;
 frameActionRow.AddChild(applyPresetBtn);
+
+var moveActionRow = new HBoxContainer();
+moveActionRow.AddThemeConstantOverride("separation", 8);
+column.AddChild(moveActionRow);
+
+var toggleMoveModeBtn = new Button { Text = "Toggle Move Mode" };
+toggleMoveModeBtn.Pressed += OnToggleMoveModePressed;
+moveActionRow.AddChild(toggleMoveModeBtn);
+
+var rotateLeftBtn = new Button { Text = "Yaw -15" };
+rotateLeftBtn.Pressed += OnRotateFrameLeftPressed;
+moveActionRow.AddChild(rotateLeftBtn);
+
+var rotateRightBtn = new Button { Text = "Yaw +15" };
+rotateRightBtn.Pressed += OnRotateFrameRightPressed;
+moveActionRow.AddChild(rotateRightBtn);
+
+var liftUpBtn = new Button { Text = "Lift +0.25" };
+liftUpBtn.Pressed += OnLiftFrameUpPressed;
+moveActionRow.AddChild(liftUpBtn);
+
+var liftDownBtn = new Button { Text = "Lift -0.25" };
+liftDownBtn.Pressed += OnLiftFrameDownPressed;
+moveActionRow.AddChild(liftDownBtn);
 
 var windowRow = new HBoxContainer();
 windowRow.AddThemeConstantOverride("separation", 8);
@@ -333,6 +361,19 @@ RefreshBindingSelectionForCurrentFrame();
 RefreshFramePresetSelectionForCurrentFrame();
 RefreshDesktopWindows();
 RefreshEnvironmentSelection();
+RefreshMoveModeStatus();
+}
+
+private void RefreshMoveModeStatus()
+{
+if (_frameService == null || _moveModeStatusLabel == null)
+return;
+
+var activeFrame = _frameService.GetMoveModeFrameId();
+if (string.IsNullOrWhiteSpace(activeFrame))
+_moveModeStatusLabel.Text = "Move mode: off";
+else
+_moveModeStatusLabel.Text = $"Move mode: {activeFrame}";
 }
 
 private void RefreshEnvironmentSelection()
@@ -666,6 +707,69 @@ return;
 var environmentPreset = _environmentPresetPicker.GetItemText(_environmentPresetPicker.Selected);
 if (_bindingService.SetEnvironmentPreset(environmentPreset))
 _statusLabel!.Text = $"Applied environment preset: {environmentPreset}";
+}
+
+private void OnToggleMoveModePressed()
+{
+if (_frameService == null || _framePicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var active = _frameService.GetMoveModeFrameId();
+var target = active == frameId ? "" : frameId;
+if (_frameService.SetMoveModeFrame(target))
+{
+_statusLabel!.Text = string.IsNullOrWhiteSpace(target)
+? "Frame move mode disabled"
+: $"Frame move mode enabled for {target}";
+RefreshMoveModeStatus();
+}
+}
+
+private void OnRotateFrameLeftPressed()
+{
+RotateCurrentFrameBy(-15f);
+}
+
+private void OnRotateFrameRightPressed()
+{
+RotateCurrentFrameBy(15f);
+}
+
+private void OnLiftFrameUpPressed()
+{
+TranslateCurrentFrameBy(new Vector3(0f, 0.25f, 0f));
+}
+
+private void OnLiftFrameDownPressed()
+{
+TranslateCurrentFrameBy(new Vector3(0f, -0.25f, 0f));
+}
+
+private void RotateCurrentFrameBy(float yawDeltaDegrees)
+{
+if (_frameService == null || _framePicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+if (_frameService.RotateFrameDegrees(frameId, new Vector3(0f, yawDeltaDegrees, 0f)))
+_statusLabel!.Text = $"Rotated {frameId} by {yawDeltaDegrees:0} degrees";
+}
+
+private void TranslateCurrentFrameBy(Vector3 delta)
+{
+if (_frameService == null || _framePicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+if (_frameService.TranslateFrame(frameId, delta))
+_statusLabel!.Text = $"Moved {frameId} by ({delta.X:0.00}, {delta.Y:0.00}, {delta.Z:0.00})";
 }
 
 private static string ExtractFrameId(string pickerText)

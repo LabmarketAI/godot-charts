@@ -34,6 +34,11 @@ public partial class MainVr : Node3D
 	private XRController3D? _leftController;
 	private XRController3D? _rightController;
 	private bool _consoleToggleHeld;
+	private bool _frameMoveHeld;
+	private string _activeMoveFrameId = "";
+	private XRController3D? _activeMoveController;
+	private Vector3 _moveOffsetLocal = Vector3.Zero;
+	private float _moveHoldDistance = 1.6f;
 
 	public override void _Ready()
 	{
@@ -67,6 +72,7 @@ public partial class MainVr : Node3D
 	public override void _Process(double delta)
 	{
 		HandleControllerConsoleToggle();
+		HandleFrameMoveMode();
 	}
 
 	private void EnsureConsoleAction()
@@ -266,11 +272,88 @@ public partial class MainVr : Node3D
 		_consoleToggleHeld = pressed;
 	}
 
+	private void HandleFrameMoveMode()
+	{
+		if (!GetViewport().UseXR || _frameService == null)
+			return;
+
+		var moveFrameId = _frameService.GetMoveModeFrameId();
+		if (string.IsNullOrWhiteSpace(moveFrameId))
+		{
+			_frameMoveHeld = false;
+			_activeMoveFrameId = "";
+			_activeMoveController = null;
+			return;
+		}
+
+		if (!_frameService.TryGetFrame(moveFrameId, out var frame))
+			return;
+
+		var pressed = IsMoveButtonPressed(out var controller);
+		if (pressed)
+		{
+			if (!_frameMoveHeld)
+			{
+				_frameMoveHeld = true;
+				_activeMoveFrameId = moveFrameId;
+				_activeMoveController = controller;
+				if (_activeMoveController != null)
+				{
+					_moveOffsetLocal = _activeMoveController.ToLocal(frame.GlobalPosition);
+					_moveHoldDistance = Mathf.Clamp(frame.GlobalPosition.DistanceTo(_activeMoveController.GlobalPosition), 0.9f, 3.5f);
+				}
+			}
+
+			if (_activeMoveController != null && _activeMoveFrameId == moveFrameId)
+			{
+				var targetPos = _activeMoveController.ToGlobal(_moveOffsetLocal);
+				if (!targetPos.IsFinite())
+					targetPos = _activeMoveController.GlobalPosition + (-_activeMoveController.GlobalBasis.Z) * _moveHoldDistance;
+
+				var targetLocal = frame.Position;
+				if (frame.GetParent() is Node3D parent)
+					targetLocal = parent.ToLocal(targetPos);
+
+				var yaw = Mathf.RadToDeg(Mathf.Atan2(-_activeMoveController.GlobalBasis.Z.X, -_activeMoveController.GlobalBasis.Z.Z));
+				var rot = frame.RotationDegrees;
+				rot.Y = yaw;
+				_frameService.SetFrameTransform(moveFrameId, targetLocal, rot, persist: false);
+			}
+			return;
+		}
+
+		if (_frameMoveHeld && _activeMoveFrameId == moveFrameId)
+		{
+			_frameMoveHeld = false;
+			_activeMoveController = null;
+			_activeMoveFrameId = "";
+			_frameService.SetFrameTransform(moveFrameId, frame.Position, frame.RotationDegrees, persist: true);
+		}
+	}
+
 	private bool IsConsoleToggleButtonPressed()
 	{
 		var leftPressed = _leftController != null && _leftController.IsButtonPressed(ConsoleToggleButtonAction);
 		var rightPressed = _rightController != null && _rightController.IsButtonPressed(ConsoleToggleButtonAction);
 		return leftPressed || rightPressed;
+	}
+
+	private bool IsMoveButtonPressed(out XRController3D? controller)
+	{
+		controller = null;
+		if (_leftController != null && _leftController.IsButtonPressed("grip_click"))
+		{
+			controller = _leftController;
+			return true;
+		}
+
+		if (_rightController != null && _rightController.IsButtonPressed("grip_click"))
+		{
+			controller = _rightController;
+			return true;
+		}
+
+		return false;
 	}
 
 	private void ToggleConsoleAndPersist()

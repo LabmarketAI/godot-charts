@@ -7,12 +7,9 @@
 resource_local_to_scene = true
 size = Vector2(3, 2)
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_ufe4n"]
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fvml0"]
 transparency = 1
 cull_mode = 2
-albedo_texture = SubResource("ViewportTexture_ufe4n")
 texture_filter = 1
 
 [sub_resource type="BoxShape3D" id="4"]

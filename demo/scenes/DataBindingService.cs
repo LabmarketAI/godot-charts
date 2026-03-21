@@ -14,6 +14,7 @@ public delegate void FrameBindingsChangedEventHandler();
 private const string BindingsProfileKey = "bindings";
 private const string FramePresetsProfileKey = "frame_presets";
 private const string DesktopWindowsProfileKey = "desktop_windows";
+private const string DesktopSourcesProfileKey = "desktop_sources";
 private const string EnvironmentPresetProfileKey = "environment_preset";
 
 private const string BindingStatic = "demo_static";
@@ -52,7 +53,8 @@ private SpotLight3D? _spotLightB;
 
 private readonly System.Collections.Generic.Dictionary<string, string> _bindingByFrame = new();
 private readonly System.Collections.Generic.Dictionary<string, string> _framePresetByFrame = new();
-private readonly System.Collections.Generic.Dictionary<string, long> _desktopWindowByFrame = new();
+private readonly System.Collections.Generic.Dictionary<string, DesktopSourceProfile> _desktopSourceByFrame = new();
+private readonly System.Collections.Generic.Dictionary<string, string> _desktopSourceStatusByFrame = new();
 private readonly System.Collections.Generic.Dictionary<string, RuntimeBindingState> _stateByFrame = new();
 private string _environmentPreset = "daylight";
 private string _environmentStatus = "pending";
@@ -164,17 +166,80 @@ return true;
 
 public long GetDesktopWindowForFrame(string frameId)
 {
-if (_desktopWindowByFrame.TryGetValue(frameId, out var windowId))
-return windowId;
+if (_desktopSourceByFrame.TryGetValue(frameId, out var source))
+return source.WindowId;
 return 0;
+}
+
+public int GetDesktopMonitorForFrame(string frameId)
+{
+if (_desktopSourceByFrame.TryGetValue(frameId, out var source))
+return source.MonitorIndex;
+return 0;
+}
+
+public string GetDesktopSourceStatus(string frameId)
+{
+if (_desktopSourceStatusByFrame.TryGetValue(frameId, out var status))
+return status;
+return "pending";
+}
+
+public string GetDesktopSourceKind(string frameId)
+{
+if (_desktopSourceByFrame.TryGetValue(frameId, out var source))
+return source.SourceKind;
+return "auto";
+}
+
+public GDDict GetDesktopSourceProfileForFrame(string frameId)
+{
+if (_desktopSourceByFrame.TryGetValue(frameId, out var source))
+return source.ToDictionary();
+
+return new GDDict
+{
+{ "monitor_index", 0 },
+{ "window_id", 0L },
+{ "title_hint", "" },
+{ "source_kind", "auto" },
+};
 }
 
 public bool SetDesktopWindowForFrame(string frameId, long windowId, bool persist = true)
 {
+if (!_desktopSourceByFrame.TryGetValue(frameId, out var source))
+source = new DesktopSourceProfile();
+
+source.WindowId = Math.Max(0, windowId);
+source.SourceKind = source.WindowId > 0 ? "window" : "auto";
+if (source.WindowId > 0)
+{
+var hint = ResolveWindowTitleHint(source.WindowId);
+if (!string.IsNullOrWhiteSpace(hint))
+source.TitleHint = hint;
+}
+
+return SetDesktopSourceForFrame(frameId, source, persist);
+}
+
+public bool SetDesktopMonitorForFrame(string frameId, int monitorIndex, bool persist = true)
+{
+if (!_desktopSourceByFrame.TryGetValue(frameId, out var source))
+source = new DesktopSourceProfile();
+
+source.MonitorIndex = Math.Max(0, monitorIndex);
+source.SourceKind = "monitor";
+source.WindowId = 0;
+return SetDesktopSourceForFrame(frameId, source, persist);
+}
+
+public bool SetDesktopSourceForFrame(string frameId, DesktopSourceProfile source, bool persist = true)
+{
 if (_frameService == null)
 return false;
 
-_desktopWindowByFrame[frameId] = windowId;
+_desktopSourceByFrame[frameId] = source.Clone();
 if (_frameService.TryGetFrame(frameId, out var frame) && _frameService.GetFrameChartType(frameId) == "desktop")
 ApplyDesktopBinding(frameId, frame);
 
@@ -202,9 +267,60 @@ windows.Add(new GDDict
 {
 { "id", id },
 { "title", title },
+{ "monitor_index", asDict.TryGetValue("monitor_index", out var monitorVariant) ? monitorVariant.AsInt32() : -1 },
 });
 }
 return windows;
+}
+
+public Array<GDDict> ListDesktopWindowsForMonitor(int monitorIndex)
+{
+var all = ListDesktopWindows();
+if (monitorIndex < 0)
+return all;
+
+var filtered = new Array<GDDict>();
+foreach (var window in all)
+{
+if (!window.TryGetValue("monitor_index", out var monitorVariant))
+{
+// Older backend payloads do not include monitor index; keep windows visible.
+filtered.Add(window);
+continue;
+}
+
+var value = monitorVariant.AsInt32();
+if (value < 0 || value == monitorIndex)
+filtered.Add(window);
+}
+return filtered;
+}
+
+public Array<GDDict> ListDesktopMonitors()
+{
+var monitors = new Array<GDDict>();
+if (_desktopPrototypeTexture == null || !_desktopPrototypeTexture.HasMethod("get_monitor_count"))
+return monitors;
+
+var count = _desktopPrototypeTexture.Call("get_monitor_count").AsInt32();
+for (var i = 0; i < count; i++)
+{
+var sizeText = "";
+if (_desktopPrototypeTexture.HasMethod("get_monitor_size"))
+{
+var size = _desktopPrototypeTexture.Call("get_monitor_size", i).AsVector2I();
+if (size.X > 0 && size.Y > 0)
+sizeText = $" ({size.X}x{size.Y})";
+}
+
+monitors.Add(new GDDict
+{
+{ "index", i },
+{ "label", $"Monitor {i}{sizeText}" },
+});
+}
+
+return monitors;
 }
 
 public override void _Process(double delta)
@@ -274,7 +390,8 @@ private void ApplyWorkspaceState()
 {
 _bindingByFrame.Clear();
 _framePresetByFrame.Clear();
-_desktopWindowByFrame.Clear();
+_desktopSourceByFrame.Clear();
+_desktopSourceStatusByFrame.Clear();
 _stateByFrame.Clear();
 
 if (_workspaceService == null)
@@ -330,7 +447,29 @@ continue;
 var windowId = entry.TryGetValue("window_id", out var windowVariant)
 ? windowVariant.AsInt64()
 : 0;
-_desktopWindowByFrame[frameId] = windowId;
+_desktopSourceByFrame[frameId] = new DesktopSourceProfile
+{
+MonitorIndex = 0,
+WindowId = Math.Max(0, windowId),
+TitleHint = "",
+SourceKind = windowId > 0 ? "window" : "auto",
+};
+}
+}
+
+if (_workspaceService.ActiveWorkspaceProfile.TryGetValue(DesktopSourcesProfileKey, out var sourcesVariant)
+&& sourcesVariant.VariantType == Variant.Type.Array)
+{
+var entries = sourcesVariant.AsGodotArray<GDDict>();
+foreach (var entry in entries)
+{
+if (!entry.TryGetValue("frame_id", out var frameIdVariant))
+continue;
+var frameId = frameIdVariant.AsString();
+if (string.IsNullOrWhiteSpace(frameId))
+continue;
+
+_desktopSourceByFrame[frameId] = DesktopSourceProfile.FromDictionary(entry);
 }
 }
 
@@ -497,8 +636,8 @@ if (!_bindingByFrame.ContainsKey(frameId))
 _bindingByFrame[frameId] = BindingStatic;
 if (!_framePresetByFrame.ContainsKey(frameId))
 _framePresetByFrame[frameId] = SupportedFramePresets[0];
-if (!_desktopWindowByFrame.ContainsKey(frameId))
-_desktopWindowByFrame[frameId] = 0;
+if (!_desktopSourceByFrame.ContainsKey(frameId))
+_desktopSourceByFrame[frameId] = new DesktopSourceProfile();
 }
 
 var removed = new List<string>();
@@ -511,7 +650,8 @@ foreach (var frameId in removed)
 {
 _bindingByFrame.Remove(frameId);
 _framePresetByFrame.Remove(frameId);
-_desktopWindowByFrame.Remove(frameId);
+_desktopSourceByFrame.Remove(frameId);
+_desktopSourceStatusByFrame.Remove(frameId);
 _stateByFrame.Remove(frameId);
 }
 }
@@ -582,15 +722,16 @@ desktopView.BindFrame(frame);
 desktopView.SetCaptureTexture(state.DesktopTexture);
 
 var selectedWindow = GetDesktopWindowForFrame(frameId);
-if (selectedWindow <= 0)
-{
-selectedWindow = PickDefaultDesktopWindowId();
-if (selectedWindow > 0)
-_desktopWindowByFrame[frameId] = selectedWindow;
-}
+var source = _desktopSourceByFrame.TryGetValue(frameId, out var existing)
+? existing.Clone()
+: new DesktopSourceProfile();
 
-if (selectedWindow > 0)
-desktopView.SetWindowId(selectedWindow);
+var resolved = ResolveDesktopSource(source);
+_desktopSourceByFrame[frameId] = resolved.Source;
+_desktopSourceStatusByFrame[frameId] = resolved.Status;
+
+desktopView.SetMonitorIndex(resolved.Source.MonitorIndex);
+desktopView.SetWindowId(resolved.Source.WindowId);
 }
 
 private Texture2D? CloneDesktopCaptureTexture()
@@ -606,9 +747,9 @@ clone.Set("enabled", true);
 return clone;
 }
 
-private long PickDefaultDesktopWindowId()
+private long PickDefaultDesktopWindowId(int preferredMonitorIndex = 0)
 {
-var windows = ListDesktopWindows();
+var windows = ListDesktopWindowsForMonitor(preferredMonitorIndex);
 foreach (var window in windows)
 {
 var id = window.TryGetValue("id", out var idVariant) ? idVariant.AsInt64() : 0;
@@ -622,7 +763,137 @@ return id;
 
 if (windows.Count > 0 && windows[0].TryGetValue("id", out var fallbackVariant))
 return fallbackVariant.AsInt64();
+
+// Last-resort fallback to any available window.
+var allWindows = ListDesktopWindows();
+if (allWindows.Count > 0 && allWindows[0].TryGetValue("id", out var anyWindowVariant))
+return anyWindowVariant.AsInt64();
 return 0;
+}
+
+private int PickDefaultMonitorIndex()
+{
+var monitors = ListDesktopMonitors();
+if (monitors.Count == 0)
+return 0;
+if (monitors[0].TryGetValue("index", out var indexVariant))
+return Math.Max(0, indexVariant.AsInt32());
+return 0;
+}
+
+private string ResolveWindowTitleHint(long windowId)
+{
+if (windowId <= 0)
+return "";
+
+var windows = ListDesktopWindows();
+foreach (var window in windows)
+{
+var id = window.TryGetValue("id", out var idVariant) ? idVariant.AsInt64() : 0;
+if (id != windowId)
+continue;
+return window.TryGetValue("title", out var titleVariant) ? titleVariant.AsString() : "";
+}
+
+return "";
+}
+
+private (DesktopSourceProfile Source, string Status) ResolveDesktopSource(DesktopSourceProfile requested)
+{
+var resolved = requested.Clone();
+resolved.SourceKind = NormalizeSourceKind(resolved.SourceKind);
+resolved.MonitorIndex = Math.Max(0, resolved.MonitorIndex);
+resolved.WindowId = Math.Max(0, resolved.WindowId);
+
+var monitorCount = ListDesktopMonitors().Count;
+if (monitorCount > 0 && resolved.MonitorIndex >= monitorCount)
+resolved.MonitorIndex = PickDefaultMonitorIndex();
+
+if (resolved.SourceKind == "monitor")
+return (resolved, $"connected (monitor:{resolved.MonitorIndex})");
+
+if (resolved.SourceKind == "window" && resolved.WindowId > 0)
+{
+if (TryFindWindowById(resolved.WindowId, out var found))
+{
+resolved.TitleHint = found.TryGetValue("title", out var titleVariant) ? titleVariant.AsString() : resolved.TitleHint;
+if (found.TryGetValue("monitor_index", out var monitorVariant))
+{
+var monitor = monitorVariant.AsInt32();
+if (monitor >= 0)
+resolved.MonitorIndex = monitor;
+}
+return (resolved, $"connected (window:{resolved.WindowId})");
+}
+
+if (!string.IsNullOrWhiteSpace(resolved.TitleHint) && TryFindWindowByTitle(resolved.TitleHint, out var byTitle))
+{
+resolved.WindowId = byTitle.TryGetValue("id", out var idVariant) ? idVariant.AsInt64() : 0;
+if (byTitle.TryGetValue("monitor_index", out var monitorVariant))
+{
+var monitor = monitorVariant.AsInt32();
+if (monitor >= 0)
+resolved.MonitorIndex = monitor;
+}
+return (resolved, $"fallback (title->window:{resolved.WindowId})");
+}
+}
+
+var fallbackWindow = PickDefaultDesktopWindowId(resolved.MonitorIndex);
+if (fallbackWindow > 0)
+{
+resolved.SourceKind = "window";
+resolved.WindowId = fallbackWindow;
+resolved.TitleHint = ResolveWindowTitleHint(fallbackWindow);
+return (resolved, $"fallback (default-window:{fallbackWindow})");
+}
+
+resolved.SourceKind = "monitor";
+resolved.WindowId = 0;
+if (monitorCount <= 0)
+return (resolved, "missing source (no monitors/windows)");
+return (resolved, $"fallback (monitor:{resolved.MonitorIndex})");
+}
+
+private bool TryFindWindowById(long windowId, out GDDict result)
+{
+result = new GDDict();
+if (windowId <= 0)
+return false;
+
+var windows = ListDesktopWindows();
+foreach (var window in windows)
+{
+var id = window.TryGetValue("id", out var idVariant) ? idVariant.AsInt64() : 0;
+if (id != windowId)
+continue;
+result = window;
+return true;
+}
+
+return false;
+}
+
+private bool TryFindWindowByTitle(string titleHint, out GDDict result)
+{
+result = new GDDict();
+if (string.IsNullOrWhiteSpace(titleHint))
+return false;
+
+var windows = ListDesktopWindows();
+foreach (var window in windows)
+{
+var title = window.TryGetValue("title", out var titleVariant) ? titleVariant.AsString() : "";
+if (string.IsNullOrWhiteSpace(title))
+continue;
+if (title.Contains(titleHint, StringComparison.OrdinalIgnoreCase))
+{
+result = window;
+return true;
+}
+}
+
+return false;
 }
 
 private static RuntimeDesktopFrameView? FindDesktopView(ChartFrame3D frame)
@@ -813,20 +1084,45 @@ presets.Add(new GDDict
 }
 
 var windows = new GDArray();
-foreach (var frameId in _desktopWindowByFrame.Keys)
+foreach (var frameId in _desktopSourceByFrame.Keys)
 {
+var source = _desktopSourceByFrame[frameId];
 windows.Add(new GDDict
 {
 { "frame_id", frameId },
-{ "window_id", _desktopWindowByFrame[frameId] },
+{ "window_id", source.WindowId },
 });
+}
+
+var sources = new GDArray();
+foreach (var frameId in _desktopSourceByFrame.Keys)
+{
+var source = _desktopSourceByFrame[frameId];
+var payload = source.ToDictionary();
+payload["frame_id"] = frameId;
+sources.Add(payload);
 }
 
 _workspaceService.ActiveWorkspaceProfile[BindingsProfileKey] = bindings;
 _workspaceService.ActiveWorkspaceProfile[FramePresetsProfileKey] = presets;
 _workspaceService.ActiveWorkspaceProfile[DesktopWindowsProfileKey] = windows;
+_workspaceService.ActiveWorkspaceProfile[DesktopSourcesProfileKey] = sources;
 _workspaceService.ActiveWorkspaceProfile[EnvironmentPresetProfileKey] = _environmentPreset;
 _workspaceService.SaveActiveWorkspace();
+}
+
+private static string NormalizeSourceKind(string sourceKind)
+{
+if (string.IsNullOrWhiteSpace(sourceKind))
+return "auto";
+
+var value = sourceKind.Trim().ToLowerInvariant();
+return value switch
+{
+"window" => "window",
+"monitor" => "monitor",
+_ => "auto",
+};
 }
 
 private static string NormalizeBindingKind(string bindingKind)
@@ -989,5 +1285,49 @@ public float Phase { get; set; }
 public StreamDataSource? StreamDataSource { get; set; }
 public DictDataSource? DictDataSource { get; set; }
 public Texture2D? DesktopTexture { get; set; }
+}
+
+public sealed class DesktopSourceProfile
+{
+public int MonitorIndex { get; set; }
+public long WindowId { get; set; }
+public string TitleHint { get; set; } = "";
+public string SourceKind { get; set; } = "auto";
+
+public DesktopSourceProfile Clone()
+{
+return new DesktopSourceProfile
+{
+MonitorIndex = MonitorIndex,
+WindowId = WindowId,
+TitleHint = TitleHint,
+SourceKind = SourceKind,
+};
+}
+
+public GDDict ToDictionary()
+{
+return new GDDict
+{
+{ "monitor_index", MonitorIndex },
+{ "window_id", WindowId },
+{ "title_hint", TitleHint },
+{ "source_kind", SourceKind },
+};
+}
+
+public static DesktopSourceProfile FromDictionary(GDDict value)
+{
+var source = new DesktopSourceProfile
+{
+MonitorIndex = value.TryGetValue("monitor_index", out var monitorVariant) ? Math.Max(0, monitorVariant.AsInt32()) : 0,
+WindowId = value.TryGetValue("window_id", out var windowVariant) ? Math.Max(0, windowVariant.AsInt64()) : 0,
+TitleHint = value.TryGetValue("title_hint", out var titleVariant) ? titleVariant.AsString() : "",
+SourceKind = value.TryGetValue("source_kind", out var sourceKindVariant) ? sourceKindVariant.AsString() : "auto",
+};
+
+source.SourceKind = NormalizeSourceKind(source.SourceKind);
+return source;
+}
 }
 }

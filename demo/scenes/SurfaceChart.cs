@@ -50,7 +50,7 @@ public partial class SurfaceChart : Node3D
         if (_chart is not GodotCharts.SurfaceChart3D c) return;
         if (_mode == 0)
         {
-            c.Title           = "sin(x)·cos(z)  [function]";
+            c.Title           = "sin(x)*cos(z)  [function]";
             c.SurfaceFunction = (x, z) =>
                 MathF.Sin(x * MathF.Tau) * MathF.Cos(z * MathF.Tau) * 0.5f + 0.5f;
         }

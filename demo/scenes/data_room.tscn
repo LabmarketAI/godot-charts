@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://df8arlbrhknrx" path="res://addons/godot-charts/charts/SurfaceChart3D.cs" id="5_surface"]
 [ext_resource type="Script" uid="uid://cat0d833wprcf" path="res://addons/godot-charts/charts/HistogramChart3D.cs" id="6_hist"]
 [ext_resource type="Script" uid="uid://b12fe4pgk3mp" path="res://addons/godot-charts/charts/GraphNetworkChart3D.cs" id="7_gnet3"]
-[ext_resource type="PackedScene" uid="uid://b37vns1d5d4ot" path="res://assets/BackPanel.glb" id="8_27won"]
+[ext_resource type="PackedScene" uid="uid://doorf883vcv4s" path="res://scenes/panel.tscn" id="9_27won"]
 [ext_resource type="PackedScene" uid="uid://b5idwuogdwy3u" path="res://assets/Floor.glb" id="9_vde67"]
 
 [sub_resource type="Environment" id="Environment_main"]
@@ -338,18 +338,34 @@ billboard = 1
 text = "[8] Live Desktop"
 font_size = 24
 
-[node name="BackPanel" parent="." unique_id=1070415017 instance=ExtResource("8_27won")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.0191345, 6.2909756, -16.854315)
-
 [node name="Floor" parent="." unique_id=1727187514 instance=ExtResource("9_vde67")]
 
-[node name="BackPanel2" parent="." unique_id=430435509 instance=ExtResource("8_27won")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.7245464, 6.256605, -16.824055)
+[node name="Panel" parent="." unique_id=1760788117 instance=ExtResource("9_27won")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.412903, 0, -16.291874)
 
-[node name="SpotLight3D" type="SpotLight3D" parent="." unique_id=1466955821]
-transform = Transform3D(1, 0, 0, 0, 0.6604604, 0.75086087, 0, -0.75086087, 0.6604604, -4.405188, 11.479966, -15.484284)
-spot_range = 7.854757
+[node name="Panel2" parent="." unique_id=1589610849 instance=ExtResource("9_27won")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.711144, 0, -16.291874)
 
-[node name="SpotLight3D2" type="SpotLight3D" parent="." unique_id=837914545]
-transform = Transform3D(1, 0, 0, 0, 0.6440702, 0.7649665, 0, -0.7649665, 0.6440702, 5.294513, 11.139043, -15.154841)
-spot_range = 7.854757
+[node name="Panel9" parent="." unique_id=279951154 instance=ExtResource("9_27won")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4.412903, 0, 16.355282)
+
+[node name="Panel10" parent="." unique_id=2059879164 instance=ExtResource("9_27won")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -4.711144, 0, 16.355282)
+
+[node name="Panel3" parent="." unique_id=39075060 instance=ExtResource("9_27won")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10.762466, 0, -9.736495)
+
+[node name="Panel4" parent="." unique_id=201633638 instance=ExtResource("9_27won")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10.762466, 0, -0.0009613037)
+
+[node name="Panel5" parent="." unique_id=650594684 instance=ExtResource("9_27won")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10.762466, 0, 9.552034)
+
+[node name="Panel6" parent="." unique_id=980903748 instance=ExtResource("9_27won")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 10.678024, 0, -9.736495)
+
+[node name="Panel7" parent="." unique_id=325435793 instance=ExtResource("9_27won")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 10.678024, 0, -0.0009613037)
+
+[node name="Panel8" parent="." unique_id=1221012277 instance=ExtResource("9_27won")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 10.678024, 0, 9.552034)

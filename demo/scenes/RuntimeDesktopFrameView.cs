@@ -45,6 +45,14 @@ public partial class RuntimeDesktopFrameView : Node3D
 		_captureTexture.Set("enabled", true);
 	}
 
+	public void SetMonitorIndex(int monitorIndex)
+	{
+		if (_captureTexture == null)
+			return;
+		_captureTexture.Set("monitor_index", Mathf.Max(0, monitorIndex));
+		_captureTexture.Set("enabled", true);
+	}
+
 	public void FitToFrame()
 	{
 		if (_frame == null || _meshInstance == null)

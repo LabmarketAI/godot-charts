@@ -122,6 +122,9 @@ public partial class MainVr : Node3D
 
 	public override void _Input(InputEvent @event)
 	{
+		var menuActionExists = InputMap.HasAction(KeyboardPassthroughToggleAction);
+		var menuPressed = menuActionExists && @event.IsActionPressed(KeyboardPassthroughToggleAction);
+
 		if (@event.IsActionPressed(ToggleConsoleAction))
 		{
 			ToggleConsoleAndPersist();
@@ -131,7 +134,7 @@ public partial class MainVr : Node3D
 
 		if (!_keyboardTrackingAvailable)
 		{
-			if (@event.IsActionPressed(KeyboardPassthroughToggleAction) && !_loggedMissingKeyboardSupport)
+			if (menuPressed && !_loggedMissingKeyboardSupport)
 			{
 				_loggedMissingKeyboardSupport = true;
 				GD.PushWarning("Keyboard passthrough is unavailable. Ensure godot-openxr-vendors is installed with binaries and that the active OpenXR runtime supports XR_FB_keyboard_tracking.");
@@ -139,7 +142,7 @@ public partial class MainVr : Node3D
 			return;
 		}
 
-		if (!@event.IsActionPressed(KeyboardPassthroughToggleAction))
+		if (!menuPressed)
 			return;
 
 		SetKeyboardPassthrough(!_keyboardPassthroughEnabled);

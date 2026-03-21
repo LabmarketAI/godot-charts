@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using GDDict = Godot.Collections.Dictionary;
 
 public partial class ConsoleRoot : Node3D
 {
@@ -18,10 +19,12 @@ private OptionButton? _chartTypePicker;
 private OptionButton? _sizePresetPicker;
 private OptionButton? _bindingKindPicker;
 private OptionButton? _framePresetPicker;
+private OptionButton? _monitorPicker;
 private OptionButton? _windowPicker;
 private OptionButton? _environmentPresetPicker;
 private Label? _statusLabel;
 private Label? _environmentStatusLabel;
+private Label? _desktopSourceStatusLabel;
 
 public bool IsConsoleVisible => Visible;
 
@@ -67,18 +70,25 @@ _statusLabel.Text = show ? "Console: Visible" : "Console: Hidden";
 
 private void BuildPanel()
 {
-if (PreferXrInteraction && FileAccess.FileExists(XrViewportScenePath))
+		var useXrViewportHost = PreferXrInteraction
+			&& ProjectSettings.HasSetting("diegetic_console/use_xr_viewport_host")
+			&& ProjectSettings.GetSetting("diegetic_console/use_xr_viewport_host").AsBool();
+
+		if (useXrViewportHost && FileAccess.FileExists(XrViewportScenePath))
 {
 var packed = GD.Load<PackedScene>(XrViewportScenePath);
-_xrViewportHost = packed.Instantiate<Node3D>();
-_xrViewportHost.Name = "ConsoleViewportHost";
-_xrViewportHost.Set("screen_size", new Vector2(1.8f, 1.1f));
-_xrViewportHost.Set("viewport_size", new Vector2(1024f, 640f));
-_xrViewportHost.Set("input_keyboard", true);
-_xrViewportHost.Set("input_gamepad", false);
-AddChild(_xrViewportHost);
+			if (packed != null)
+			{
+				_xrViewportHost = packed.Instantiate<Node3D>();
+				_xrViewportHost.Name = "ConsoleViewportHost";
+				_xrViewportHost.Set("screen_size", new Vector2(1.8f, 1.1f));
+				_xrViewportHost.Set("viewport_size", new Vector2(1024f, 640f));
+				_xrViewportHost.Set("input_keyboard", true);
+				_xrViewportHost.Set("input_gamepad", false);
+				AddChild(_xrViewportHost);
 
-_subViewport = _xrViewportHost.GetNodeOrNull<SubViewport>("Viewport");
+				_subViewport = _xrViewportHost.GetNodeOrNull<SubViewport>("Viewport");
+			}
 }
 
 if (_subViewport == null)
@@ -127,6 +137,9 @@ column.AddChild(_statusLabel);
 
 _environmentStatusLabel = new Label { Text = "Environment: pending" };
 column.AddChild(_environmentStatusLabel);
+
+_desktopSourceStatusLabel = new Label { Text = "Desktop source: pending" };
+column.AddChild(_desktopSourceStatusLabel);
 
 var row = new HBoxContainer();
 row.AddThemeConstantOverride("separation", 8);
@@ -211,6 +224,14 @@ frameActionRow.AddChild(applyPresetBtn);
 var windowRow = new HBoxContainer();
 windowRow.AddThemeConstantOverride("separation", 8);
 column.AddChild(windowRow);
+
+_monitorPicker = new OptionButton();
+_monitorPicker.ItemSelected += OnMonitorSelected;
+windowRow.AddChild(_monitorPicker);
+
+var applyMonitorBtn = new Button { Text = "Set Monitor" };
+applyMonitorBtn.Pressed += OnSetDesktopMonitorPressed;
+windowRow.AddChild(applyMonitorBtn);
 
 _windowPicker = new OptionButton();
 windowRow.AddChild(_windowPicker);
@@ -373,14 +394,49 @@ return;
 
 private void RefreshDesktopWindows()
 {
-if (_bindingService == null || _windowPicker == null || _framePicker == null || _frameService == null)
+if (_bindingService == null || _windowPicker == null || _monitorPicker == null || _framePicker == null || _frameService == null)
 return;
+
+_monitorPicker.Clear();
+var monitors = _bindingService.ListDesktopMonitors();
+for (var i = 0; i < monitors.Count; i++)
+{
+var monitor = monitors[i];
+var index = monitor.TryGetValue("index", out var indexVariant) ? indexVariant.AsInt32() : i;
+var label = monitor.TryGetValue("label", out var labelVariant) ? labelVariant.AsString() : $"Monitor {index}";
+_monitorPicker.AddItem(label);
+_monitorPicker.SetItemMetadata(_monitorPicker.ItemCount - 1, index);
+}
+if (_monitorPicker.ItemCount == 0)
+{
+_monitorPicker.AddItem("Monitor 0");
+_monitorPicker.SetItemMetadata(0, 0);
+}
 
 _windowPicker.Clear();
 _windowPicker.AddItem("(auto)");
-_windowPicker.SetItemMetadata(0, 0L);
+_windowPicker.SetItemMetadata(0, new GDDict { { "id", 0L }, { "title", "" } });
 
-var windows = _bindingService.ListDesktopWindows();
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var chartType = _frameService.GetFrameChartType(frameId);
+var selectedMonitor = _bindingService.GetDesktopMonitorForFrame(frameId);
+var selectedWindow = _bindingService.GetDesktopWindowForFrame(frameId);
+
+var monitorSelectedIndex = 0;
+for (var i = 0; i < _monitorPicker.ItemCount; i++)
+{
+if (_monitorPicker.GetItemMetadata(i).AsInt32() == selectedMonitor)
+{
+monitorSelectedIndex = i;
+break;
+}
+}
+_monitorPicker.Select(monitorSelectedIndex);
+
+var windows = _bindingService.ListDesktopWindowsForMonitor(selectedMonitor);
 for (var i = 0; i < windows.Count; i++)
 {
 var window = windows[i];
@@ -391,27 +447,30 @@ continue;
 
 var safeTitle = string.IsNullOrWhiteSpace(title) ? "(untitled)" : title;
 _windowPicker.AddItem($"{safeTitle} [{windowId}]");
-_windowPicker.SetItemMetadata(_windowPicker.ItemCount - 1, windowId);
+_windowPicker.SetItemMetadata(_windowPicker.ItemCount - 1, new GDDict
+{
+{ "id", windowId },
+{ "title", title },
+});
 }
-
-if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
-return;
-
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
-var chartType = _frameService.GetFrameChartType(frameId);
-var selectedWindow = _bindingService.GetDesktopWindowForFrame(frameId);
 
 var selectedIndex = 0;
 for (var i = 0; i < _windowPicker.ItemCount; i++)
 {
-if (_windowPicker.GetItemMetadata(i).AsInt64() == selectedWindow)
+var meta = _windowPicker.GetItemMetadata(i).AsGodotDictionary();
+var id = meta.TryGetValue("id", out var idVariant) ? idVariant.AsInt64() : 0;
+if (id == selectedWindow)
 {
 selectedIndex = i;
 break;
 }
 }
 _windowPicker.Select(selectedIndex);
+_monitorPicker.Disabled = chartType != "desktop";
 _windowPicker.Disabled = chartType != "desktop";
+
+if (_desktopSourceStatusLabel != null)
+_desktopSourceStatusLabel.Text = $"Desktop source: {_bindingService.GetDesktopSourceStatus(frameId)}";
 }
 
 private void OnWorkspaceLoaded(string name)
@@ -434,6 +493,11 @@ _workspaceService.LoadWorkspace(name);
 private void OnFrameSelected(long _index)
 {
 RefreshFrameControlsForCurrentSelection();
+}
+
+private void OnMonitorSelected(long _index)
+{
+RefreshDesktopWindows();
 }
 
 private void OnNewWorkspacePressed()
@@ -556,12 +620,40 @@ if (_windowPicker.Selected < 0 || _windowPicker.Selected >= _windowPicker.ItemCo
 return;
 
 var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
-var windowId = _windowPicker.GetItemMetadata(_windowPicker.Selected).AsInt64();
+var meta = _windowPicker.GetItemMetadata(_windowPicker.Selected).AsGodotDictionary();
+var windowId = meta.TryGetValue("id", out var idVariant) ? idVariant.AsInt64() : 0;
+var title = meta.TryGetValue("title", out var titleVariant) ? titleVariant.AsString() : "";
 if (_bindingService.SetDesktopWindowForFrame(frameId, windowId))
 {
 var label = windowId > 0 ? windowId.ToString() : "auto";
 _statusLabel!.Text = $"Set {frameId} desktop window to {label}";
+
+if (windowId > 0)
+{
+var profile = DataBindingService.DesktopSourceProfile.FromDictionary(_bindingService.GetDesktopSourceProfileForFrame(frameId));
+profile.TitleHint = title;
+_bindingService.SetDesktopSourceForFrame(frameId, profile);
 }
+}
+
+RefreshDesktopWindows();
+}
+
+private void OnSetDesktopMonitorPressed()
+{
+if (_bindingService == null || _framePicker == null || _monitorPicker == null)
+return;
+if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+return;
+if (_monitorPicker.Selected < 0 || _monitorPicker.Selected >= _monitorPicker.ItemCount)
+return;
+
+var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var monitorIndex = _monitorPicker.GetItemMetadata(_monitorPicker.Selected).AsInt32();
+if (_bindingService.SetDesktopMonitorForFrame(frameId, monitorIndex))
+_statusLabel!.Text = $"Set {frameId} desktop monitor to {monitorIndex}";
+
+RefreshDesktopWindows();
 }
 
 private void OnSetEnvironmentPresetPressed()

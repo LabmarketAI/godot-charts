@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://doorf883vcv4s"]
+
+[ext_resource type="PackedScene" uid="uid://b37vns1d5d4ot" path="res://assets/BackPanel.glb" id="1_8e8e8"]
+
+[node name="Panel" type="Node3D" unique_id=1760788117]
+
+[node name="BackPanel" parent="." unique_id=1070415017 instance=ExtResource("1_8e8e8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.999325, 0)
+
+[node name="SpotLight3D2" type="SpotLight3D" parent="." unique_id=1226908025]
+transform = Transform3D(1, 0, 0, 0, 0.6440702, 0.7649665, 0, -0.7649665, 0.6440702, -1.5283641, 11.139043, 3.6880665)
+light_color = Color(0.83137256, 0.49411765, 0.18039216, 1)
+spot_range = 7.854757
+
+[node name="SpotLight3D3" type="SpotLight3D" parent="." unique_id=1997730192]
+transform = Transform3D(1, 0, 0, 0, 0.6440702, 0.7649665, 0, -0.7649665, 0.6440702, 1.7592402, 11.139043, 3.6880665)
+light_color = Color(0.83137256, 0.49411765, 0.18039216, 1)
+spot_range = 7.854757

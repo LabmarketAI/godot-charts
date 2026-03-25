@@ -461,6 +461,12 @@ public partial class MainVr : Node3D
 			tex.Set("window_id", targetId);
 			GD.Print($"Auto-selected window ID: {targetId}");
 		}
+		else
+		{
+			GD.Print("No window selected for capture — using monitor index 0.");
+		}
+
+		tex.Set("enabled", true);
 	}
 
 	private void ResolveControllers()

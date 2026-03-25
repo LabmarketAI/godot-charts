@@ -569,7 +569,36 @@ RefreshFrameControlsForCurrentSelection();
 
 private void OnMonitorSelected(long _index)
 {
-RefreshDesktopWindows();
+if (_bindingService == null || _monitorPicker == null || _windowPicker == null)
+return;
+if (_monitorPicker.Selected < 0 || _monitorPicker.Selected >= _monitorPicker.ItemCount)
+return;
+
+var monitorIndex = _monitorPicker.GetItemMetadata(_monitorPicker.Selected).AsInt32();
+
+_windowPicker.Clear();
+_windowPicker.AddItem("(auto)");
+_windowPicker.SetItemMetadata(0, new GDDict { { "id", 0L }, { "title", "" } });
+
+var windows = _bindingService.ListDesktopWindowsForMonitor(monitorIndex);
+for (var i = 0; i < windows.Count; i++)
+{
+var window = windows[i];
+var windowId = window.TryGetValue("id", out var idVariant) ? idVariant.AsInt64() : 0;
+var title = window.TryGetValue("title", out var titleVariant) ? titleVariant.AsString() : "";
+if (windowId <= 0)
+continue;
+
+var safeTitle = string.IsNullOrWhiteSpace(title) ? "(untitled)" : title;
+_windowPicker.AddItem($"{safeTitle} [{windowId}]");
+_windowPicker.SetItemMetadata(_windowPicker.ItemCount - 1, new GDDict
+{
+{ "id", windowId },
+{ "title", title },
+});
+}
+
+_windowPicker.Select(0);
 }
 
 private void OnNewWorkspacePressed()

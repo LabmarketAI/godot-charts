@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "id": "high_contrast",
+  "colors": {
+    "bg_normal":      "#000000",
+    "bg_hover":       "#333333",
+    "bg_pressed":     "#FFFF00",
+    "bg_disabled":    "#1A1A1A",
+    "bg_checked":     "#FFFF00",
+    "border_normal":  "#FFFFFF",
+    "border_focused": "#FFFF00",
+    "text_normal":    "#FFFFFF",
+    "text_disabled":  "#808080",
+    "accent":         "#FFFF00",
+    "slider_track":   "#333333",
+    "slider_thumb":   "#FFFF00"
+  },
+  "sizes": {
+    "text_size":    20,
+    "border_width": 0.006
+  }
+}

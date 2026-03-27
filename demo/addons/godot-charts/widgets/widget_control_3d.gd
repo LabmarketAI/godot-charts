@@ -54,6 +54,9 @@ func _ready() -> void:
 		var fm := _get_focus_manager()
 		if fm:
 			fm.register(self)
+		var tm := _get_theme_manager()
+		if tm:
+			tm.theme_changed.connect(_on_global_theme_changed)
 
 
 func _exit_tree() -> void:
@@ -113,8 +116,19 @@ func _apply_shape() -> void:
 
 # ── color helpers ─────────────────────────────────────────────────────────────
 
+## Returns the explicit theme_data override if set, otherwise the global
+## WidgetThemeManager active theme, otherwise null (hardcoded defaults apply).
+func _get_effective_theme() -> WidgetThemeData3D:
+	if theme_data != null:
+		return theme_data
+	var tm := _get_theme_manager()
+	if tm:
+		return tm.get_active_theme()
+	return null
+
+
 func _get_bg_color() -> Color:
-	var t := theme_data
+	var t := _get_effective_theme()
 	match _state:
 		State.HOVER:    return t.bg_hover    if t else Color(0.28, 0.28, 0.32)
 		State.PRESSED:  return t.bg_pressed  if t else Color(0.12, 0.45, 0.82)
@@ -122,13 +136,13 @@ func _get_bg_color() -> Color:
 		_:              return t.bg_normal   if t else Color(0.18, 0.18, 0.20)
 
 func _get_text_color() -> Color:
-	var t := theme_data
+	var t := _get_effective_theme()
 	if _state == State.DISABLED:
 		return t.text_disabled if t else Color(0.45, 0.45, 0.45)
 	return t.text_normal if t else Color(0.95, 0.95, 0.95)
 
 func _get_border_color() -> Color:
-	var t := theme_data
+	var t := _get_effective_theme()
 	if _keyboard_focused:
 		return t.border_focused if t else Color(0.30, 0.65, 1.0)
 	return t.border_normal if t else Color(0.35, 0.35, 0.40)
@@ -250,3 +264,14 @@ func get_widget_size() -> Vector2:
 
 func _get_focus_manager() -> Node:
 	return get_node_or_null("/root/WidgetFocusManager")
+
+
+func _get_theme_manager() -> Node:
+	return get_node_or_null("/root/WidgetThemeManager")
+
+
+## Called when the global theme changes.  Controls with an explicit theme_data
+## override are unaffected; all others rebuild to pick up the new tokens.
+func _on_global_theme_changed(_theme: WidgetThemeData3D) -> void:
+	if theme_data == null:
+		_queue_rebuild()

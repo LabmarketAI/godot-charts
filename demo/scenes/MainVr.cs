@@ -331,6 +331,7 @@ public partial class MainVr : Node3D
 			_consoleRoot.BindFrameService(_frameService);
 		if (_bindingService != null)
 			_consoleRoot.BindBindingService(_bindingService);
+		_consoleRoot.TeleportToFrameRequested += OnTeleportToFrameRequested;
 
 		if (_workspaceService.ActiveWorkspaceProfile.TryGetValue("console_visible", out var storedVisible))
 			_consoleRoot.SetConsoleVisible(storedVisible.AsBool());
@@ -588,5 +589,33 @@ public partial class MainVr : Node3D
 			_consoleRoot.ToggleConsole();
 		if (_workspaceService != null && _consoleRoot != null)
 			_workspaceService.SaveActiveWorkspace(_consoleRoot.IsConsoleVisible);
+	}
+
+	private void OnTeleportToFrameRequested(string frameId)
+	{
+		if (_frameService == null)
+			return;
+
+		var xrOrigin = GetNodeOrNull<Node3D>("XROrigin3D");
+		if (xrOrigin == null)
+			return;
+
+		if (!_frameService.TryGetFrame(frameId, out var frame))
+			return;
+
+		var forward = -frame.GlobalBasis.Z;
+		if (forward.LengthSquared() < 0.0001f)
+			forward = Vector3.Forward;
+		forward = forward.Normalized();
+
+		var standDistance = Mathf.Clamp(frame.Size.X * 0.65f, 2.0f, 4.5f);
+		var targetPos = frame.GlobalPosition + forward * standDistance;
+		targetPos.Y = xrOrigin.GlobalPosition.Y;
+
+		xrOrigin.GlobalPosition = targetPos;
+		var lookTarget = frame.GlobalPosition + new Vector3(0f, frame.Size.Y * 0.5f, 0f);
+		var flatTarget = new Vector3(lookTarget.X, xrOrigin.GlobalPosition.Y, lookTarget.Z);
+		if (xrOrigin.GlobalPosition.DistanceTo(flatTarget) > 0.001f)
+			xrOrigin.LookAt(flatTarget, Vector3.Up);
 	}
 }

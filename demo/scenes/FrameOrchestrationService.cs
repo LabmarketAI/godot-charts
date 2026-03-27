@@ -6,6 +6,8 @@ using GodotCharts;
 
 public partial class FrameOrchestrationService : Node
 {
+	public readonly record struct FrameDisplayIdentity(string DisplayName, int DisplayIndex);
+
 	[Signal]
 	public delegate void RuntimeFramesChangedEventHandler();
 
@@ -15,6 +17,7 @@ public partial class FrameOrchestrationService : Node
 
 	private readonly System.Collections.Generic.Dictionary<string, ChartFrame3D> _framesById = new();
 	private readonly System.Collections.Generic.Dictionary<string, FrameRoutingProfile> _routingByFrameId = new();
+	private readonly System.Collections.Generic.Dictionary<string, FrameDisplayIdentity> _identityByFrameId = new();
 	private Node3D? _dataRoom;
 	private Node3D? _runtimeContainer;
 	private WorkspaceStateService? _workspaceService;
@@ -83,6 +86,15 @@ public partial class FrameOrchestrationService : Node
 			return true;
 
 		routing = default;
+		return false;
+	}
+
+	public bool TryGetFrameDisplayIdentity(string frameId, out FrameDisplayIdentity identity)
+	{
+		if (_identityByFrameId.TryGetValue(frameId, out identity))
+			return true;
+
+		identity = default;
 		return false;
 	}
 
@@ -253,6 +265,7 @@ public partial class FrameOrchestrationService : Node
 		_runtimeContainer.AddChild(frame);
 		frame.LookAt(new Vector3(0f, RuntimeRingHeight + 0.8f, 0f), Vector3.Up);
 		_framesById[id] = frame;
+		_identityByFrameId[id] = BuildDefaultIdentity(chartType);
 		_routingByFrameId[id] = FrameRoutingProfileContract.CreateDefault(chartType);
 
 		SetFrameChartType(id, chartType, persist: false);
@@ -273,6 +286,7 @@ public partial class FrameOrchestrationService : Node
 
 		_framesById.Remove(frameId);
 		_routingByFrameId.Remove(frameId);
+		_identityByFrameId.Remove(frameId);
 		if (_moveModeFrameId == frameId)
 			_moveModeFrameId = "";
 		frame.QueueFree();
@@ -325,6 +339,7 @@ public partial class FrameOrchestrationService : Node
 			frame.QueueFree();
 		_framesById.Clear();
 		_routingByFrameId.Clear();
+		_identityByFrameId.Clear();
 
 		if (!_workspaceService.ActiveWorkspaceProfile.TryGetValue("frames", out var framesVariant)
 			|| framesVariant.VariantType != Variant.Type.Array)
@@ -373,6 +388,7 @@ public partial class FrameOrchestrationService : Node
 
 		_runtimeContainer.AddChild(frame);
 		_framesById[frameId] = frame;
+		_identityByFrameId[frameId] = ParseFrameIdentity(profile, chartType);
 		_routingByFrameId[frameId] = ParseRoutingProfile(profile, chartType);
 		ReplaceFrameChart(frame, chartType);
 	}
@@ -474,12 +490,16 @@ public partial class FrameOrchestrationService : Node
 	private Dictionary BuildFrameProfile(string frameId, ChartFrame3D frame)
 	{
 		var chartType = DetectChartType(frame);
+		if (!_identityByFrameId.TryGetValue(frameId, out var identity))
+			identity = BuildDefaultIdentity(chartType);
 		if (!_routingByFrameId.TryGetValue(frameId, out var routing))
 			routing = FrameRoutingProfileContract.CreateDefault(chartType);
 
 		return new Dictionary
 		{
 			{ "id", frameId },
+			{ "display_name", identity.DisplayName },
+			{ "display_index", identity.DisplayIndex },
 			{ "chart_type", chartType },
 			{ "size_preset", PresetForSize(frame.Size) },
 			{ "frame_size", SerializeVector2(frame.Size) },
@@ -584,6 +604,47 @@ public partial class FrameOrchestrationService : Node
 			FrameRoutingProfileContract.NormalizeTopicProfileId(topicProfileId),
 			FrameRoutingProfileContract.NormalizeChartTypeMappingMode(chartTypeMappingMode),
 			manualChartTypeLock);
+	}
+
+	private FrameDisplayIdentity ParseFrameIdentity(Dictionary profile, string chartType)
+	{
+		var fallback = BuildDefaultIdentity(chartType);
+
+		var displayName = profile.TryGetValue("display_name", out var nameVariant)
+			? nameVariant.AsString()
+			: fallback.DisplayName;
+
+		var displayIndex = fallback.DisplayIndex;
+		if (profile.TryGetValue("display_index", out var indexVariant))
+		{
+			if (indexVariant.VariantType == Variant.Type.Int)
+				displayIndex = Math.Max(1, indexVariant.AsInt32());
+			else if (indexVariant.VariantType == Variant.Type.String && int.TryParse(indexVariant.AsString(), out var parsedIndex))
+				displayIndex = Math.Max(1, parsedIndex);
+		}
+
+		if (string.IsNullOrWhiteSpace(displayName))
+			displayName = $"Frame {displayIndex:00}";
+
+		return new FrameDisplayIdentity(displayName.Trim(), displayIndex);
+	}
+
+	private FrameDisplayIdentity BuildDefaultIdentity(string chartType)
+	{
+		var nextIndex = 1;
+		foreach (var identity in _identityByFrameId.Values)
+			nextIndex = Math.Max(nextIndex, identity.DisplayIndex + 1);
+
+		var normalized = NormalizeChartType(chartType);
+		var prefix = normalized switch
+		{
+			"network" => "Graph",
+			"desktop" => "Desktop",
+			"circuit" => "Circuit",
+			_ => char.ToUpperInvariant(normalized[0]) + normalized[1..],
+		};
+
+		return new FrameDisplayIdentity($"{prefix} {nextIndex:00}", nextIndex);
 	}
 
 	private void UpdateRoutingTopicDefault(string frameId, string previousChartType, string newChartType)

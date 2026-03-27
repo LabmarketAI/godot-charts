@@ -126,6 +126,7 @@ public partial class Main : Node3D
         _consoleRoot.BindFrameService(_frameService);
         _consoleRoot.BindBindingService(_bindingService);
         _consoleRoot.BindMessageBus(_messageBusService);
+        _consoleRoot.TeleportToFrameRequested += OnTeleportToFrameRequested;
 
         MaybeEnableHeadlessSmokeHarness();
 
@@ -295,5 +296,26 @@ public partial class Main : Node3D
     private static void ShowHint()
     {
         GD.Print("Godot Charts Demo — WASD to walk, mouse to look, [1]-[7] to jump to a chart, [Esc] to toggle mouse lock.");
+    }
+
+    private void OnTeleportToFrameRequested(string frameId)
+    {
+        if (_frameService == null || _player == null)
+            return;
+
+        if (!_frameService.TryGetFrame(frameId, out var frame))
+            return;
+
+        var forward = -frame.GlobalBasis.Z;
+        if (forward.LengthSquared() < 0.0001f)
+            forward = Vector3.Forward;
+        forward = forward.Normalized();
+
+        var standDistance = Mathf.Clamp(frame.Size.X * 0.65f, 2.0f, 4.5f);
+        var targetPos = frame.GlobalPosition + forward * standDistance;
+        targetPos.Y = 0.9f;
+
+        var lookAtPos = frame.GlobalPosition + new Vector3(0f, frame.Size.Y * 0.5f, 0f);
+        _player.TeleportTo(targetPos, lookAtPos);
     }
 }

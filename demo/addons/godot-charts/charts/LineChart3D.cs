@@ -181,7 +181,8 @@ public partial class LineChart3D : PointChart3D
 
         float xs = ChartSize.X / (maxX - minX);
         float ys = ChartSize.Y / (maxY - minY);
-        float zs = ChartSize.X / (maxZ - minZ);
+        float depthExtent = MathF.Min(ChartSize.X, ChartSize.Y);
+        float zs = depthExtent / (maxZ - minZ);
 
         for (int dsIdx = 0; dsIdx < datasets.Count; dsIdx++)
         {
@@ -214,7 +215,7 @@ public partial class LineChart3D : PointChart3D
                     }
         }
 
-        DrawAxes(ChartSize.X, ChartSize.Y, ChartSize.X);
+        DrawAxes(ChartSize.X, ChartSize.Y, depthExtent);
 
         var names = new string[datasets.Count];
         var cols  = new Color[datasets.Count];

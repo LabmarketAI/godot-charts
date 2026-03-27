@@ -10,85 +10,115 @@ func _enable_plugin() -> void:
 	add_custom_type(
 		"ChartDataSource",
 		"Resource",
-		load("res://addons/godot-charts/utils/ChartDataSource.cs"),
+		preload("utils/chart_data_source.gd"),
 		null
 	)
 	add_custom_type(
 		"DictDataSource",
 		"Resource",
-		load("res://addons/godot-charts/utils/DictDataSource.cs"),
+		preload("utils/dict_data_source.gd"),
 		null
 	)
 	add_custom_type(
 		"CSVDataSource",
 		"Resource",
-		load("res://addons/godot-charts/utils/CsvDataSource.cs"),
+		preload("utils/csv_data_source.gd"),
 		null
 	)
 	add_custom_type(
 		"StreamDataSource",
 		"Resource",
-		load("res://addons/godot-charts/utils/StreamDataSource.cs"),
+		preload("utils/stream_data_source.gd"),
 		null
 	)
 	add_custom_type(
 		"GraphNetworkDataSource",
 		"Resource",
-		load("res://addons/godot-charts/utils/GraphNetworkDataSource.cs"),
+		preload("utils/graph_network_data_source.gd"),
 		null
 	)
 	add_custom_type(
 		"ChartFrame3D",
 		"Node3D",
-		load("res://addons/godot-charts/charts/ChartFrame3D.cs"),
+		preload("charts/chart_frame_3d.gd"),
 		null
 	)
 	add_custom_type(
 		"PointChart3D",
 		"Node3D",
-		load("res://addons/godot-charts/charts/PointChart3D.cs"),
+		preload("charts/point_chart_3d.gd"),
 		null
 	)
 	add_custom_type(
 		"BarChart3D",
 		"Node3D",
-		load("res://addons/godot-charts/charts/BarChart3D.cs"),
+		preload("charts/bar_chart_3d.gd"),
 		null
 	)
 	add_custom_type(
 		"LineChart3D",
 		"Node3D",
-		load("res://addons/godot-charts/charts/LineChart3D.cs"),
+		preload("charts/line_chart_3d.gd"),
 		null
 	)
 	add_custom_type(
 		"ScatterChart3D",
 		"Node3D",
-		load("res://addons/godot-charts/charts/ScatterChart3D.cs"),
+		preload("charts/scatter_chart_3d.gd"),
 		null
 	)
 	add_custom_type(
 		"SurfaceChart3D",
 		"Node3D",
-		load("res://addons/godot-charts/charts/SurfaceChart3D.cs"),
+		preload("charts/surface_chart_3d.gd"),
 		null
 	)
 	add_custom_type(
 		"HistogramChart3D",
 		"Node3D",
-		load("res://addons/godot-charts/charts/HistogramChart3D.cs"),
+		preload("charts/histogram_chart_3d.gd"),
 		null
 	)
 	add_custom_type(
 		"GraphNetworkChart3D",
 		"Node3D",
-		load("res://addons/godot-charts/charts/GraphNetworkChart3D.cs"),
+		preload("charts/graph_network_chart_3d.gd"),
 		null
 	)
 	add_custom_type(
 		"CircuitChart3D",
 		"Node3D",
-		load("res://addons/godot-charts/circuits/CircuitChart3D.cs"),
+		preload("circuits/circuit_chart_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetPanel3D",
+		"Node3D",
+		preload("widgets/widget_panel_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetRow3D",
+		"Node3D",
+		preload("widgets/widget_row_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetColumn3D",
+		"Node3D",
+		preload("widgets/widget_column_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetGrid3D",
+		"Node3D",
+		preload("widgets/widget_grid_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetStack3D",
+		"Node3D",
+		preload("widgets/widget_stack_3d.gd"),
 		null
 	)
 
@@ -108,3 +138,8 @@ func _disable_plugin() -> void:
 	remove_custom_type("HistogramChart3D")
 	remove_custom_type("GraphNetworkChart3D")
 	remove_custom_type("CircuitChart3D")
+	remove_custom_type("WidgetPanel3D")
+	remove_custom_type("WidgetRow3D")
+	remove_custom_type("WidgetColumn3D")
+	remove_custom_type("WidgetGrid3D")
+	remove_custom_type("WidgetStack3D")

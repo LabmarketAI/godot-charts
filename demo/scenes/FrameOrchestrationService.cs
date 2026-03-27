@@ -124,6 +124,30 @@ public partial class FrameOrchestrationService : Node
 		return true;
 	}
 
+	public bool SetFrameTopicMappingPolicy(string frameId, string mappingMode, bool manualChartTypeLock, bool persist = true)
+	{
+		if (!_framesById.ContainsKey(frameId))
+			return false;
+
+		var chartType = GetFrameChartType(frameId);
+		if (!_routingByFrameId.TryGetValue(frameId, out var current))
+			current = FrameRoutingProfileContract.CreateDefault(chartType);
+
+		_routingByFrameId[frameId] = current with
+		{
+			ChartTypeMappingMode = FrameRoutingProfileContract.NormalizeChartTypeMappingMode(mappingMode),
+			ManualChartTypeLock = manualChartTypeLock,
+		};
+
+		if (persist)
+		{
+			PersistWorkspaceFrames();
+			EmitSignal(SignalName.RuntimeFramesChanged);
+		}
+
+		return true;
+	}
+
 	public string GetMoveModeFrameId()
 	{
 		return _moveModeFrameId;

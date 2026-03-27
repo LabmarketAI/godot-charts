@@ -5,6 +5,9 @@ using GDDict = Godot.Collections.Dictionary;
 
 public partial class ConsoleRoot : Node3D
 {
+	[Signal]
+	public delegate void TeleportToFrameRequestedEventHandler(string frameId);
+
 private const string XrViewportScenePath = "res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn";
 
 public bool PreferXrInteraction { get; set; }
@@ -269,6 +272,10 @@ var applyPresetBtn = new Button { Text = "Set Preset" };
 applyPresetBtn.Pressed += OnSetFramePresetPressed;
 frameActionRow.AddChild(applyPresetBtn);
 
+var teleportFrameBtn = new Button { Text = "Teleport To Frame" };
+teleportFrameBtn.Pressed += OnTeleportToFramePressed;
+frameActionRow.AddChild(teleportFrameBtn);
+
 column.AddChild(new Label { Text = "Stream Routing" });
 
 var routingRow = new HBoxContainer();
@@ -435,8 +442,11 @@ for (var i = 0; i < profiles.Count; i++)
 {
 var profile = profiles[i];
 var id = profile.TryGetValue("id", out var idVariant) ? idVariant.AsString() : $"frame-{i}";
+		var displayName = profile.TryGetValue("display_name", out var displayNameVariant) ? displayNameVariant.AsString() : id;
+		var displayIndex = profile.TryGetValue("display_index", out var displayIndexVariant) ? displayIndexVariant.AsInt32() : i + 1;
 var chart = profile.TryGetValue("chart_type", out var chartVariant) ? chartVariant.AsString() : "bar";
-_framePicker.AddItem($"{id} ({chart})");
+		_framePicker.AddItem($"[{displayIndex:00}] {displayName} ({chart})");
+		_framePicker.SetItemMetadata(i, id);
 }
 
 if (_framePicker.ItemCount > 0)
@@ -505,7 +515,9 @@ return;
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 var bindingKind = _bindingService.GetBindingKind(frameId);
 for (var i = 0; i < _bindingKindPicker.ItemCount; i++)
 {
@@ -524,7 +536,9 @@ return;
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 var framePreset = _bindingService.GetFramePreset(frameId);
 for (var i = 0; i < _framePresetPicker.ItemCount; i++)
 {
@@ -547,7 +561,9 @@ private void RefreshRoutingControlsForCurrentFrame()
 		return;
 	}
 
-	var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+	var frameId = GetSelectedFrameId();
+	if (string.IsNullOrWhiteSpace(frameId))
+		return;
 	if (!_frameService.TryGetFrameRoutingProfile(frameId, out var routing))
 	{
 		var chartType = _frameService.GetFrameChartType(frameId);
@@ -596,7 +612,9 @@ _windowPicker.SetItemMetadata(0, new GDDict { { "id", 0L }, { "title", "" } });
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 var chartType = _frameService.GetFrameChartType(frameId);
 var selectedMonitor = _bindingService.GetDesktopMonitorForFrame(frameId);
 var selectedWindow = _bindingService.GetDesktopWindowForFrame(frameId);
@@ -767,7 +785,9 @@ return;
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 var chartType = _chartTypePicker.GetItemText(_chartTypePicker.Selected);
 if (_frameService.SetFrameChartType(frameId, chartType))
 _statusLabel!.Text = $"Set {frameId} to {chartType}";
@@ -782,7 +802,9 @@ return;
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 var sizePreset = _sizePresetPicker.GetItemText(_sizePresetPicker.Selected);
 if (_frameService.SetFrameSizePreset(frameId, sizePreset))
 _statusLabel!.Text = $"Set {frameId} size to {sizePreset}";
@@ -795,7 +817,9 @@ return;
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 if (_frameService.DeleteFrame(frameId))
 _statusLabel!.Text = $"Deleted {frameId}";
 }
@@ -807,7 +831,9 @@ return;
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 var bindingKind = _bindingKindPicker.GetItemText(_bindingKindPicker.Selected);
 if (_bindingService.SetBindingKind(frameId, bindingKind))
 _statusLabel!.Text = $"Set {frameId} binding to {bindingKind}";
@@ -820,10 +846,23 @@ return;
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 var framePreset = _framePresetPicker.GetItemText(_framePresetPicker.Selected);
 if (_bindingService.SetFramePreset(frameId, framePreset))
 _statusLabel!.Text = $"Set {frameId} preset to {framePreset}";
+}
+
+private void OnTeleportToFramePressed()
+{
+	var frameId = GetSelectedFrameId();
+	if (string.IsNullOrWhiteSpace(frameId))
+		return;
+
+	EmitSignal(SignalName.TeleportToFrameRequested, frameId);
+	if (_statusLabel != null)
+		_statusLabel.Text = $"Teleport requested for {frameId}";
 }
 
 private void OnApplyRoutingPressed()
@@ -833,7 +872,9 @@ private void OnApplyRoutingPressed()
 	if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 		return;
 
-	var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+	var frameId = GetSelectedFrameId();
+	if (string.IsNullOrWhiteSpace(frameId))
+		return;
 	var topicId = _topicRouteInput.Text?.Trim() ?? "";
 	if (string.IsNullOrWhiteSpace(topicId))
 	{
@@ -876,7 +917,9 @@ return;
 if (_windowPicker.Selected < 0 || _windowPicker.Selected >= _windowPicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 var meta = _windowPicker.GetItemMetadata(_windowPicker.Selected).AsGodotDictionary();
 var windowId = meta.TryGetValue("id", out var idVariant) ? idVariant.AsInt64() : 0;
 var title = meta.TryGetValue("title", out var titleVariant) ? titleVariant.AsString() : "";
@@ -905,7 +948,9 @@ return;
 if (_monitorPicker.Selected < 0 || _monitorPicker.Selected >= _monitorPicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 var monitorIndex = _monitorPicker.GetItemMetadata(_monitorPicker.Selected).AsInt32();
 if (_bindingService.SetDesktopMonitorForFrame(frameId, monitorIndex))
 _statusLabel!.Text = $"Set {frameId} desktop monitor to {monitorIndex}";
@@ -984,7 +1029,9 @@ return;
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 var active = _frameService.GetMoveModeFrameId();
 var target = active == frameId ? "" : frameId;
 if (_frameService.SetMoveModeFrame(target))
@@ -1023,7 +1070,9 @@ return;
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 if (_frameService.RotateFrameDegrees(frameId, new Vector3(0f, yawDeltaDegrees, 0f)))
 _statusLabel!.Text = $"Rotated {frameId} by {yawDeltaDegrees:0} degrees";
 }
@@ -1035,9 +1084,23 @@ return;
 if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
 return;
 
-var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+var frameId = GetSelectedFrameId();
+if (string.IsNullOrWhiteSpace(frameId))
+return;
 if (_frameService.TranslateFrame(frameId, delta))
 _statusLabel!.Text = $"Moved {frameId} by ({delta.X:0.00}, {delta.Y:0.00}, {delta.Z:0.00})";
+}
+
+private string GetSelectedFrameId()
+{
+	if (_framePicker == null || _framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+		return "";
+
+	var metadata = _framePicker.GetItemMetadata(_framePicker.Selected);
+	if (metadata.VariantType == Variant.Type.String)
+		return metadata.AsString();
+
+	return ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
 }
 
 private static string ExtractFrameId(string pickerText)

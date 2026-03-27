@@ -22,6 +22,7 @@
     <Compile Include="TestTopicChartMappingPolicy.cs" />
     <Compile Include="TestWidgetSchemaValidator.cs" />
     <Compile Include="TestWidgetSchemaImporter.cs" />
+    <Compile Include="TestWidgetThemeEngine.cs" />
     <Compile Include="GodotStubs.cs" />
   </ItemGroup>
 
@@ -34,6 +35,7 @@
     <Compile Include="../addons/godot-charts/circuits/CircuitLoader.cs" />
     <Compile Include="../addons/godot-charts/widgets/WidgetSchemaValidator.cs" />
     <Compile Include="../addons/godot-charts/widgets/WidgetSchemaImporter.cs" />
+    <Compile Include="../addons/godot-charts/widgets/WidgetThemeEngine.cs" />
   </ItemGroup>
 
   <ItemGroup>

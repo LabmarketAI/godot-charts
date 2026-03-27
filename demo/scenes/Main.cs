@@ -110,6 +110,7 @@ public partial class Main : Node3D
         _consoleRoot.BindWorkspaceService(_workspaceService);
         _consoleRoot.BindFrameService(_frameService);
         _consoleRoot.BindBindingService(_bindingService);
+        _consoleRoot.BindMessageBus(_messageBusService);
 
         if (_workspaceService.ActiveWorkspaceProfile.TryGetValue("console_visible", out var storedVisible))
             _consoleRoot.SetConsoleVisible(storedVisible.AsBool());

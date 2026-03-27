@@ -58,6 +58,7 @@ private readonly System.Collections.Generic.Dictionary<string, DesktopSourceProf
 private readonly System.Collections.Generic.Dictionary<string, string> _desktopSourceStatusByFrame = new();
 private readonly System.Collections.Generic.Dictionary<string, RuntimeBindingState> _stateByFrame = new();
 private readonly System.Collections.Generic.Dictionary<string, string> _topicByFrame = new();
+private readonly HashSet<string> _loggedBusAppliedChartTypes = new();
 private string _environmentPreset = "daylight";
 private string _environmentStatus = "pending";
 private bool _loggedMissingEnvironmentNodes;
@@ -103,9 +104,13 @@ public void BindMessageBus(MessageBusService messageBusService)
 		return;
 
 	if (_messageBusService != null)
+	{
+		_messageBusService.MessageReceived -= OnMessageBusMessageReceived;
 		ClearMessageBusSubscriptions(_messageBusService);
+	}
 
 	_messageBusService = messageBusService;
+	_messageBusService.MessageReceived += OnMessageBusMessageReceived;
 	SyncMessageBusSubscriptions();
 }
 
@@ -147,6 +152,7 @@ return false;
 bindingKind = NormalizeBindingKind(bindingKind);
 _bindingByFrame[frameId] = bindingKind;
 ApplyBindingToFrame(frameId, frame);
+SyncMessageBusSubscriptions();
 
 if (persist)
 PersistState();
@@ -339,6 +345,9 @@ return monitors;
 
 public override void _Process(double delta)
 {
+	if (_messageBusService != null && _messageBusService.IsRunning)
+		return;
+
 _streamAccumulator += delta;
 if (_streamAccumulator < StreamTickSeconds)
 return;
@@ -390,6 +399,48 @@ _environmentStatus = "ready";
 private void OnWorkspaceLoaded(string _workspaceName)
 {
 ApplyWorkspaceState();
+}
+
+private void OnMessageBusMessageReceived(string topic, Dictionary payload)
+{
+	if (_frameService == null || string.IsNullOrWhiteSpace(topic))
+		return;
+
+	if (!payload.TryGetValue("chart_type", out var chartTypeVariant))
+		return;
+
+	var payloadChartType = NormalizeBusChartType(chartTypeVariant.AsString());
+	if (string.IsNullOrWhiteSpace(payloadChartType))
+		return;
+
+	if (!payload.TryGetValue("data", out var dataVariant) || dataVariant.VariantType != Variant.Type.Dictionary)
+		return;
+
+	if (BuildFrameTopic(payloadChartType) != topic)
+		return;
+
+	var payloadData = dataVariant.AsGodotDictionary();
+	foreach (var profile in _frameService.ListRuntimeFrameProfiles())
+	{
+		if (!profile.TryGetValue("id", out var idVariant))
+			continue;
+
+		var frameId = idVariant.AsString();
+		if (string.IsNullOrWhiteSpace(frameId))
+			continue;
+
+		if (GetBindingKind(frameId) != BindingStream)
+			continue;
+
+		var frameChartType = _frameService.GetFrameChartType(frameId);
+		if (NormalizeBusChartType(frameChartType) != payloadChartType)
+			continue;
+
+		if (!_frameService.TryGetFrame(frameId, out var frame))
+			continue;
+
+		ApplyPayloadToFrame(frameId, frame, frameChartType, payloadData);
+	}
 }
 
 private void OnRuntimeFramesChanged()
@@ -1152,7 +1203,7 @@ private void SyncMessageBusSubscriptions()
 		if (chartType == "desktop")
 			continue;
 
-		expectedTopicsByFrame[frameId] = BuildFrameTopic(frameId);
+		expectedTopicsByFrame[frameId] = BuildFrameTopic(chartType);
 	}
 
 	var removeIds = new List<string>();
@@ -1185,9 +1236,196 @@ private void ClearMessageBusSubscriptions(MessageBusService service)
 	_topicByFrame.Clear();
 }
 
-private static string BuildFrameTopic(string frameId)
+private static string BuildFrameTopic(string chartType)
 {
-	return $"demo/frame/{frameId}";
+	return $"demo/stream/{NormalizeBusChartType(chartType)}";
+}
+
+private void ApplyPayloadToFrame(string frameId, ChartFrame3D frame, string frameChartType, GDDict payloadData)
+{
+	var chartNode = FindRuntimeChart(frame);
+	if (chartNode == null)
+		return;
+
+	if (!_stateByFrame.TryGetValue(frameId, out var state))
+	{
+		state = new RuntimeBindingState();
+		_stateByFrame[frameId] = state;
+	}
+
+	var normalizedType = NormalizeBusChartType(frameChartType);
+	LogBusApplyOnce(normalizedType, frameId);
+	switch (normalizedType)
+	{
+		case "surface":
+			if (chartNode is SurfaceChart3D surface && payloadData.TryGetValue("values", out var valuesVariant) && valuesVariant.VariantType == Variant.Type.Array)
+				surface.GridData = valuesVariant.AsGodotArray();
+			break;
+		case "histogram":
+			if (chartNode is HistogramChart3D histogram)
+				histogram.RawData = BuildHistogramRawDataFromPayload(payloadData);
+			break;
+		case "graph_network":
+			state.StreamDataSource = null;
+			state.DictDataSource ??= new DictDataSource();
+			state.DictDataSource.SourceData = NormalizeGraphPayload(payloadData);
+			chartNode.DataSource = state.DictDataSource;
+			break;
+		case "scatter":
+		case "line":
+			state.StreamDataSource = null;
+			state.DictDataSource ??= new DictDataSource();
+			state.DictDataSource.SourceData = NormalizePointSeriesPayload(payloadData);
+			chartNode.DataSource = state.DictDataSource;
+			break;
+		default:
+			state.StreamDataSource = null;
+			state.DictDataSource ??= new DictDataSource();
+			state.DictDataSource.SourceData = payloadData;
+			chartNode.DataSource = state.DictDataSource;
+			break;
+	}
+}
+
+private void LogBusApplyOnce(string chartType, string frameId)
+{
+	if (string.IsNullOrWhiteSpace(chartType))
+		return;
+
+	if (_loggedBusAppliedChartTypes.Contains(chartType))
+		return;
+
+	_loggedBusAppliedChartTypes.Add(chartType);
+	GD.Print($"SmokeBusApply: chart_type={chartType} frame_id={frameId}");
+}
+
+private static GDDict NormalizePointSeriesPayload(GDDict payloadData)
+{
+	if (!payloadData.TryGetValue("datasets", out var datasetsVariant) || datasetsVariant.VariantType != Variant.Type.Array)
+		return payloadData;
+
+	var datasets = datasetsVariant.AsGodotArray();
+	var normalizedDatasets = new GDArray();
+	foreach (var item in datasets)
+	{
+		if (item.VariantType != Variant.Type.Dictionary)
+		{
+			normalizedDatasets.Add(item);
+			continue;
+		}
+
+		var dataset = item.AsGodotDictionary();
+		var normalizedDataset = new GDDict();
+		foreach (var key in dataset.Keys)
+			normalizedDataset[key] = dataset[key];
+
+		if (dataset.TryGetValue("points", out var pointsVariant) && pointsVariant.VariantType == Variant.Type.Array)
+		{
+			var points = pointsVariant.AsGodotArray();
+			var normalizedPoints = new GDArray();
+			foreach (var pointItem in points)
+			{
+				if (pointItem.VariantType == Variant.Type.Dictionary)
+				{
+					var point = pointItem.AsGodotDictionary();
+					var x = point.TryGetValue("x", out var xVariant) ? (float)xVariant.AsDouble() : 0f;
+					var y = point.TryGetValue("y", out var yVariant) ? (float)yVariant.AsDouble() : 0f;
+					var z = point.TryGetValue("z", out var zVariant) ? (float)zVariant.AsDouble() : 0f;
+					normalizedPoints.Add(new Vector3(x, y, z));
+				}
+				else
+				{
+					normalizedPoints.Add(pointItem);
+				}
+			}
+
+			normalizedDataset["points"] = normalizedPoints;
+		}
+
+		normalizedDatasets.Add(normalizedDataset);
+	}
+
+	var normalized = new GDDict();
+	foreach (var key in payloadData.Keys)
+		normalized[key] = payloadData[key];
+	normalized["datasets"] = normalizedDatasets;
+	return normalized;
+}
+
+private static GDDict NormalizeGraphPayload(GDDict payloadData)
+{
+	var normalized = new GDDict();
+	foreach (var key in payloadData.Keys)
+		normalized[key] = payloadData[key];
+
+	if (!payloadData.TryGetValue("edges", out var edgesVariant) || edgesVariant.VariantType != Variant.Type.Array)
+		return normalized;
+
+	var edges = edgesVariant.AsGodotArray();
+	var normalizedEdges = new GDArray();
+	foreach (var edgeItem in edges)
+	{
+		if (edgeItem.VariantType != Variant.Type.Dictionary)
+		{
+			normalizedEdges.Add(edgeItem);
+			continue;
+		}
+
+		var edge = edgeItem.AsGodotDictionary();
+		var normalizedEdge = new GDDict();
+		foreach (var key in edge.Keys)
+			normalizedEdge[key] = edge[key];
+
+		if (edge.TryGetValue("from", out var fromVariant) && !normalizedEdge.ContainsKey("source"))
+			normalizedEdge["source"] = fromVariant;
+		if (edge.TryGetValue("to", out var toVariant) && !normalizedEdge.ContainsKey("target"))
+			normalizedEdge["target"] = toVariant;
+
+		normalizedEdges.Add(normalizedEdge);
+	}
+
+	normalized["edges"] = normalizedEdges;
+	return normalized;
+}
+
+private static double[] BuildHistogramRawDataFromPayload(GDDict payloadData)
+{
+	if (!payloadData.TryGetValue("bin_edges", out var edgesVariant)
+		|| !payloadData.TryGetValue("counts", out var countsVariant)
+		|| edgesVariant.VariantType != Variant.Type.Array
+		|| countsVariant.VariantType != Variant.Type.Array)
+		return BuildHistogramData(0f);
+
+	var edges = edgesVariant.AsGodotArray();
+	var counts = countsVariant.AsGodotArray();
+	if (edges.Count < 2 || counts.Count == 0)
+		return BuildHistogramData(0f);
+
+	var samples = new List<double>();
+	for (var i = 0; i < counts.Count && i + 1 < edges.Count; i++)
+	{
+		var count = Math.Max(0, counts[i].AsInt32());
+		var left = edges[i].AsDouble();
+		var right = edges[i + 1].AsDouble();
+		var midpoint = (left + right) * 0.5;
+		for (var n = 0; n < count; n++)
+			samples.Add(midpoint);
+	}
+
+	return samples.Count > 0 ? samples.ToArray() : BuildHistogramData(0f);
+}
+
+private static string NormalizeBusChartType(string chartType)
+{
+	if (string.IsNullOrWhiteSpace(chartType))
+		return "bar";
+
+	return chartType.Trim().ToLowerInvariant() switch
+	{
+		"network" => "graph_network",
+		"graph_network" => "graph_network",
+		_ => chartType.Trim().ToLowerInvariant(),
+	};
 }
 
 private static string BuildSubscriberId(string frameId)

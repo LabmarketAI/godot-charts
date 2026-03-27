@@ -1,0 +1,171 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://ckjvc6am1ja1p" path="res://addons/godot-charts/charts/ChartFrame3D.cs" id="1_frame"]
+[ext_resource type="Script" uid="uid://ccxqdf4rh4x3o" path="res://addons/godot-charts/widgets/widget_panel_3d.gd" id="2_panel"]
+[ext_resource type="Script" uid="uid://d17q2dq6jr8it" path="res://addons/godot-charts/widgets/widget_row_3d.gd" id="3_row"]
+[ext_resource type="Script" uid="uid://2qwwbwi3s6je" path="res://addons/godot-charts/widgets/widget_column_3d.gd" id="4_column"]
+[ext_resource type="Script" uid="uid://c322e5r9od4v7" path="res://addons/godot-charts/widgets/widget_grid_3d.gd" id="5_grid"]
+[ext_resource type="Script" uid="uid://d2q2uvksp8g16" path="res://addons/godot-charts/widgets/widget_stack_3d.gd" id="6_stack"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_tile"]
+size = Vector3(0.36, 0.2, 0.03)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_row"]
+albedo_color = Color(0.231373, 0.545098, 0.854902, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_column"]
+albedo_color = Color(0.294118, 0.686275, 0.313726, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_grid"]
+albedo_color = Color(0.909804, 0.541176, 0.176471, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stack"]
+albedo_color = Color(0.658824, 0.34902, 0.807843, 1)
+roughness = 0.5
+
+[node name="WidgetLayoutValidation" type="Node3D"]
+
+[node name="WidgetFrame" type="Node3D" parent="."]
+script = ExtResource("1_frame")
+Size = Vector2(4.0, 3.0)
+
+[node name="Title" type="Label3D" parent="WidgetFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 3.35, 0)
+billboard = 1
+text = "[9] Widget Layout Primitives"
+font_size = 24
+
+[node name="WidgetPanelRoot" type="Node3D" parent="WidgetFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.5, 0.01)
+script = ExtResource("2_panel")
+panel_size = Vector2(3.6, 2.3)
+auto_layout = true
+
+[node name="RootGrid" type="Node3D" parent="WidgetFrame/WidgetPanelRoot"]
+script = ExtResource("5_grid")
+columns = 2
+gap = 0.15
+padding = Vector2(0.05, 0.05)
+default_child_size = Vector2(1.7, 1)
+
+[node name="RowSample" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid"]
+script = ExtResource("3_row")
+metadata/widget_size = Vector2(1.7, 1)
+gap = 0.05
+padding = Vector2(0.05, 0.05)
+default_child_size = Vector2(0.35, 0.2)
+
+[node name="RowA" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/RowSample"]
+metadata/widget_size = Vector2(0.45, 0.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/RowSample/RowA"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_row")
+
+[node name="RowB" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/RowSample"]
+metadata/widget_size = Vector2(0.55, 0.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/RowSample/RowB"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_row")
+
+[node name="RowC" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/RowSample"]
+metadata/widget_size = Vector2(0.35, 0.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/RowSample/RowC"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_row")
+
+[node name="ColumnSample" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid"]
+script = ExtResource("4_column")
+metadata/widget_size = Vector2(1.7, 1)
+gap = 0.05
+padding = Vector2(0.05, 0.05)
+default_child_size = Vector2(0.5, 0.18)
+
+[node name="ColumnA" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/ColumnSample"]
+metadata/widget_size = Vector2(0.5, 0.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/ColumnSample/ColumnA"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_column")
+
+[node name="ColumnB" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/ColumnSample"]
+metadata/widget_size = Vector2(0.7, 0.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/ColumnSample/ColumnB"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_column")
+
+[node name="ColumnC" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/ColumnSample"]
+metadata/widget_size = Vector2(0.4, 0.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/ColumnSample/ColumnC"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_column")
+
+[node name="GridSample" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid"]
+script = ExtResource("5_grid")
+metadata/widget_size = Vector2(1.7, 1)
+columns = 2
+gap = 0.05
+padding = Vector2(0.05, 0.05)
+default_child_size = Vector2(0.35, 0.2)
+
+[node name="GridA" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/GridSample"]
+metadata/widget_size = Vector2(0.35, 0.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/GridSample/GridA"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_grid")
+
+[node name="GridB" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/GridSample"]
+metadata/widget_size = Vector2(0.35, 0.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/GridSample/GridB"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_grid")
+
+[node name="GridC" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/GridSample"]
+metadata/widget_size = Vector2(0.35, 0.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/GridSample/GridC"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_grid")
+
+[node name="GridD" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/GridSample"]
+metadata/widget_size = Vector2(0.35, 0.2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/GridSample/GridD"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_grid")
+
+[node name="StackSample" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid"]
+script = ExtResource("6_stack")
+metadata/widget_size = Vector2(1.7, 1)
+z_step = 0.03
+default_child_size = Vector2(0.5, 0.22)
+
+[node name="StackA" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/StackSample"]
+metadata/widget_size = Vector2(0.6, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/StackSample/StackA"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_stack")
+
+[node name="StackB" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/StackSample"]
+metadata/widget_size = Vector2(0.5, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/StackSample/StackB"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_stack")
+
+[node name="StackC" type="Node3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/StackSample"]
+metadata/widget_size = Vector2(0.4, 0.22)
+
+[node name="Mesh" type="MeshInstance3D" parent="WidgetFrame/WidgetPanelRoot/RootGrid/StackSample/StackC"]
+mesh = SubResource("BoxMesh_tile")
+surface_material_override/0 = SubResource("StandardMaterial3D_stack")

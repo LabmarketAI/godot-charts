@@ -54,7 +54,7 @@ public partial class HistogramChart3D : BarChart3D
             result = ChartBinner.ManualBin(source, _binEdges);
         else
         {
-            int k = _nBins > 0 ? _nBins : ChartBinner.SuggestBinCount(source);
+            int k = _nBins > 0 ? _nBins : ChartBinner.SuggestBinCountAuto(source);
             result = ChartBinner.AutoBin(source, k);
         }
 

@@ -460,7 +460,15 @@ public partial class Chart3D : Node3D
         if (!ap.HasAnimation(_spawnAnimation)) return;
         ap.Play(_spawnAnimation);
         if (!_loopAnimation)
-            ap.AnimationFinished += _ => ap.Stop();
+        {
+            void OnFinished(StringName _)
+            {
+                ap.Stop();
+                ap.AnimationFinished -= OnFinished;
+            }
+
+            ap.AnimationFinished += OnFinished;
+        }
     }
 
     /// <summary>

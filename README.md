@@ -9,6 +9,16 @@ Add beautiful, interactive 3D charts to any Godot project with a few lines of GD
 
 ---
 
+## Planning Docs
+
+- [Issue 56 widget-library implementation plan](docs/issue-56-widget-library-implementation-plan.md)
+- [Issue 56 sub-issue drafts](docs/issue-56-sub-issue-drafts.md)
+- [Issue 56 master checklist comment template](docs/issue-56-master-checklist-comment.md)
+- [Issue 56 live tracking](docs/issue-56-tracking-live.md)
+- [Widget system RFC draft (Phase 0 kickoff)](docs/widget-system-rfc-draft.md)
+
+---
+
 ## Chart types
 
 | Class | Description |

@@ -21,12 +21,7 @@ public static class ChartBinner
         if (data.Length == 0 || nBins <= 0)
             return new BinResult(Array.Empty<double>(), Array.Empty<int>());
 
-        double minVal = data[0], maxVal = data[0];
-        foreach (double v in data)
-        {
-            if (v < minVal) minVal = v;
-            if (v > maxVal) maxVal = v;
-        }
+        var (minVal, maxVal) = ChartStatistics.GetMinMax(data);
 
         // Avoid zero-width range (all values identical).
         if (Math.Abs(maxVal - minVal) < double.Epsilon)
@@ -95,5 +90,18 @@ public static class ChartBinner
         int n = data.Length;
         if (n <= 1) return 1;
         return (int)Math.Ceiling(Math.Log2(n)) + 1;
+    }
+
+    /// <summary>
+    /// Suggests an automatic bin count using Freedman-Diaconis with Sturges fallback.
+    /// </summary>
+    public static int SuggestBinCountAuto(double[] data)
+    {
+        if (data.Length <= 1) return 1;
+
+        int fd = ChartStatistics.SuggestBinCountFreedmanDiaconis(data);
+        if (fd > 1) return fd;
+
+        return SuggestBinCount(data);
     }
 }

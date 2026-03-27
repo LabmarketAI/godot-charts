@@ -2,13 +2,15 @@
 
 [ext_resource type="Script" uid="uid://ckjvc6am1ja1p" path="res://addons/godot-charts/charts/ChartFrame3D.cs" id="1_frame"]
 [ext_resource type="Script" uid="uid://dr57q0ba74kih" path="res://addons/godot-charts/charts/BarChart3D.cs" id="2_bar"]
-[ext_resource type="Script" uid="uid://cbg4fl37f6vkm" path="res://addons/godot-charts/charts/LineChart3D.cs" id="3_line"]
-[ext_resource type="Script" uid="uid://dtpje0y4v2qi0" path="res://addons/godot-charts/charts/ScatterChart3D.cs" id="4_scatter"]
+[ext_resource type="Script" uid="uid://bdyg3bce2gm5" path="res://addons/godot-charts/charts/LineChart3D.cs" id="3_line"]
+[ext_resource type="Script" uid="uid://brfuympqty7gp" path="res://addons/godot-charts/charts/ScatterChart3D.cs" id="4_scatter"]
 [ext_resource type="Script" uid="uid://df8arlbrhknrx" path="res://addons/godot-charts/charts/SurfaceChart3D.cs" id="5_surface"]
-[ext_resource type="Script" uid="uid://cat0d833wprcf" path="res://addons/godot-charts/charts/HistogramChart3D.cs" id="6_hist"]
+[ext_resource type="Script" uid="uid://d0qjistyou3nq" path="res://addons/godot-charts/charts/HistogramChart3D.cs" id="6_hist"]
 [ext_resource type="Script" uid="uid://b12fe4pgk3mp" path="res://addons/godot-charts/charts/GraphNetworkChart3D.cs" id="7_gnet3"]
 [ext_resource type="PackedScene" uid="uid://doorf883vcv4s" path="res://scenes/panel.tscn" id="9_27won"]
 [ext_resource type="PackedScene" uid="uid://b5idwuogdwy3u" path="res://assets/Floor.glb" id="9_vde67"]
+[ext_resource type="PackedScene" path="res://scenes/widget_layout_validation.tscn" id="10_widget"]
+[ext_resource type="PackedScene" path="res://scenes/widget_controls_demo.tscn" id="11_controls"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -369,3 +371,9 @@ transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 10.6
 
 [node name="Panel8" parent="." unique_id=1221012277 instance=ExtResource("9_27won")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 10.678024, 0, 9.552034)
+
+[node name="WidgetLayoutValidation" parent="." unique_id=759254079 instance=ExtResource("10_widget")]
+transform = Transform3D(-0.016501099, 0, 0.999864, 0, 1, 0, -0.999864, 0, -0.016501099, -5.69475, 1, 4.732853)
+
+[node name="WidgetControlsDemo" parent="." unique_id=850147392 instance=ExtResource("11_controls")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.69475, 1, -4.0)

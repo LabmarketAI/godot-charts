@@ -18,12 +18,14 @@
   <ItemGroup>
     <Compile Include="TestChartBinner.cs" />
     <Compile Include="TestCircuitLoader.cs" />
+    <Compile Include="TestFrameRoutingProfileContract.cs" />
     <Compile Include="GodotStubs.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="../addons/godot-charts/utils/ChartBinner.cs" />
     <Compile Include="../addons/godot-charts/utils/ChartStatistics.cs" />
+    <Compile Include="../addons/godot-charts/utils/FrameRoutingProfileContract.cs" />
     <Compile Include="../addons/godot-charts/circuits/CircuitData.cs" />
     <Compile Include="../addons/godot-charts/circuits/CircuitLoader.cs" />
   </ItemGroup>

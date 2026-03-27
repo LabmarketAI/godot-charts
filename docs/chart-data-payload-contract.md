@@ -1,51 +1,148 @@
 # Chart Data Payload Contract
 
-This document defines a stable JSON payload shape for chart data publication and subscription workflows (for example, issue #8 Jupyter -> Godot routing).
+This document defines the canonical JSON contract for demo data publishing and chart subscription workflows.
+
+Current primary consumers:
+
+- #55 (demo message bus foundation)
+- #51 (per-frame topic routing)
+- #63 (schema validator and importer tooling)
 
 ## Goals
 
-- Keep chart payloads transport-friendly (JSON).
-- Keep rendering-specific state out of payloads.
-- Provide enough metadata for deterministic replay and cross-client rendering.
+- Keep transport simple and deterministic (JSON-only payloads).
+- Keep routing concerns in the envelope and rendering values in the chart body.
+- Allow additive evolution without breaking existing consumers.
 
-## Envelope
+## Canonical Envelope (v1)
 
-All chart payloads should include a small common envelope:
+All chart updates published on the demo message bus should follow this envelope:
 
 ```json
 {
-  "kind": "histogram",
-  "version": "1.0",
-  "source": {
-    "workspace": "default",
-    "topic": "notebook:foo.ipynb/cell:abc123"
+  "schema_version": "1.0",
+  "topic": "notebook:foo.ipynb/cell:abc123",
+  "chart_type": "histogram",
+  "timestamp": "2026-03-27T18:00:00Z",
+  "data": {},
+  "style": {
+    "color": "#4EA3FF",
+    "texture": null
   },
-  "updated_at": "2026-03-19T12:00:00Z",
-  "payload": {}
+  "meta": {
+    "workspace": "default",
+    "source": "agentic-jupyter-node"
+  }
 }
 ```
 
-Fields:
+### Field requirements
 
-- `kind`: chart kind (`histogram`, `line`, `scatter`, `bar`, `surface`, `graph_network`, `circuit`)
-- `version`: payload schema version
-- `source.workspace`: optional logical workspace name
-- `source.topic`: stable routing key for external subscribers
-- `updated_at`: UTC timestamp (ISO 8601)
-- `payload`: kind-specific body
+Required fields:
 
-## Histogram Payload (recommended)
+- `schema_version` (string): schema version for payload compatibility checks.
+- `topic` (string): subscriber routing key, stable across updates for the same stream.
+- `chart_type` (enum): one of `bar`, `line`, `scatter`, `histogram`, `surface`, `graph_network`.
+- `timestamp` (string): ISO 8601 UTC timestamp.
+- `data` (object): chart-type-specific payload.
+
+Optional fields:
+
+- `style.color` (string): preferred series/base color in `#RRGGBB` format.
+- `style.texture` (string or null): optional Godot `res://...` resource path.
+- `meta.workspace` (string): logical workspace name.
+- `meta.source` (string): publisher identity (for traceability).
+- Any additional producer-specific metadata under `meta.*`.
+
+### Decision: texture representation
+
+`style.texture` uses a project-local resource path string (for example `res://assets/textures/noise.png`) or `null`.
+
+Rationale:
+
+- Matches Godot runtime resource loading directly.
+- Avoids large base64 payload inflation on frequent updates.
+- Keeps the transport contract stable for validator tooling in #63.
+
+## Per-chart `data` payloads
+
+Each sample below is a complete canonical message.
+
+### Bar sample
 
 ```json
 {
-  "kind": "histogram",
-  "version": "1.0",
-  "source": {
-    "workspace": "default",
-    "topic": "notebook:foo.ipynb/cell:abc123"
+  "schema_version": "1.0",
+  "topic": "demo/bar/sales",
+  "chart_type": "bar",
+  "timestamp": "2026-03-27T18:00:00Z",
+  "data": {
+    "labels": ["Q1", "Q2", "Q3", "Q4"],
+    "datasets": [
+      { "name": "Revenue", "values": [10.0, 13.5, 12.2, 16.1] }
+    ]
   },
-  "updated_at": "2026-03-19T12:00:00Z",
-  "payload": {
+  "style": { "color": "#2D9CDB", "texture": null }
+}
+```
+
+### Line sample
+
+```json
+{
+  "schema_version": "1.0",
+  "topic": "demo/line/telemetry",
+  "chart_type": "line",
+  "timestamp": "2026-03-27T18:00:00Z",
+  "data": {
+    "datasets": [
+      {
+        "name": "LatencyMs",
+        "points": [
+          { "x": 0.0, "y": 11.0, "z": 0.0 },
+          { "x": 1.0, "y": 9.6, "z": 0.0 },
+          { "x": 2.0, "y": 10.4, "z": 0.0 }
+        ]
+      }
+    ]
+  },
+  "style": { "color": "#27AE60", "texture": null }
+}
+```
+
+### Scatter sample
+
+```json
+{
+  "schema_version": "1.0",
+  "topic": "demo/scatter/clusters",
+  "chart_type": "scatter",
+  "timestamp": "2026-03-27T18:00:00Z",
+  "data": {
+    "datasets": [
+      {
+        "name": "ClusterA",
+        "points": [
+          { "x": 0.2, "y": 1.3, "z": 0.5 },
+          { "x": 0.4, "y": 1.1, "z": 0.7 },
+          { "x": 0.1, "y": 1.6, "z": 0.4 }
+        ]
+      }
+    ]
+  },
+  "style": { "color": "#EB5757", "texture": null }
+}
+```
+
+### Histogram sample
+
+```json
+{
+  "schema_version": "1.0",
+  "topic": "demo/histogram/counts",
+  "chart_type": "histogram",
+  "timestamp": "2026-03-27T18:00:00Z",
+  "data": {
     "name": "Count",
     "bin_edges": [0.0, 1.0, 2.0, 3.0],
     "counts": [10, 7, 2],
@@ -54,68 +151,76 @@ Fields:
       "rule": "freedman_diaconis",
       "fallback": "sturges"
     }
-  }
+  },
+  "style": { "color": "#F2994A", "texture": null }
 }
 ```
 
-Rules:
+Histogram invariants:
 
 - `bin_edges.length = counts.length + 1`
-- `bin_edges` MUST be monotonic non-decreasing
-- `counts` MUST be non-negative integers
-- Last bin is closed on the right edge
+- `bin_edges` is monotonic non-decreasing
+- `counts` contains non-negative integers
 
-Notes for current implementation:
-
-- `HistogramChart3D` supports explicit `BinEdges` (manual mode).
-- Auto mode uses `ChartBinner.SuggestBinCountAuto(...)`.
-- Auto rule implementation is Freedman-Diaconis with Sturges fallback.
-
-## Bar/Line/Scatter Payload Sketches
-
-Bar/line payloads should continue to align with existing addon dictionary patterns:
+### Surface sample
 
 ```json
 {
-  "kind": "bar",
-  "version": "1.0",
-  "payload": {
-    "labels": ["A", "B", "C"],
-    "datasets": [
-      { "name": "Series 1", "values": [1.0, 2.0, 3.0] }
+  "schema_version": "1.0",
+  "topic": "demo/surface/heatmap",
+  "chart_type": "surface",
+  "timestamp": "2026-03-27T18:00:00Z",
+  "data": {
+    "x_labels": ["0", "1", "2"],
+    "z_labels": ["0", "1", "2"],
+    "values": [
+      [0.0, 0.4, 0.8],
+      [0.2, 0.7, 1.0],
+      [0.1, 0.5, 0.9]
     ]
-  }
+  },
+  "style": { "color": "#9B51E0", "texture": "res://assets/textures/noise.png" }
 }
 ```
+
+### Graph network sample
 
 ```json
 {
-  "kind": "scatter",
-  "version": "1.0",
-  "payload": {
-    "datasets": [
-      {
-        "name": "Cluster A",
-        "points": [
-          { "x": 0.2, "y": 1.3, "z": 0.5 },
-          { "x": 0.4, "y": 1.1, "z": 0.7 }
-        ]
-      }
+  "schema_version": "1.0",
+  "topic": "demo/graph/network",
+  "chart_type": "graph_network",
+  "timestamp": "2026-03-27T18:00:00Z",
+  "data": {
+    "nodes": [
+      { "id": "n1", "label": "Hub", "x": 0.0, "y": 0.0, "z": 0.0 },
+      { "id": "n2", "label": "A", "x": 1.0, "y": 0.2, "z": 0.1 },
+      { "id": "n3", "label": "B", "x": -0.6, "y": 0.3, "z": -0.2 }
+    ],
+    "edges": [
+      { "from": "n1", "to": "n2", "weight": 0.8 },
+      { "from": "n1", "to": "n3", "weight": 0.5 }
     ]
-  }
+  },
+  "style": { "color": "#56CCF2", "texture": null }
 }
 ```
 
-## Backward Compatibility
+## Compatibility and migration notes
 
-- New fields should be additive.
-- Producers should keep `version` explicit.
-- Consumers should ignore unknown fields.
+- `schema_version` must be explicit and semver-like (`1.0`, `1.1`, etc.).
+- Consumers should ignore unknown fields for forward compatibility.
+- Producers should only add fields in minor schema updates.
 
-## Integration Guidance for #8
+Legacy envelope mapping (existing docs or producers) to canonical v1:
 
-For Jupyter routing:
+- `kind` -> `chart_type`
+- `version` -> `schema_version`
+- `source.topic` -> `topic`
+- `updated_at` -> `timestamp`
+- `payload` -> `data`
 
-- Use `source.topic` as the subscriber key (`notebook:{path}/cell:{cell_id}`).
-- Keep `kind` in envelope so a mixed stream can be demultiplexed without inspecting payload internals.
-- Keep payload numeric arrays compact for efficient Godot-side conversion.
+## Integration guidance
+
+- #51 should use `topic` as the frame routing key and `chart_type` for optional chart compatibility checks.
+- #63 should validate required/optional fields and chart-specific `data` shape with chart-type switches.

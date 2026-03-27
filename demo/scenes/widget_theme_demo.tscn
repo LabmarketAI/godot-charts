@@ -1,0 +1,96 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/WidgetThemeDemo.cs" id="1_demo"]
+[ext_resource type="Script" path="res://addons/godot-charts/charts/ChartFrame3D.cs" id="2_frame"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_panel_3d.gd" id="3_panel"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_column_3d.gd" id="4_col"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_row_3d.gd" id="5_row"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_button_3d.gd" id="6_btn"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_label_3d.gd" id="7_label"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_toggle_3d.gd" id="8_toggle"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_slider_3d.gd" id="9_slider"]
+
+[node name="WidgetThemeDemo" type="Node3D"]
+script = ExtResource("1_demo")
+
+[node name="Frame" type="Node3D" parent="."]
+script = ExtResource("2_frame")
+Size = Vector2(3.2, 2.0)
+
+[node name="Title" type="Label3D" parent="Frame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 2.15, 0)
+billboard = 1
+text = "[11] Theme Engine — Runtime Switching"
+font_size = 22
+
+[node name="Panel" type="Node3D" parent="Frame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 1.0, 0.01)
+script = ExtResource("3_panel")
+panel_size = Vector2(3.0, 1.8)
+auto_layout = true
+
+[node name="ContentColumn" type="Node3D" parent="Frame/Panel"]
+script = ExtResource("4_col")
+gap = 0.06
+padding = Vector2(0.08, 0.08)
+default_child_size = Vector2(2.8, 0.12)
+
+[node name="LabelTitle" type="Node3D" parent="Frame/Panel/ContentColumn"]
+script = ExtResource("7_label")
+text = "Theme Switcher"
+font_size = 22
+widget_size = Vector2(2.8, 0.10)
+
+[node name="LabelHint" type="Node3D" parent="Frame/Panel/ContentColumn"]
+script = ExtResource("7_label")
+text = "Click a button to switch the global theme live."
+font_size = 14
+widget_size = Vector2(2.8, 0.08)
+
+[node name="ButtonRow" type="Node3D" parent="Frame/Panel/ContentColumn"]
+script = ExtResource("5_row")
+gap = 0.06
+padding = Vector2(0.0, 0.0)
+default_child_size = Vector2(1.34, 0.12)
+
+[node name="BtnNeutral" type="Area3D" parent="Frame/Panel/ContentColumn/ButtonRow"]
+script = ExtResource("6_btn")
+text = "Neutral"
+widget_size = Vector2(1.34, 0.12)
+
+[node name="BtnHighContrast" type="Area3D" parent="Frame/Panel/ContentColumn/ButtonRow"]
+script = ExtResource("6_btn")
+text = "High Contrast"
+widget_size = Vector2(1.34, 0.12)
+
+[node name="LabelControlsTitle" type="Node3D" parent="Frame/Panel/ContentColumn"]
+script = ExtResource("7_label")
+text = "Preview Controls"
+font_size = 16
+widget_size = Vector2(2.8, 0.08)
+
+[node name="ToggleExample" type="Area3D" parent="Frame/Panel/ContentColumn"]
+script = ExtResource("8_toggle")
+label_text = "Enable Feature"
+value = true
+widget_size = Vector2(2.8, 0.12)
+
+[node name="SliderExample" type="Area3D" parent="Frame/Panel/ContentColumn"]
+script = ExtResource("9_slider")
+min_value = 0.0
+max_value = 1.0
+value = 0.6
+step = 0.1
+widget_size = Vector2(2.8, 0.12)
+
+[node name="LabelDisabledBtn" type="Node3D" parent="Frame/Panel/ContentColumn"]
+script = ExtResource("7_label")
+text = "Disabled button example:"
+font_size = 14
+widget_size = Vector2(2.8, 0.08)
+
+[node name="BtnDisabled" type="Area3D" parent="Frame/Panel/ContentColumn"]
+script = ExtResource("6_btn")
+text = "Unavailable"
+enabled = false
+widget_size = Vector2(2.8, 0.12)

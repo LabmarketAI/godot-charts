@@ -23,6 +23,7 @@
     <Compile Include="TestWidgetSchemaValidator.cs" />
     <Compile Include="TestWidgetSchemaImporter.cs" />
     <Compile Include="TestWidgetSpecTranslator.cs" />
+    <Compile Include="TestWidgetThemeEngine.cs" />
     <Compile Include="GodotStubs.cs" />
   </ItemGroup>
 
@@ -36,6 +37,7 @@
     <Compile Include="../addons/godot-charts/widgets/WidgetSchemaValidator.cs" />
     <Compile Include="../addons/godot-charts/widgets/WidgetSchemaImporter.cs" />
     <Compile Include="../addons/godot-charts/widgets/WidgetSpecTranslator.cs" />
+    <Compile Include="../addons/godot-charts/widgets/WidgetThemeEngine.cs" />
   </ItemGroup>
 
   <ItemGroup>

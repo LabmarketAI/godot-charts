@@ -1,0 +1,151 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/AppPanelDemo.cs" id="1_demo"]
+[ext_resource type="Script" path="res://addons/godot-charts/charts/ChartFrame3D.cs" id="2_frame"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_panel_3d.gd" id="3_panel"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_column_3d.gd" id="4_col"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_row_3d.gd" id="5_row"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_button_3d.gd" id="6_btn"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_label_3d.gd" id="7_label"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_toggle_3d.gd" id="8_toggle"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_slider_3d.gd" id="9_slider"]
+[ext_resource type="Script" path="res://addons/godot-charts/widgets/widget_list_item_3d.gd" id="10_item"]
+
+[node name="AppPanelDemo" type="Node3D"]
+script = ExtResource("1_demo")
+
+[node name="Frame" type="Node3D" parent="."]
+script = ExtResource("2_frame")
+Size = Vector2(3.6, 2.6)
+
+[node name="Title" type="Label3D" parent="Frame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 2.75, 0)
+billboard = 1
+text = "[12] App-Style Panel"
+font_size = 22
+
+[node name="MainPanel" type="Node3D" parent="Frame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 1.3, 0.01)
+script = ExtResource("3_panel")
+panel_size = Vector2(3.4, 2.4)
+auto_layout = true
+
+[node name="ContentColumn" type="Node3D" parent="Frame/MainPanel"]
+script = ExtResource("4_col")
+gap = 0.06
+padding = Vector2(0.08, 0.08)
+default_child_size = Vector2(3.2, 0.12)
+
+[node name="LabelTitle" type="Node3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("7_label")
+text = "Chart Configuration"
+font_size = 22
+widget_size = Vector2(3.2, 0.1)
+
+[node name="LabelStep1" type="Node3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("7_label")
+text = "1. Select chart type"
+font_size = 16
+widget_size = Vector2(3.2, 0.08)
+
+[node name="ItemBar" type="Area3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("10_item")
+item_text = "Bar Chart"
+widget_size = Vector2(3.2, 0.1)
+
+[node name="ItemLine" type="Area3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("10_item")
+item_text = "Line Chart"
+widget_size = Vector2(3.2, 0.1)
+
+[node name="ItemPoint" type="Area3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("10_item")
+item_text = "Point Chart"
+widget_size = Vector2(3.2, 0.1)
+
+[node name="ItemScatter" type="Area3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("10_item")
+item_text = "Scatter Chart"
+widget_size = Vector2(3.2, 0.1)
+
+[node name="LabelStep2" type="Node3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("7_label")
+text = "2. Configure"
+font_size = 16
+widget_size = Vector2(3.2, 0.08)
+
+[node name="ToggleGrid" type="Area3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("8_toggle")
+label_text = "Show Grid"
+value = true
+widget_size = Vector2(3.2, 0.12)
+
+[node name="ToggleLegend" type="Area3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("8_toggle")
+label_text = "Show Legend"
+value = true
+widget_size = Vector2(3.2, 0.12)
+
+[node name="OpacityLabel" type="Node3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("7_label")
+text = "Opacity: 1.0"
+font_size = 16
+widget_size = Vector2(3.2, 0.08)
+
+[node name="SliderOpacity" type="Area3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("9_slider")
+min_value = 0.1
+max_value = 1.0
+value = 1.0
+step = 0.1
+widget_size = Vector2(3.2, 0.12)
+
+[node name="ActionRow" type="Node3D" parent="Frame/MainPanel/ContentColumn"]
+script = ExtResource("5_row")
+gap = 0.06
+padding = Vector2(0.0, 0.0)
+default_child_size = Vector2(1.57, 0.12)
+
+[node name="BtnApply" type="Area3D" parent="Frame/MainPanel/ContentColumn/ActionRow"]
+script = ExtResource("6_btn")
+text = "Apply"
+widget_size = Vector2(1.57, 0.12)
+
+[node name="BtnReset" type="Area3D" parent="Frame/MainPanel/ContentColumn/ActionRow"]
+script = ExtResource("6_btn")
+text = "Reset"
+widget_size = Vector2(1.57, 0.12)
+
+[node name="ConfirmPanel" type="Node3D" parent="Frame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 1.3, 0.03)
+script = ExtResource("3_panel")
+panel_size = Vector2(2.4, 0.55)
+auto_layout = true
+
+[node name="ConfirmColumn" type="Node3D" parent="Frame/ConfirmPanel"]
+script = ExtResource("4_col")
+gap = 0.06
+padding = Vector2(0.08, 0.08)
+default_child_size = Vector2(2.2, 0.12)
+
+[node name="LabelPrompt" type="Node3D" parent="Frame/ConfirmPanel/ConfirmColumn"]
+script = ExtResource("7_label")
+text = "Apply settings?"
+font_size = 18
+widget_size = Vector2(2.2, 0.1)
+
+[node name="ConfirmRow" type="Node3D" parent="Frame/ConfirmPanel/ConfirmColumn"]
+script = ExtResource("5_row")
+gap = 0.06
+padding = Vector2(0.0, 0.0)
+default_child_size = Vector2(1.04, 0.12)
+
+[node name="BtnConfirm" type="Area3D" parent="Frame/ConfirmPanel/ConfirmColumn/ConfirmRow"]
+script = ExtResource("6_btn")
+text = "Confirm"
+widget_size = Vector2(1.04, 0.12)
+
+[node name="BtnCancel" type="Area3D" parent="Frame/ConfirmPanel/ConfirmColumn/ConfirmRow"]
+script = ExtResource("6_btn")
+text = "Cancel"
+widget_size = Vector2(1.04, 0.12)

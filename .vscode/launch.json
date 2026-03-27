@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Godot 4.7-dev3 Mono Demo (main scene)",
+      "type": "godot",
+      "request": "launch",
+      "project": "${workspaceFolder}/demo",
+      "scene": "main",
+      "editor_path": "C:/Users/b/Desktop/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64.exe"
+    },
+    {
+      "name": "Godot 4.7-dev3 Mono Demo (current scene)",
+      "type": "godot",
+      "request": "launch",
+      "project": "${workspaceFolder}/demo",
+      "scene": "current",
+      "editor_path": "C:/Users/b/Desktop/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64.exe"
+    }
+  ]
+}

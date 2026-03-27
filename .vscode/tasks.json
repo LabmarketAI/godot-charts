@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Open Godot Demo Project (4.7-dev3 Mono)",
+      "type": "shell",
+      "command": "\"C:/Users/b/Desktop/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64.exe\" --editor --path \"${workspaceFolder}/demo\"",
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using GodotCharts;
 using GDDict = Godot.Collections.Dictionary;
 
 public partial class ConsoleRoot : Node3D
@@ -20,6 +21,9 @@ private OptionButton? _chartTypePicker;
 private OptionButton? _sizePresetPicker;
 private OptionButton? _bindingKindPicker;
 private OptionButton? _framePresetPicker;
+private LineEdit? _topicRouteInput;
+private OptionButton? _mappingModePicker;
+private CheckBox? _manualLockToggle;
 private OptionButton? _monitorPicker;
 private OptionButton? _windowPicker;
 private OptionButton? _environmentPresetPicker;
@@ -29,6 +33,7 @@ private Label? _desktopSourceStatusLabel;
 private Label? _moveModeStatusLabel;
 private Label? _placementStatusLabel;
 private Label? _busStatusLabel;
+private Label? _routeSummaryLabel;
 
 public bool IsConsoleVisible => Visible;
 
@@ -264,6 +269,38 @@ var applyPresetBtn = new Button { Text = "Set Preset" };
 applyPresetBtn.Pressed += OnSetFramePresetPressed;
 frameActionRow.AddChild(applyPresetBtn);
 
+column.AddChild(new Label { Text = "Stream Routing" });
+
+var routingRow = new HBoxContainer();
+routingRow.AddThemeConstantOverride("separation", 8);
+column.AddChild(routingRow);
+
+_topicRouteInput = new LineEdit
+{
+	PlaceholderText = "Topic (e.g. demo/stream/bar)",
+	CustomMinimumSize = new Vector2(280, 0),
+};
+routingRow.AddChild(_topicRouteInput);
+
+_mappingModePicker = new OptionButton();
+_mappingModePicker.AddItem("manual");
+_mappingModePicker.AddItem("suggested");
+routingRow.AddChild(_mappingModePicker);
+
+_manualLockToggle = new CheckBox
+{
+	Text = "Manual Lock",
+	ButtonPressed = true,
+};
+routingRow.AddChild(_manualLockToggle);
+
+var applyRoutingBtn = new Button { Text = "Apply Route" };
+applyRoutingBtn.Pressed += OnApplyRoutingPressed;
+routingRow.AddChild(applyRoutingBtn);
+
+_routeSummaryLabel = new Label { Text = "Route: pending" };
+column.AddChild(_routeSummaryLabel);
+
 column.AddChild(new Label { Text = "Create Charts (Widgets)" });
 var chartWidgetRow = new HFlowContainer();
 chartWidgetRow.AddThemeConstantOverride("h_separation", 8);
@@ -412,6 +449,7 @@ private void RefreshFrameControlsForCurrentSelection()
 {
 RefreshBindingSelectionForCurrentFrame();
 RefreshFramePresetSelectionForCurrentFrame();
+RefreshRoutingControlsForCurrentFrame();
 RefreshDesktopWindows();
 RefreshEnvironmentSelection();
 RefreshMoveModeStatus();
@@ -496,6 +534,38 @@ _framePresetPicker.Select(i);
 return;
 }
 }
+}
+
+private void RefreshRoutingControlsForCurrentFrame()
+{
+	if (_frameService == null || _framePicker == null || _topicRouteInput == null || _mappingModePicker == null || _manualLockToggle == null || _routeSummaryLabel == null)
+		return;
+
+	if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+	{
+		_routeSummaryLabel.Text = "Route: no frame selected";
+		return;
+	}
+
+	var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+	if (!_frameService.TryGetFrameRoutingProfile(frameId, out var routing))
+	{
+		var chartType = _frameService.GetFrameChartType(frameId);
+		routing = FrameRoutingProfileContract.CreateDefault(chartType);
+	}
+
+	_topicRouteInput.Text = routing.TopicId;
+	for (var i = 0; i < _mappingModePicker.ItemCount; i++)
+	{
+		if (string.Equals(_mappingModePicker.GetItemText(i), routing.ChartTypeMappingMode, StringComparison.OrdinalIgnoreCase))
+		{
+			_mappingModePicker.Select(i);
+			break;
+		}
+	}
+
+	_manualLockToggle.ButtonPressed = routing.ManualChartTypeLock;
+	_routeSummaryLabel.Text = $"Route: bus={routing.BusId} topic={routing.TopicId} mode={routing.ChartTypeMappingMode} manual_lock={routing.ManualChartTypeLock}";
 }
 
 private void RefreshDesktopWindows()
@@ -754,6 +824,40 @@ var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
 var framePreset = _framePresetPicker.GetItemText(_framePresetPicker.Selected);
 if (_bindingService.SetFramePreset(frameId, framePreset))
 _statusLabel!.Text = $"Set {frameId} preset to {framePreset}";
+}
+
+private void OnApplyRoutingPressed()
+{
+	if (_bindingService == null || _framePicker == null || _topicRouteInput == null || _mappingModePicker == null || _manualLockToggle == null)
+		return;
+	if (_framePicker.Selected < 0 || _framePicker.Selected >= _framePicker.ItemCount)
+		return;
+
+	var frameId = ExtractFrameId(_framePicker.GetItemText(_framePicker.Selected));
+	var topicId = _topicRouteInput.Text?.Trim() ?? "";
+	if (string.IsNullOrWhiteSpace(topicId))
+	{
+		if (_statusLabel != null)
+			_statusLabel.Text = "Routing apply rejected: topic is required";
+		return;
+	}
+
+	var mappingMode = _mappingModePicker.GetItemText(_mappingModePicker.Selected);
+	var manualLock = _manualLockToggle.ButtonPressed;
+
+	var routeSet = _bindingService.SetFrameStreamTopic(frameId, topicId);
+	var policySet = _bindingService.SetFrameTopicMappingPolicy(frameId, mappingMode, manualLock);
+	if (routeSet && policySet)
+	{
+		if (_statusLabel != null)
+			_statusLabel.Text = $"Applied route for {frameId}: topic={topicId}, mode={mappingMode}, manual_lock={manualLock}";
+	}
+	else if (_statusLabel != null)
+	{
+		_statusLabel.Text = $"Routing apply failed for {frameId}";
+	}
+
+	RefreshRoutingControlsForCurrentFrame();
 }
 
 private void OnRefreshWindowsPressed()

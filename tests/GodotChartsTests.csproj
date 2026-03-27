@@ -20,6 +20,8 @@
     <Compile Include="TestCircuitLoader.cs" />
     <Compile Include="TestFrameRoutingProfileContract.cs" />
     <Compile Include="TestTopicChartMappingPolicy.cs" />
+    <Compile Include="TestWidgetSchemaValidator.cs" />
+    <Compile Include="TestWidgetSchemaImporter.cs" />
     <Compile Include="GodotStubs.cs" />
   </ItemGroup>
 
@@ -30,6 +32,8 @@
     <Compile Include="../addons/godot-charts/utils/TopicChartMappingPolicy.cs" />
     <Compile Include="../addons/godot-charts/circuits/CircuitData.cs" />
     <Compile Include="../addons/godot-charts/circuits/CircuitLoader.cs" />
+    <Compile Include="../addons/godot-charts/widgets/WidgetSchemaValidator.cs" />
+    <Compile Include="../addons/godot-charts/widgets/WidgetSchemaImporter.cs" />
   </ItemGroup>
 
   <ItemGroup>

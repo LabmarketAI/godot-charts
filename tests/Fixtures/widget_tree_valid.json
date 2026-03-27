@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "type": "widget_panel",
+  "size": [0.8, 0.6],
+  "children": [
+    {
+      "type": "row",
+      "children": [
+        {
+          "type": "label",
+          "text": "Settings",
+          "size": [0.3, 0.08]
+        },
+        {
+          "type": "button",
+          "text": "OK",
+          "size": [0.1, 0.08],
+          "enabled": true
+        },
+        {
+          "type": "toggle",
+          "text": "Enable",
+          "size": [0.15, 0.08],
+          "value": 1.0
+        }
+      ]
+    },
+    {
+      "type": "slider",
+      "size": [0.7, 0.06],
+      "value": 0.5
+    },
+    {
+      "type": "list_item",
+      "text": "Item A",
+      "size": [0.7, 0.07]
+    }
+  ]
+}

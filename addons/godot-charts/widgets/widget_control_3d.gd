@@ -10,7 +10,7 @@ signal focus_entered
 ## Emitted when the pointer leaves the control.
 signal focus_exited
 ## Forwarded XRToolsPointerEvent for XR consumers.
-signal pointer_event(event)
+signal xr_pointer_event(event)
 
 @export var enabled: bool = true:
 	set(value):
@@ -213,7 +213,7 @@ func _on_input_event(_camera: Node, event: InputEvent, _pos: Vector3, _normal: V
 ## Called by XRToolsPointerEvent.report() when this node is the pointer target.
 ## event_type values: 0=ENTERED 1=EXITED 2=PRESSED 3=RELEASED 4=MOVED
 func pointer_event(event: Object) -> void:
-	emit_signal("pointer_event", event)
+	xr_pointer_event.emit(event)
 	if not enabled:
 		return
 	var t: int = event.get("event_type") if event else -1

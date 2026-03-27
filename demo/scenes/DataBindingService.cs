@@ -44,6 +44,7 @@ private static readonly string[] NightHdriCandidates =
 
 private WorkspaceStateService? _workspaceService;
 private FrameOrchestrationService? _frameService;
+private MessageBusService? _messageBusService;
 private Node3D? _dataRoom;
 private Texture2D? _desktopPrototypeTexture;
 private WorldEnvironment? _worldEnvironment;
@@ -56,6 +57,7 @@ private readonly System.Collections.Generic.Dictionary<string, string> _framePre
 private readonly System.Collections.Generic.Dictionary<string, DesktopSourceProfile> _desktopSourceByFrame = new();
 private readonly System.Collections.Generic.Dictionary<string, string> _desktopSourceStatusByFrame = new();
 private readonly System.Collections.Generic.Dictionary<string, RuntimeBindingState> _stateByFrame = new();
+private readonly System.Collections.Generic.Dictionary<string, string> _topicByFrame = new();
 private string _environmentPreset = "daylight";
 private string _environmentStatus = "pending";
 private bool _loggedMissingEnvironmentNodes;
@@ -93,6 +95,18 @@ ResolveEnvironmentNodes();
 _workspaceService.WorkspaceLoaded += OnWorkspaceLoaded;
 _frameService.RuntimeFramesChanged += OnRuntimeFramesChanged;
 ApplyWorkspaceState();
+}
+
+public void BindMessageBus(MessageBusService messageBusService)
+{
+	if (_messageBusService == messageBusService)
+		return;
+
+	if (_messageBusService != null)
+		ClearMessageBusSubscriptions(_messageBusService);
+
+	_messageBusService = messageBusService;
+	SyncMessageBusSubscriptions();
 }
 
 public string GetEnvironmentPreset()
@@ -382,6 +396,7 @@ private void OnRuntimeFramesChanged()
 {
 SyncStateToRuntimeFrames();
 ApplyAllStateToRuntimeFrames();
+	SyncMessageBusSubscriptions();
 PersistState();
 EmitSignal(SignalName.FrameBindingsChanged);
 }
@@ -671,6 +686,7 @@ continue;
 if (_frameService.TryGetFrame(frameId, out var frame))
 ApplyBindingToFrame(frameId, frame);
 }
+	SyncMessageBusSubscriptions();
 }
 
 private void ApplyBindingToFrame(string frameId, ChartFrame3D frame)
@@ -1109,6 +1125,74 @@ _workspaceService.ActiveWorkspaceProfile[DesktopWindowsProfileKey] = windows;
 _workspaceService.ActiveWorkspaceProfile[DesktopSourcesProfileKey] = sources;
 _workspaceService.ActiveWorkspaceProfile[EnvironmentPresetProfileKey] = _environmentPreset;
 _workspaceService.SaveActiveWorkspace();
+}
+
+private void SyncMessageBusSubscriptions()
+{
+	if (_messageBusService == null || _frameService == null)
+	{
+		_topicByFrame.Clear();
+		return;
+	}
+
+	var expectedTopicsByFrame = new System.Collections.Generic.Dictionary<string, string>();
+	foreach (var profile in _frameService.ListRuntimeFrameProfiles())
+	{
+		if (!profile.TryGetValue("id", out var idVariant))
+			continue;
+
+		var frameId = idVariant.AsString();
+		if (string.IsNullOrWhiteSpace(frameId))
+			continue;
+
+		if (GetBindingKind(frameId) != BindingStream)
+			continue;
+
+		var chartType = _frameService.GetFrameChartType(frameId);
+		if (chartType == "desktop")
+			continue;
+
+		expectedTopicsByFrame[frameId] = BuildFrameTopic(frameId);
+	}
+
+	var removeIds = new List<string>();
+	foreach (var existing in _topicByFrame)
+	{
+		if (!expectedTopicsByFrame.TryGetValue(existing.Key, out var expectedTopic) || expectedTopic != existing.Value)
+		{
+			_messageBusService.UnregisterSubscriber(existing.Value, BuildSubscriberId(existing.Key));
+			removeIds.Add(existing.Key);
+		}
+	}
+
+	foreach (var frameId in removeIds)
+		_topicByFrame.Remove(frameId);
+
+	foreach (var expected in expectedTopicsByFrame)
+	{
+		if (_topicByFrame.TryGetValue(expected.Key, out var currentTopic) && currentTopic == expected.Value)
+			continue;
+
+		_messageBusService.RegisterSubscriber(expected.Value, BuildSubscriberId(expected.Key));
+		_topicByFrame[expected.Key] = expected.Value;
+	}
+}
+
+private void ClearMessageBusSubscriptions(MessageBusService service)
+{
+	foreach (var entry in _topicByFrame)
+		service.UnregisterSubscriber(entry.Value, BuildSubscriberId(entry.Key));
+	_topicByFrame.Clear();
+}
+
+private static string BuildFrameTopic(string frameId)
+{
+	return $"demo/frame/{frameId}";
+}
+
+private static string BuildSubscriberId(string frameId)
+{
+	return $"DataBindingService:{frameId}";
 }
 
 private static string NormalizeSourceKind(string sourceKind)

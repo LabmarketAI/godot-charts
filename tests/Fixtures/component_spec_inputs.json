@@ -1,0 +1,41 @@
+{
+  "spec_version": "1.0",
+  "source": "material-design-simplified",
+  "family": "inputs",
+  "components": [
+    {
+      "name": "Button",
+      "props": {
+        "label": { "type": "string", "required": true, "default": "" },
+        "disabled": { "type": "boolean", "default": false },
+        "width_dp": 88,
+        "height_dp": 40
+      },
+      "events": ["click"],
+      "states": ["enabled", "disabled", "hover", "pressed", "focused"]
+    },
+    {
+      "name": "Switch",
+      "props": {
+        "label": { "type": "string" },
+        "checked": { "type": "boolean", "default": false },
+        "disabled": { "type": "boolean", "default": false },
+        "width_dp": 52,
+        "height_dp": 32
+      },
+      "events": ["change"],
+      "states": ["on", "off", "disabled"]
+    },
+    {
+      "name": "Slider",
+      "props": {
+        "value": { "type": "number", "min": 0, "max": 1, "default": 0 },
+        "disabled": { "type": "boolean", "default": false },
+        "width_dp": 200,
+        "height_dp": 40
+      },
+      "events": ["change"],
+      "states": ["enabled", "disabled", "active"]
+    }
+  ]
+}

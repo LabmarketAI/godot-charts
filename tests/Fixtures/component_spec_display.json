@@ -1,0 +1,25 @@
+{
+  "spec_version": "1.0",
+  "source": "material-design-simplified",
+  "family": "display",
+  "components": [
+    {
+      "name": "Label",
+      "props": {
+        "text": { "type": "string", "required": true, "default": "" },
+        "width_dp": 160,
+        "height_dp": 32
+      }
+    },
+    {
+      "name": "ListItem",
+      "props": {
+        "label": { "type": "string", "required": true, "default": "" },
+        "disabled": { "type": "boolean", "default": false },
+        "width_dp": 280,
+        "height_dp": 48
+      },
+      "events": ["click"]
+    }
+  ]
+}

@@ -21,7 +21,7 @@ public partial class WidgetThemeDemo : Node3D
 
     static void SetPreset(string name)
     {
-        var mgr = Engine.GetMainLoop()?.Root?.GetNodeOrNull("/root/WidgetThemeManager");
+        var mgr = (Engine.GetMainLoop() as SceneTree)?.Root?.GetNodeOrNull("/root/WidgetThemeManager");
         if (mgr == null)
         {
             GD.PrintErr("WidgetThemeDemo: WidgetThemeManager autoload not found.");

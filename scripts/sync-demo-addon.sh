@@ -15,6 +15,7 @@ mkdir -p "$dst_dir"
 rsync -a --delete \
   --exclude='.git/' \
   --exclude='.DS_Store' \
+  --exclude='*.uid' \
   "$src_dir" "$dst_dir"
 
 echo "Synchronized: addons/godot-charts -> demo/addons/godot-charts"

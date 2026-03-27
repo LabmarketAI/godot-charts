@@ -50,6 +50,7 @@ public partial class Main : Node3D
     private FrameOrchestrationService _frameService = null!;
     private DataBindingService _bindingService = null!;
     private MessageBusService _messageBusService = null!;
+    private DemoDataGenerator _demoDataGenerator = null!;
     private ConsoleRoot _consoleRoot = null!;
 
     public override void _Ready()
@@ -96,6 +97,10 @@ public partial class Main : Node3D
         _messageBusService = new MessageBusService { Name = "MessageBusService" };
         AddChild(_messageBusService);
         _bindingService.BindMessageBus(_messageBusService);
+
+        _demoDataGenerator = new DemoDataGenerator { Name = "DemoDataGenerator" };
+        AddChild(_demoDataGenerator);
+        _demoDataGenerator.Initialize(_messageBusService);
 
         var packed = GD.Load<PackedScene>("res://scenes/console_root.tscn");
         _consoleRoot = packed.Instantiate<ConsoleRoot>();

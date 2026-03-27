@@ -163,6 +163,10 @@ func _enable_plugin() -> void:
 		preload("widgets/widget_list_item_3d.gd"),
 		null
 	)
+	add_autoload_singleton(
+		"WidgetFocusManager",
+		"res://addons/godot-charts/widgets/widget_focus_manager.gd"
+	)
 
 
 func _disable_plugin() -> void:
@@ -191,4 +195,5 @@ func _disable_plugin() -> void:
 	remove_custom_type("WidgetButton3D")
 	remove_custom_type("WidgetToggle3D")
 	remove_custom_type("WidgetSlider3D")
+	remove_autoload_singleton("WidgetFocusManager")
 	remove_custom_type("WidgetListItem3D")

@@ -176,6 +176,18 @@ public bool SetFrameStreamTopic(string frameId, string topicId, bool persist = t
 	return true;
 }
 
+public bool SetFrameTopicMappingPolicy(string frameId, string mappingMode, bool manualChartTypeLock, bool persist = true)
+{
+	if (_frameService == null)
+		return false;
+
+	if (!_frameService.SetFrameTopicMappingPolicy(frameId, mappingMode, manualChartTypeLock, persist))
+		return false;
+
+	EmitSignal(SignalName.FrameBindingsChanged);
+	return true;
+}
+
 public string GetFramePreset(string frameId)
 {
 if (_framePresetByFrame.TryGetValue(frameId, out var preset))
@@ -451,6 +463,29 @@ private void OnMessageBusMessageReceived(string topic, Dictionary payload)
 
 		if (!string.Equals(expectedTopic, topic, StringComparison.Ordinal))
 			continue;
+
+		if (_frameService.TryGetFrameRoutingProfile(frameId, out var routingProfile))
+		{
+			var mappingDecision = TopicChartMappingPolicy.Decide(
+				frameChartType,
+				chartTypeVariant.AsString(),
+				routingProfile.ChartTypeMappingMode,
+				routingProfile.ManualChartTypeLock);
+
+			if (mappingDecision.ShouldSwitch)
+			{
+				var switched = _frameService.SetFrameChartType(frameId, mappingDecision.TargetChartType, persist: true);
+				LogTopicChartMappingDecision(frameId, routingProfile, chartTypeVariant.AsString(), switched, switched ? mappingDecision.Reason : "switch_failed");
+				if (!switched)
+					continue;
+
+				frameChartType = _frameService.GetFrameChartType(frameId);
+			}
+			else
+			{
+				LogTopicChartMappingDecision(frameId, routingProfile, chartTypeVariant.AsString(), false, mappingDecision.Reason);
+			}
+		}
 
 		if (NormalizeBusChartType(frameChartType) != payloadChartType)
 			continue;
@@ -1288,6 +1323,19 @@ private bool TryGetStreamTopicForFrame(string frameId, string chartType, out str
 		topicId = routing.TopicId;
 
 	return !string.IsNullOrWhiteSpace(topicId);
+}
+
+private static void LogTopicChartMappingDecision(
+	string frameId,
+	FrameRoutingProfile routing,
+	string suggestedChartType,
+	bool switched,
+	string reason)
+{
+	GD.Print(
+		$"TopicChartMappingDecision: frame_id={frameId} bus_id={routing.BusId} topic_id={routing.TopicId} " +
+		$"mode={routing.ChartTypeMappingMode} manual_lock={routing.ManualChartTypeLock} suggested={suggestedChartType} " +
+		$"switched={switched} reason={reason}");
 }
 
 private void ApplyPayloadToFrame(string frameId, ChartFrame3D frame, string frameChartType, GDDict payloadData)

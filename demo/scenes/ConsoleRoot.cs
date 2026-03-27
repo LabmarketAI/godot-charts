@@ -11,6 +11,7 @@ public bool PreferXrInteraction { get; set; }
 private WorkspaceStateService? _workspaceService;
 private FrameOrchestrationService? _frameService;
 private DataBindingService? _bindingService;
+private MessageBusService? _messageBusService;
 private SubViewport? _subViewport;
 private Node3D? _xrViewportHost;
 private OptionButton? _workspacePicker;
@@ -27,6 +28,7 @@ private Label? _environmentStatusLabel;
 private Label? _desktopSourceStatusLabel;
 private Label? _moveModeStatusLabel;
 private Label? _placementStatusLabel;
+private Label? _busStatusLabel;
 
 public bool IsConsoleVisible => Visible;
 
@@ -56,6 +58,19 @@ public void BindBindingService(DataBindingService service)
 _bindingService = service;
 _bindingService.FrameBindingsChanged += RefreshFrameControlsForCurrentSelection;
 RefreshFrameControlsForCurrentSelection();
+}
+
+public void BindMessageBus(MessageBusService service)
+{
+if (_messageBusService == service)
+return;
+
+if (_messageBusService != null)
+_messageBusService.RunningStateChanged -= OnMessageBusRunningStateChanged;
+
+_messageBusService = service;
+_messageBusService.RunningStateChanged += OnMessageBusRunningStateChanged;
+RefreshMessageBusStatus();
 }
 
 public void ToggleConsole()
@@ -148,6 +163,25 @@ column.AddChild(_moveModeStatusLabel);
 
 _placementStatusLabel = new Label { Text = "Placement: idle" };
 column.AddChild(_placementStatusLabel);
+
+_busStatusLabel = new Label { Text = "Data stream bus: pending" };
+column.AddChild(_busStatusLabel);
+
+var busRow = new HBoxContainer();
+busRow.AddThemeConstantOverride("separation", 8);
+column.AddChild(busRow);
+
+var busStartBtn = new Button { Text = "Start Stream" };
+busStartBtn.Pressed += OnStartBusPressed;
+busRow.AddChild(busStartBtn);
+
+var busStopBtn = new Button { Text = "Stop Stream" };
+busStopBtn.Pressed += OnStopBusPressed;
+busRow.AddChild(busStopBtn);
+
+var busToggleBtn = new Button { Text = "Toggle Stream" };
+busToggleBtn.Pressed += OnToggleBusPressed;
+busRow.AddChild(busToggleBtn);
 
 var row = new HBoxContainer();
 row.AddThemeConstantOverride("separation", 8);
@@ -550,6 +584,12 @@ private void OnWorkspaceLoaded(string name)
 if (_statusLabel != null)
 _statusLabel.Text = $"Active workspace: {name}";
 RefreshWorkspaceList();
+RefreshMessageBusStatus();
+}
+
+private void OnMessageBusRunningStateChanged(bool _isRunning)
+{
+RefreshMessageBusStatus();
 }
 
 private void OnWorkspaceSelected(long index)
@@ -779,6 +819,58 @@ return;
 var environmentPreset = _environmentPresetPicker.GetItemText(_environmentPresetPicker.Selected);
 if (_bindingService.SetEnvironmentPreset(environmentPreset))
 _statusLabel!.Text = $"Applied environment preset: {environmentPreset}";
+}
+
+private void OnStartBusPressed()
+{
+if (_messageBusService == null)
+return;
+
+_messageBusService.Start();
+if (_statusLabel != null)
+_statusLabel.Text = "Data stream bus started";
+RefreshMessageBusStatus();
+}
+
+private void OnStopBusPressed()
+{
+if (_messageBusService == null)
+return;
+
+_messageBusService.Stop();
+if (_statusLabel != null)
+_statusLabel.Text = "Data stream bus stopped";
+RefreshMessageBusStatus();
+}
+
+private void OnToggleBusPressed()
+{
+if (_messageBusService == null)
+return;
+
+if (_messageBusService.IsRunning)
+_messageBusService.Stop();
+else
+_messageBusService.Start();
+
+if (_statusLabel != null)
+_statusLabel.Text = _messageBusService.IsRunning ? "Data stream bus started" : "Data stream bus stopped";
+RefreshMessageBusStatus();
+}
+
+private void RefreshMessageBusStatus()
+{
+if (_busStatusLabel == null)
+return;
+
+if (_messageBusService == null)
+{
+_busStatusLabel.Text = "Data stream bus: unavailable";
+return;
+}
+
+var stateText = _messageBusService.IsRunning ? "running" : "stopped";
+_busStatusLabel.Text = $"Data stream bus: {stateText}";
 }
 
 private void OnToggleMoveModePressed()

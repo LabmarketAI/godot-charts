@@ -230,6 +230,7 @@ Diegetic console workspace persistence:
 - The active workspace is remembered between runs
 - The console defaults to **hidden** on first run (`F1` to open)
 - Phase 4 scaffold: use the console to create/delete runtime frames, set chart type/size, set frame visual presets, choose per-frame binding mode (`demo_static` or `demo_stream`), and apply environment presets (`daylight`, `studio`, `night`)
+- Data stream control: the console includes explicit `Start Stream`, `Stop Stream`, and `Toggle Stream` controls for the demo message bus. The bus defaults to started on scene load and can be toggled repeatedly during runtime.
 - Desktop runtime frames (`chart_type = desktop`) can be assigned to specific host windows so multiple in-world frames can show different applications simultaneously
 - Runtime frame transforms, chart assignments, binding modes, frame presets, and desktop window selections are saved with the active workspace profile
 - Console now surfaces environment-application status (ready/partial/missing nodes) when applying presets
@@ -247,6 +248,7 @@ Diegetic console workspace persistence:
 - The active workspace is remembered between runs
 - The console defaults to **hidden** on first run (`F1` to open)
 - Phase 4 scaffold: use the console to create/delete runtime frames, set chart type/size, set frame visual presets, choose per-frame binding mode (`demo_static` or `demo_stream`), and apply environment presets (`daylight`, `studio`, `night`)
+- Data stream control: the console includes explicit `Start Stream`, `Stop Stream`, and `Toggle Stream` controls for the demo message bus. The bus defaults to started on scene load and can be toggled repeatedly during runtime.
 - Desktop runtime frames (`chart_type = desktop`) can be assigned to specific host windows so multiple in-world frames can show different applications simultaneously
 - Runtime frame transforms, chart assignments, binding modes, frame presets, and desktop window selections are saved with the active workspace profile
 - Console now surfaces environment-application status (ready/partial/missing nodes) when applying presets

@@ -49,6 +49,7 @@ public partial class Main : Node3D
     private WorkspaceStateService _workspaceService = null!;
     private FrameOrchestrationService _frameService = null!;
     private DataBindingService _bindingService = null!;
+    private MessageBusService _messageBusService = null!;
     private ConsoleRoot _consoleRoot = null!;
 
     public override void _Ready()
@@ -91,6 +92,10 @@ public partial class Main : Node3D
         _bindingService = new DataBindingService { Name = "DataBindingService" };
         AddChild(_bindingService);
         _bindingService.Initialize(_frameService, _workspaceService, GetNode<Node3D>("DataRoom"));
+
+        _messageBusService = new MessageBusService { Name = "MessageBusService" };
+        AddChild(_messageBusService);
+        _bindingService.BindMessageBus(_messageBusService);
 
         var packed = GD.Load<PackedScene>("res://scenes/console_root.tscn");
         _consoleRoot = packed.Instantiate<ConsoleRoot>();

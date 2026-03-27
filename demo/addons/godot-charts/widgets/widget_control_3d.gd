@@ -29,10 +29,14 @@ signal pointer_event(event)
 		_queue_rebuild()
 
 var _state: State = State.NORMAL
+var _keyboard_focused: bool = false
 var _rebuild_queued: bool = false
 var _bg_mat: StandardMaterial3D
 var _border_mat: StandardMaterial3D
+var _border_inst: MeshInstance3D
 var _shape: CollisionShape3D
+
+const _BORDER_W: float = 0.006  # 6 mm frame around each control
 
 
 func _ready() -> void:
@@ -47,6 +51,16 @@ func _ready() -> void:
 		mouse_entered.connect(_on_mouse_entered)
 		mouse_exited.connect(_on_mouse_exited)
 		input_event.connect(_on_input_event)
+		var fm := _get_focus_manager()
+		if fm:
+			fm.register(self)
+
+
+func _exit_tree() -> void:
+	if not Engine.is_editor_hint():
+		var fm := _get_focus_manager()
+		if fm:
+			fm.unregister(self)
 
 
 func _process(_delta: float) -> void:
@@ -75,12 +89,26 @@ func _ensure_children() -> void:
 	if not is_instance_valid(_bg_mat):
 		_bg_mat = StandardMaterial3D.new()
 		_bg_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	if not is_instance_valid(_border_mat):
+		_border_mat = StandardMaterial3D.new()
+		_border_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	if not is_instance_valid(_border_inst):
+		_border_inst = MeshInstance3D.new()
+		_border_inst.name = "_border"
+		_border_inst.material_override = _border_mat
+		add_child(_border_inst)
 
 
 func _apply_shape() -> void:
 	var box := BoxShape3D.new()
 	box.size = Vector3(widget_size.x, widget_size.y, 0.002)
 	_shape.shape = box
+
+	var bw := _BORDER_W
+	var border_q := QuadMesh.new()
+	border_q.size = Vector2(widget_size.x + bw * 2.0, widget_size.y + bw * 2.0)
+	_border_inst.mesh = border_q
+	_border_inst.position = Vector3(0.0, 0.0, -0.0005)
 
 
 # ── color helpers ─────────────────────────────────────────────────────────────
@@ -101,12 +129,14 @@ func _get_text_color() -> Color:
 
 func _get_border_color() -> Color:
 	var t := theme_data
-	if _state == State.FOCUSED:
+	if _keyboard_focused:
 		return t.border_focused if t else Color(0.30, 0.65, 1.0)
 	return t.border_normal if t else Color(0.35, 0.35, 0.40)
 
 func _apply_colors() -> void:
 	_bg_mat.albedo_color = _get_bg_color()
+	if is_instance_valid(_border_mat):
+		_border_mat.albedo_color = _get_border_color()
 
 
 # ── state machine ─────────────────────────────────────────────────────────────
@@ -118,6 +148,36 @@ func _update_state(new_state: State) -> void:
 	_apply_colors()
 
 
+# ── keyboard focus (managed by WidgetFocusManager) ────────────────────────────
+
+func _on_focus_gained() -> void:
+	_keyboard_focused = true
+	_apply_colors()
+
+
+func _on_focus_lost() -> void:
+	_keyboard_focused = false
+	_apply_colors()
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not _keyboard_focused or not enabled:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		var fm := _get_focus_manager()
+		if not fm:
+			return
+		if event.keycode == KEY_TAB:
+			if event.shift_pressed:
+				fm.focus_prev(self)
+			else:
+				fm.focus_next(self)
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_ENTER or event.keycode == KEY_SPACE:
+			_on_clicked()
+			get_viewport().set_input_as_handled()
+
+
 # ── desktop interaction ───────────────────────────────────────────────────────
 
 func _on_mouse_entered() -> void:
@@ -126,11 +186,13 @@ func _on_mouse_entered() -> void:
 	_update_state(State.HOVER)
 	emit_signal("focus_entered")
 
+
 func _on_mouse_exited() -> void:
 	if not enabled:
 		return
 	_update_state(State.NORMAL)
 	emit_signal("focus_exited")
+
 
 func _on_input_event(_camera: Node, event: InputEvent, _pos: Vector3, _normal: Vector3, _idx: int) -> void:
 	if not enabled:
@@ -140,23 +202,36 @@ func _on_input_event(_camera: Node, event: InputEvent, _pos: Vector3, _normal: V
 		if mb.button_index == MOUSE_BUTTON_LEFT:
 			_update_state(State.PRESSED if mb.pressed else State.HOVER)
 			if not mb.pressed:
+				var fm := _get_focus_manager()
+				if fm:
+					fm.request_focus(self, fm.InputMode.DESKTOP)
 				_on_clicked()
 
 
 # ── XR pointer (godot-xr-tools) ──────────────────────────────────────────────
 
+## Called by XRToolsPointerEvent.report() when this node is the pointer target.
+## event_type values: 0=ENTERED 1=EXITED 2=PRESSED 3=RELEASED 4=MOVED
 func pointer_event(event: Object) -> void:
 	emit_signal("pointer_event", event)
 	if not enabled:
 		return
 	var t: int = event.get("event_type") if event else -1
 	match t:
-		1: _update_state(State.HOVER)   # ENTERED
-		2: _update_state(State.NORMAL)  # EXITED
-		3:                               # PRESSED
+		0:  # ENTERED
+			_update_state(State.HOVER)
+			emit_signal("focus_entered")
+		1:  # EXITED
+			_update_state(State.NORMAL)
+			emit_signal("focus_exited")
+		2:  # PRESSED
 			_update_state(State.PRESSED)
+			var fm := _get_focus_manager()
+			if fm:
+				fm.request_focus(self, fm.InputMode.XR)
 			_on_clicked()
-		4: _update_state(State.HOVER)   # RELEASED
+		3:  # RELEASED
+			_update_state(State.HOVER)
 
 
 # ── override point ────────────────────────────────────────────────────────────
@@ -165,6 +240,13 @@ func pointer_event(event: Object) -> void:
 func _on_clicked() -> void:
 	pass
 
+
 ## Return preferred size for layout containers.
 func get_widget_size() -> Vector2:
 	return widget_size
+
+
+# ── helpers ───────────────────────────────────────────────────────────────────
+
+func _get_focus_manager() -> Node:
+	return get_node_or_null("/root/WidgetFocusManager")

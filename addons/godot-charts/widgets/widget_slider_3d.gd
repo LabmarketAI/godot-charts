@@ -40,6 +40,10 @@ var _dragging: bool = false
 var _drag_start_x: float = 0.0
 var _drag_start_val: float = 0.0
 
+var _xr_dragging: bool = false
+var _xr_drag_start_x: float = 0.0
+var _xr_drag_start_val: float = 0.0
+
 
 func _rebuild() -> void:
 	super._rebuild()
@@ -137,3 +141,28 @@ func _on_input_event(camera: Node, event: InputEvent, pos: Vector3, normal: Vect
 		if step > 0.0:
 			new_val = roundf(new_val / step) * step
 		value = clampf(new_val, min_value, max_value)
+
+
+## Handle XR MOVED events for drag-to-scrub.
+## event_type: 0=ENTERED 1=EXITED 2=PRESSED 3=RELEASED 4=MOVED
+func pointer_event(event: Object) -> void:
+	super.pointer_event(event)
+	if not enabled or not event:
+		return
+	var t: int = event.get("event_type")
+	match t:
+		2:  # PRESSED — begin XR drag
+			_xr_dragging = true
+			_xr_drag_start_x = to_local(event.get("position")).x
+			_xr_drag_start_val = value
+		3:  # RELEASED — end XR drag
+			_xr_dragging = false
+		4:  # MOVED — scrub slider
+			if _xr_dragging:
+				var lx := to_local(event.get("position")).x
+				var dx := lx - _xr_drag_start_x
+				var range_val := max_value - min_value
+				var new_val := _xr_drag_start_val + dx / widget_size.x * range_val
+				if step > 0.0:
+					new_val = roundf(new_val / step) * step
+				value = clampf(new_val, min_value, max_value)

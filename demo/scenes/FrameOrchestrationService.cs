@@ -14,6 +14,7 @@ public partial class FrameOrchestrationService : Node
 	private const float RuntimeRingHeight = 1.0f;
 
 	private readonly System.Collections.Generic.Dictionary<string, ChartFrame3D> _framesById = new();
+	private readonly System.Collections.Generic.Dictionary<string, FrameRoutingProfile> _routingByFrameId = new();
 	private Node3D? _dataRoom;
 	private Node3D? _runtimeContainer;
 	private WorkspaceStateService? _workspaceService;
@@ -181,6 +182,7 @@ public partial class FrameOrchestrationService : Node
 		_runtimeContainer.AddChild(frame);
 		frame.LookAt(new Vector3(0f, RuntimeRingHeight + 0.8f, 0f), Vector3.Up);
 		_framesById[id] = frame;
+		_routingByFrameId[id] = FrameRoutingProfileContract.CreateDefault(chartType);
 
 		SetFrameChartType(id, chartType, persist: false);
 		PersistWorkspaceFrames();
@@ -199,6 +201,7 @@ public partial class FrameOrchestrationService : Node
 			return false;
 
 		_framesById.Remove(frameId);
+		_routingByFrameId.Remove(frameId);
 		if (_moveModeFrameId == frameId)
 			_moveModeFrameId = "";
 		frame.QueueFree();
@@ -212,8 +215,10 @@ public partial class FrameOrchestrationService : Node
 		if (!_framesById.TryGetValue(frameId, out var frame))
 			return false;
 
+		var previousChartType = DetectChartType(frame);
 		chartType = NormalizeChartType(chartType);
 		ReplaceFrameChart(frame, chartType);
+		UpdateRoutingTopicDefault(frameId, previousChartType, chartType);
 
 		if (persist)
 		{
@@ -248,6 +253,7 @@ public partial class FrameOrchestrationService : Node
 		foreach (var frame in _framesById.Values)
 			frame.QueueFree();
 		_framesById.Clear();
+		_routingByFrameId.Clear();
 
 		if (!_workspaceService.ActiveWorkspaceProfile.TryGetValue("frames", out var framesVariant)
 			|| framesVariant.VariantType != Variant.Type.Array)
@@ -296,6 +302,7 @@ public partial class FrameOrchestrationService : Node
 
 		_runtimeContainer.AddChild(frame);
 		_framesById[frameId] = frame;
+		_routingByFrameId[frameId] = ParseRoutingProfile(profile, chartType);
 		ReplaceFrameChart(frame, chartType);
 	}
 
@@ -393,9 +400,11 @@ public partial class FrameOrchestrationService : Node
 		frame.AddChild(chart);
 	}
 
-	private static Dictionary BuildFrameProfile(string frameId, ChartFrame3D frame)
+	private Dictionary BuildFrameProfile(string frameId, ChartFrame3D frame)
 	{
 		var chartType = DetectChartType(frame);
+		if (!_routingByFrameId.TryGetValue(frameId, out var routing))
+			routing = FrameRoutingProfileContract.CreateDefault(chartType);
 
 		return new Dictionary
 		{
@@ -405,6 +414,11 @@ public partial class FrameOrchestrationService : Node
 			{ "frame_size", SerializeVector2(frame.Size) },
 			{ "position", SerializeVector3(frame.Position) },
 			{ "rotation_degrees", SerializeVector3(frame.RotationDegrees) },
+			{ FrameRoutingProfileContract.BusIdKey, routing.BusId },
+			{ FrameRoutingProfileContract.TopicIdKey, routing.TopicId },
+			{ FrameRoutingProfileContract.TopicProfileIdKey, routing.TopicProfileId },
+			{ FrameRoutingProfileContract.ChartTypeMappingModeKey, routing.ChartTypeMappingMode },
+			{ FrameRoutingProfileContract.ManualChartTypeLockKey, routing.ManualChartTypeLock },
 		};
 	}
 
@@ -462,5 +476,58 @@ public partial class FrameOrchestrationService : Node
 		if (arr.Count < 3)
 			return fallback;
 		return new Vector3((float)arr[0].AsDouble(), (float)arr[1].AsDouble(), (float)arr[2].AsDouble());
+	}
+
+	private static FrameRoutingProfile ParseRoutingProfile(Dictionary profile, string chartType)
+	{
+		var busId = profile.TryGetValue(FrameRoutingProfileContract.BusIdKey, out var busIdVariant)
+			? busIdVariant.AsString()
+			: null;
+
+		var topicId = profile.TryGetValue(FrameRoutingProfileContract.TopicIdKey, out var topicIdVariant)
+			? topicIdVariant.AsString()
+			: null;
+
+		var topicProfileId = profile.TryGetValue(FrameRoutingProfileContract.TopicProfileIdKey, out var topicProfileIdVariant)
+			? topicProfileIdVariant.AsString()
+			: null;
+
+		var chartTypeMappingMode = profile.TryGetValue(FrameRoutingProfileContract.ChartTypeMappingModeKey, out var mappingModeVariant)
+			? mappingModeVariant.AsString()
+			: null;
+
+		var manualChartTypeLock = FrameRoutingProfileContract.DefaultManualChartTypeLock;
+		if (profile.TryGetValue(FrameRoutingProfileContract.ManualChartTypeLockKey, out var manualLockVariant))
+		{
+			if (manualLockVariant.VariantType == Variant.Type.Bool)
+				manualChartTypeLock = manualLockVariant.AsBool();
+			else if (manualLockVariant.VariantType == Variant.Type.Int)
+				manualChartTypeLock = manualLockVariant.AsInt32() != 0;
+			else if (manualLockVariant.VariantType == Variant.Type.String && bool.TryParse(manualLockVariant.AsString(), out var parsedBool))
+				manualChartTypeLock = parsedBool;
+		}
+
+		return new FrameRoutingProfile(
+			FrameRoutingProfileContract.NormalizeBusId(busId),
+			FrameRoutingProfileContract.NormalizeTopicId(topicId, chartType),
+			FrameRoutingProfileContract.NormalizeTopicProfileId(topicProfileId),
+			FrameRoutingProfileContract.NormalizeChartTypeMappingMode(chartTypeMappingMode),
+			manualChartTypeLock);
+	}
+
+	private void UpdateRoutingTopicDefault(string frameId, string previousChartType, string newChartType)
+	{
+		if (!_routingByFrameId.TryGetValue(frameId, out var routing))
+		{
+			_routingByFrameId[frameId] = FrameRoutingProfileContract.CreateDefault(newChartType);
+			return;
+		}
+
+		var previousDefaultTopic = FrameRoutingProfileContract.BuildDefaultTopicId(previousChartType);
+		if (string.IsNullOrWhiteSpace(routing.TopicId) || routing.TopicId == previousDefaultTopic)
+		{
+			routing = routing with { TopicId = FrameRoutingProfileContract.BuildDefaultTopicId(newChartType) };
+			_routingByFrameId[frameId] = routing;
+		}
 	}
 }

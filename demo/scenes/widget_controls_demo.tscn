@@ -46,22 +46,22 @@ gap = 0.06
 padding = Vector2(0.0, 0.0)
 default_child_size = Vector2(1.34, 0.12)
 
-[node name="BtnApply" type="Node3D" parent="Frame/Panel/ContentColumn/ButtonRow"]
+[node name="BtnApply" type="Area3D" parent="Frame/Panel/ContentColumn/ButtonRow"]
 script = ExtResource("5_btn")
 text = "Apply"
 widget_size = Vector2(1.34, 0.12)
 
-[node name="BtnReset" type="Node3D" parent="Frame/Panel/ContentColumn/ButtonRow"]
+[node name="BtnReset" type="Area3D" parent="Frame/Panel/ContentColumn/ButtonRow"]
 script = ExtResource("5_btn")
 text = "Reset"
 widget_size = Vector2(1.34, 0.12)
 
-[node name="ToggleVSync" type="Node3D" parent="Frame/Panel/ContentColumn"]
+[node name="ToggleVSync" type="Area3D" parent="Frame/Panel/ContentColumn"]
 script = ExtResource("6_toggle")
 label_text = "Enable V-Sync"
 widget_size = Vector2(2.8, 0.12)
 
-[node name="ToggleShadows" type="Node3D" parent="Frame/Panel/ContentColumn"]
+[node name="ToggleShadows" type="Area3D" parent="Frame/Panel/ContentColumn"]
 script = ExtResource("6_toggle")
 label_text = "Dynamic Shadows"
 value = true
@@ -73,7 +73,7 @@ text = "Render Scale"
 font_size = 16
 widget_size = Vector2(2.8, 0.08)
 
-[node name="SliderScale" type="Node3D" parent="Frame/Panel/ContentColumn"]
+[node name="SliderScale" type="Area3D" parent="Frame/Panel/ContentColumn"]
 script = ExtResource("7_slider")
 min_value = 0.5
 max_value = 2.0
@@ -87,18 +87,18 @@ text = "Quality Preset"
 font_size = 16
 widget_size = Vector2(2.8, 0.08)
 
-[node name="ItemLow" type="Node3D" parent="Frame/Panel/ContentColumn"]
+[node name="ItemLow" type="Area3D" parent="Frame/Panel/ContentColumn"]
 script = ExtResource("9_item")
 item_text = "Low"
 widget_size = Vector2(2.8, 0.1)
 
-[node name="ItemMedium" type="Node3D" parent="Frame/Panel/ContentColumn"]
+[node name="ItemMedium" type="Area3D" parent="Frame/Panel/ContentColumn"]
 script = ExtResource("9_item")
 item_text = "Medium"
 selected_item = true
 widget_size = Vector2(2.8, 0.1)
 
-[node name="ItemHigh" type="Node3D" parent="Frame/Panel/ContentColumn"]
+[node name="ItemHigh" type="Area3D" parent="Frame/Panel/ContentColumn"]
 script = ExtResource("9_item")
 item_text = "High"
 widget_size = Vector2(2.8, 0.1)

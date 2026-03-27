@@ -83,7 +83,7 @@ public static class CircuitLoader
         using (doc)
         {
             var root = doc.RootElement;
-            int numQubits = root.TryGetProperty("qubits", out var qp) ? qp.GetInt32() : 1;
+            int numQubits = ParseQubitCount(root);
 
             var rawOps = ParseRawOps(root);
             if (rawOps.Count == 0)
@@ -170,8 +170,8 @@ public static class CircuitLoader
         if (string.IsNullOrWhiteSpace(id)) id = $"op{ordinal}";
 
         string gate = op.TryGetProperty("gate", out var gatep) ? gatep.GetString() ?? "u" : "u";
-        int[] qb = ParseIntArray(op, "q");
-        int[] cb = ParseIntArray(op, "c");
+        int[] qb = ParseIntArray(op, "q", "qubits");
+        int[] cb = ParseIntArray(op, "c", "cbits");
         float[] prm = ParseFloatArray(op, "params");
         return new RawOp(id, gate, qb, cb, prm, hintT);
     }
@@ -184,11 +184,23 @@ public static class CircuitLoader
 
         foreach (var edgeEl in edgesEl.EnumerateArray())
         {
-            if (!edgeEl.TryGetProperty("from", out var fromEl) || !edgeEl.TryGetProperty("to", out var toEl))
-                continue;
+            string from;
+            string to;
 
-            var from = fromEl.GetString() ?? string.Empty;
-            var to = toEl.GetString() ?? string.Empty;
+            if (edgeEl.TryGetProperty("from", out var fromEl) && edgeEl.TryGetProperty("to", out var toEl))
+            {
+                from = fromEl.GetString() ?? string.Empty;
+                to = toEl.GetString() ?? string.Empty;
+            }
+            else if (edgeEl.TryGetProperty("source", out var sourceEl) && edgeEl.TryGetProperty("target", out var targetEl))
+            {
+                from = sourceEl.GetString() ?? string.Empty;
+                to = targetEl.GetString() ?? string.Empty;
+            }
+            else
+            {
+                continue;
+            }
 
             if (from.Length == 0 || to.Length == 0) continue;
             if (from == to) continue;
@@ -197,7 +209,54 @@ public static class CircuitLoader
             graph.AddEdge(new Edge<string>(from, to));
         }
 
+        if (graph.EdgeCount > 0)
+            return true;
+
+        var byId = rawOps.ToDictionary(op => op.Id);
+        foreach (var op in rawOps)
+        {
+            if (!TryGetDepsForOp(root, byId, op.Id, out var deps))
+                continue;
+
+            foreach (var dep in deps)
+            {
+                if (!validIds.Contains(dep) || dep == op.Id)
+                    continue;
+                graph.AddEdge(new Edge<string>(dep, op.Id));
+            }
+        }
+
         return graph.EdgeCount > 0;
+    }
+
+    private static bool TryGetDepsForOp(JsonElement root, Dictionary<string, RawOp> byId, string opId, out List<string> deps)
+    {
+        deps = new List<string>();
+        if (!root.TryGetProperty("ops", out var flatOpsEl))
+            return false;
+
+        foreach (var opEl in flatOpsEl.EnumerateArray())
+        {
+            var id = opEl.TryGetProperty("id", out var idEl) ? idEl.GetString() ?? string.Empty : string.Empty;
+            if (!string.Equals(id, opId, StringComparison.Ordinal))
+                continue;
+
+            if (!opEl.TryGetProperty("deps", out var depsEl))
+                return false;
+
+            foreach (var depEl in depsEl.EnumerateArray())
+            {
+                var dep = depEl.GetString() ?? string.Empty;
+                if (dep.Length == 0)
+                    continue;
+                if (byId.ContainsKey(dep))
+                    deps.Add(dep);
+            }
+
+            return deps.Count > 0;
+        }
+
+        return false;
     }
 
     private static void AddQubitInferredEdges(List<RawOp> rawOps, AdjacencyGraph<string, Edge<string>> graph)
@@ -215,10 +274,32 @@ public static class CircuitLoader
         }
     }
 
-    private static int[] ParseIntArray(JsonElement el, string prop)
+    private static int ParseQubitCount(JsonElement root)
     {
-        if (!el.TryGetProperty(prop, out var arr)) return Array.Empty<int>();
-        return arr.EnumerateArray().Select(x => x.GetInt32()).ToArray();
+        if (root.TryGetProperty("qubits", out var qubitsProp))
+        {
+            if (qubitsProp.ValueKind == JsonValueKind.Number)
+                return Math.Max(1, qubitsProp.GetInt32());
+            if (qubitsProp.ValueKind == JsonValueKind.Array)
+                return Math.Max(1, qubitsProp.GetArrayLength());
+        }
+
+        if (root.TryGetProperty("num_qubits", out var numQubitsProp) && numQubitsProp.ValueKind == JsonValueKind.Number)
+            return Math.Max(1, numQubitsProp.GetInt32());
+
+        return 1;
+    }
+
+    private static int[] ParseIntArray(JsonElement el, params string[] props)
+    {
+        foreach (var prop in props)
+        {
+            if (!el.TryGetProperty(prop, out var arr) || arr.ValueKind != JsonValueKind.Array)
+                continue;
+            return arr.EnumerateArray().Select(x => x.GetInt32()).ToArray();
+        }
+
+        return Array.Empty<int>();
     }
 
     private static float[] ParseFloatArray(JsonElement el, string prop)

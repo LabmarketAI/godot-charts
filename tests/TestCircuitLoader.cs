@@ -159,6 +159,55 @@ public class TestCircuitLoader
     }
 
         [Test]
+        public void Parse_QiskitAliasShape_ParsesQubitsAndLayers()
+        {
+                const string json = """
+                {
+                    "num_qubits": 2,
+                    "ops": [
+                        {"id":"h0", "gate":"h", "qubits":[0]},
+                        {"id":"cx01", "gate":"cx", "qubits":[0,1], "deps":["h0"]},
+                        {"id":"m0", "gate":"measure", "qubits":[0], "deps":["cx01"]}
+                    ]
+                }
+                """;
+
+                var cg = CircuitLoader.Parse(json)!;
+                Assert.That(cg, Is.Not.Null);
+                Assert.That(cg.NumQubits, Is.EqualTo(2));
+                Assert.That(cg.AllOps, Has.Count.EqualTo(3));
+                Assert.That(cg.AllOps.First(op => op.Id == "h0").Qubits, Is.EqualTo(new[] { 0 }));
+                Assert.That(cg.AllOps.First(op => op.Id == "cx01").Qubits, Is.EqualTo(new[] { 0, 1 }));
+                Assert.That(cg.AllOps.First(op => op.Id == "h0").Layer, Is.LessThan(cg.AllOps.First(op => op.Id == "cx01").Layer));
+        }
+
+        [Test]
+        public void Parse_EdgesSourceTarget_AreAccepted()
+        {
+                const string json = """
+                {
+                    "qubits": 2,
+                    "ops": [
+                        {"id":"a","gate":"h","q":[0]},
+                        {"id":"b","gate":"cx","q":[0,1]},
+                        {"id":"c","gate":"measure","q":[1]}
+                    ],
+                    "edges": [
+                        {"source":"a","target":"b"},
+                        {"source":"b","target":"c"}
+                    ]
+                }
+                """;
+
+                var cg = CircuitLoader.Parse(json)!;
+                var byId = cg.AllOps.ToDictionary(op => op.Id);
+
+                Assert.That(byId["a"].Layer, Is.EqualTo(0));
+                Assert.That(byId["b"].Layer, Is.EqualTo(1));
+                Assert.That(byId["c"].Layer, Is.EqualTo(2));
+        }
+
+        [Test]
         public void Parse_FlatOpsWithCyclicEdges_ReturnsNull()
         {
                 const string json = """

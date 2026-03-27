@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "id": "neutral",
+  "colors": {
+    "bg_normal": "#2E2E33",
+    "bg_hover": "#474752",
+    "bg_pressed": "#1F73D1",
+    "bg_disabled": "#232325",
+    "bg_checked": "#1F73D1",
+    "border_normal": "#595966",
+    "border_focused": "#4DA6FF",
+    "text_normal": "#F2F2F2",
+    "text_disabled": "#737373",
+    "accent": "#1F73D1",
+    "slider_track": "#404047",
+    "slider_thumb": "#1F73D1"
+  },
+  "sizes": {
+    "text_size": 18,
+    "border_width": 0.004
+  }
+}

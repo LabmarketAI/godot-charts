@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "colors": {
+    "bg_normal": "#2E2E33"
+  },
+  "sizes": {
+    "text_size": 18,
+    "border_width": 0.004
+  }
+}

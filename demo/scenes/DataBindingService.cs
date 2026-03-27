@@ -58,6 +58,7 @@ private readonly System.Collections.Generic.Dictionary<string, DesktopSourceProf
 private readonly System.Collections.Generic.Dictionary<string, string> _desktopSourceStatusByFrame = new();
 private readonly System.Collections.Generic.Dictionary<string, RuntimeBindingState> _stateByFrame = new();
 private readonly System.Collections.Generic.Dictionary<string, string> _topicByFrame = new();
+private readonly HashSet<string> _loggedBusAppliedChartTypes = new();
 private string _environmentPreset = "daylight";
 private string _environmentStatus = "pending";
 private bool _loggedMissingEnvironmentNodes;
@@ -1253,6 +1254,7 @@ private void ApplyPayloadToFrame(string frameId, ChartFrame3D frame, string fram
 	}
 
 	var normalizedType = NormalizeBusChartType(frameChartType);
+	LogBusApplyOnce(normalizedType, frameId);
 	switch (normalizedType)
 	{
 		case "surface":
@@ -1283,6 +1285,18 @@ private void ApplyPayloadToFrame(string frameId, ChartFrame3D frame, string fram
 			chartNode.DataSource = state.DictDataSource;
 			break;
 	}
+}
+
+private void LogBusApplyOnce(string chartType, string frameId)
+{
+	if (string.IsNullOrWhiteSpace(chartType))
+		return;
+
+	if (_loggedBusAppliedChartTypes.Contains(chartType))
+		return;
+
+	_loggedBusAppliedChartTypes.Add(chartType);
+	GD.Print($"SmokeBusApply: chart_type={chartType} frame_id={frameId}");
 }
 
 private static GDDict NormalizePointSeriesPayload(GDDict payloadData)

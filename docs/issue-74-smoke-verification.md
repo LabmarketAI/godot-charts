@@ -23,6 +23,10 @@ Smoke-verify that demo stream payloads can drive chart updates for all supported
 - Godot runtime attempted: 4.7-dev3 mono (headless)
 - Demo path: `demo/`
 
+Additional runtime check:
+
+- OS/runtime: Windows Godot console executable (`Godot_v4.7-dev3_mono_win64_console.exe`) invoked from WSL
+
 ## Commands Executed
 
 1. Build demo project:
@@ -49,6 +53,18 @@ Result: PASS (41/41)
 
 Result: BLOCKED (runtime initialization failure before stable frame render loop)
 
+4. Attempt headless demo run with Windows Godot console:
+
+```bash
+"C:/Users/b/Desktop/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64_console.exe" --path demo --headless --scene res://scenes/main.tscn --quit-after 45
+```
+
+Result: PARTIAL / BLOCKED
+
+- Process exits cleanly (`EXIT:0`)
+- Desktop capture backend initializes and captures frames
+- Runtime still logs `CircuitChart3D` `IndexOutOfRangeException` during scene processing
+
 ## Runtime Failure Evidence
 
 Observed startup blockers in headless Linux environment:
@@ -62,16 +78,23 @@ Observed startup blockers in headless Linux environment:
 
 Because scene initialization fails early in this environment, visual chart update verification cannot complete here.
 
+Windows-console run notes:
+
+- Startup succeeds further than Linux headless path
+- `DesktopCapture` starts and reports active window capture
+- However, `CircuitChart3D` runtime exception remains a blocker for declaring full clean smoke pass
+- `demo_stream` validation for all chart families also requires runtime frames configured to `demo_stream`; default startup content is static scene content and does not automatically prove one update cycle per chart family
+
 ## Checklist
 
 | Check | Status | Notes |
 |---|---|---|
-| Bar receives at least one stream payload update | Blocked | Runtime startup failure prevents frame verification in current environment |
-| Line receives at least one stream payload update | Blocked | Runtime startup failure prevents frame verification in current environment |
-| Scatter receives at least one stream payload update | Blocked | Runtime startup failure prevents frame verification in current environment |
-| Histogram receives at least one stream payload update | Blocked | Runtime startup failure prevents frame verification in current environment |
-| Surface receives at least one stream payload update | Blocked | Runtime startup failure prevents frame verification in current environment |
-| Graph network receives at least one stream payload update | Blocked | Runtime startup failure prevents frame verification in current environment |
+| Bar receives at least one stream payload update | Blocked | Requires runtime frame in `demo_stream`; not auto-provisioned in headless startup |
+| Line receives at least one stream payload update | Blocked | Requires runtime frame in `demo_stream`; not auto-provisioned in headless startup |
+| Scatter receives at least one stream payload update | Blocked | Requires runtime frame in `demo_stream`; not auto-provisioned in headless startup |
+| Histogram receives at least one stream payload update | Blocked | Requires runtime frame in `demo_stream`; not auto-provisioned in headless startup |
+| Surface receives at least one stream payload update | Blocked | Requires runtime frame in `demo_stream`; not auto-provisioned in headless startup |
+| Graph network receives at least one stream payload update | Blocked | Requires runtime frame in `demo_stream`; not auto-provisioned in headless startup |
 
 ## Code-level Verification Added
 
@@ -100,5 +123,6 @@ This enables bus-delivered runtime updates once the scene starts successfully in
 ## Conclusion
 
 - Automated build/test checks: PASS
-- Full visual smoke verification in this Linux headless environment: BLOCKED by native extension/runtime startup issues
+- Linux headless smoke: BLOCKED by native extension/runtime startup issues
+- Windows-console headless smoke: PARTIAL (startup and capture run, but blocked by `CircuitChart3D` runtime exception and lack of preconfigured `demo_stream` runtime frames)
 - Runtime bus-to-chart data path is now wired in code and ready for desktop visual confirmation

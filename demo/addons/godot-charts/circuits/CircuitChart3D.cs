@@ -123,6 +123,28 @@ public partial class CircuitChart3D : Chart3D
         // ---- Draw gates ----
         foreach (var op in _circuit.AllOps)
         {
+            if (op.Qubits.Length == 0)
+            {
+                GD.PushWarning($"CircuitChart3D: skipping op '{op.Id}' ({op.Gate}) because it has no qubit targets.");
+                continue;
+            }
+
+            var hasInvalidQubit = false;
+            for (int i = 0; i < op.Qubits.Length; i++)
+            {
+                if (op.Qubits[i] < 0 || op.Qubits[i] >= numQubits)
+                {
+                    hasInvalidQubit = true;
+                    break;
+                }
+            }
+
+            if (hasInvalidQubit)
+            {
+                GD.PushWarning($"CircuitChart3D: skipping op '{op.Id}' ({op.Gate}) due to out-of-range qubit index.");
+                continue;
+            }
+
             float x = (op.Layer + 0.5f) * _layerSpacing;
             var gateNode = op.Qubits.Length >= 2
                 ? DrawMultiQubitGate(op, x)

@@ -177,9 +177,9 @@ public partial class FrameOrchestrationService : Node
 			Size = SizeForPreset(sizePreset),
 		};
 		frame.Position = ComputeSpawnPosition(_framesById.Count);
-		frame.LookAt(new Vector3(0f, RuntimeRingHeight + 0.8f, 0f), Vector3.Up);
 
 		_runtimeContainer.AddChild(frame);
+		frame.LookAt(new Vector3(0f, RuntimeRingHeight + 0.8f, 0f), Vector3.Up);
 		_framesById[id] = frame;
 
 		SetFrameChartType(id, chartType, persist: false);
@@ -413,14 +413,14 @@ public partial class FrameOrchestrationService : Node
 		var chartType = "bar";
 		foreach (var child in frame.GetChildren())
 		{
-			if (child is BarChart3D) chartType = "bar";
+			if (child is HistogramChart3D) chartType = "histogram";
 			else if (child is LineChart3D) chartType = "line";
 			else if (child is ScatterChart3D) chartType = "scatter";
 			else if (child is SurfaceChart3D) chartType = "surface";
-			else if (child is HistogramChart3D) chartType = "histogram";
 			else if (child is GraphNetworkChart3D) chartType = "network";
 			else if (child is CircuitChart3D) chartType = "circuit";
 			else if (child is RuntimeDesktopFrameView) chartType = "desktop";
+			else if (child is BarChart3D) chartType = "bar";
 		}
 		return chartType;
 	}

@@ -32,13 +32,14 @@ WidgetFocusManager="*res://addons/godot-charts/widgets/widget_focus_manager.gd"
 
 project/assembly_name="GodotChartsDemo"
 
-[labmarket]
-
-tools/godot_console_executable="C:/Users/b/Desktop/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64_console.exe"
-
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot-charts/plugin.cfg")
+
+[labmarket]
+
+tools/godot_console_executable="C:/Users/b/Desktop/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64/Godot_v4.7-dev3_mono_win64_console.exe"
+testing_enable_headless_smoke=false
 
 [xr]
 

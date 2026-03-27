@@ -26,6 +26,7 @@ config/run/main_scene="res://scenes/main.tscn"
 
 XRToolsUserSettings="*res://addons/godot-xr-tools/user_settings/user_settings.gd"
 XRToolsRumbleManager="*res://addons/godot-xr-tools/rumble/rumble_manager.gd"
+WidgetFocusManager="*res://addons/godot-charts/widgets/widget_focus_manager.gd"
 
 [dotnet]
 

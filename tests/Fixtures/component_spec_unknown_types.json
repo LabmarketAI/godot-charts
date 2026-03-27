@@ -1,0 +1,36 @@
+{
+  "spec_version": "1.0",
+  "source": "material-design-simplified",
+  "family": "mixed",
+  "components": [
+    {
+      "name": "Button",
+      "props": {
+        "label": { "type": "string", "default": "OK" },
+        "variant": "filled",
+        "icon": "check",
+        "width_dp": 88,
+        "height_dp": 40
+      },
+      "events": ["click"]
+    },
+    {
+      "name": "DatePicker",
+      "props": {
+        "value": { "type": "string" },
+        "width_dp": 320,
+        "height_dp": 56
+      }
+    },
+    {
+      "name": "Slider",
+      "props": {
+        "value": { "type": "number", "default": 0.5 },
+        "min": 0,
+        "max": 100,
+        "width_dp": 200,
+        "height_dp": 40
+      }
+    }
+  ]
+}

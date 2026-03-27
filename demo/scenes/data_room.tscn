@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://doorf883vcv4s" path="res://scenes/panel.tscn" id="9_27won"]
 [ext_resource type="PackedScene" uid="uid://b5idwuogdwy3u" path="res://assets/Floor.glb" id="9_vde67"]
 [ext_resource type="PackedScene" path="res://scenes/widget_layout_validation.tscn" id="10_widget"]
+[ext_resource type="PackedScene" path="res://scenes/widget_controls_demo.tscn" id="11_controls"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -373,3 +374,6 @@ transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 10.6
 
 [node name="WidgetLayoutValidation" parent="." unique_id=759254079 instance=ExtResource("10_widget")]
 transform = Transform3D(-0.016501099, 0, 0.999864, 0, 1, 0, -0.999864, 0, -0.016501099, -5.69475, 1, 4.732853)
+
+[node name="WidgetControlsDemo" parent="." unique_id=850147392 instance=ExtResource("11_controls")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.69475, 1, -4.0)

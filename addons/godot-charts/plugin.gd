@@ -121,6 +121,48 @@ func _enable_plugin() -> void:
 		preload("widgets/widget_stack_3d.gd"),
 		null
 	)
+	add_custom_type(
+		"WidgetThemeData3D",
+		"Resource",
+		preload("widgets/widget_theme_data_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetControl3D",
+		"Area3D",
+		preload("widgets/widget_control_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetLabel3D",
+		"Node3D",
+		preload("widgets/widget_label_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetButton3D",
+		"Area3D",
+		preload("widgets/widget_button_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetToggle3D",
+		"Area3D",
+		preload("widgets/widget_toggle_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetSlider3D",
+		"Area3D",
+		preload("widgets/widget_slider_3d.gd"),
+		null
+	)
+	add_custom_type(
+		"WidgetListItem3D",
+		"Area3D",
+		preload("widgets/widget_list_item_3d.gd"),
+		null
+	)
 
 
 func _disable_plugin() -> void:
@@ -143,3 +185,10 @@ func _disable_plugin() -> void:
 	remove_custom_type("WidgetColumn3D")
 	remove_custom_type("WidgetGrid3D")
 	remove_custom_type("WidgetStack3D")
+	remove_custom_type("WidgetThemeData3D")
+	remove_custom_type("WidgetControl3D")
+	remove_custom_type("WidgetLabel3D")
+	remove_custom_type("WidgetButton3D")
+	remove_custom_type("WidgetToggle3D")
+	remove_custom_type("WidgetSlider3D")
+	remove_custom_type("WidgetListItem3D")

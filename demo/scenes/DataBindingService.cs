@@ -160,6 +160,22 @@ EmitSignal(SignalName.FrameBindingsChanged);
 return true;
 }
 
+public bool SetFrameStreamTopic(string frameId, string topicId, bool persist = true)
+{
+	if (_frameService == null)
+		return false;
+
+	if (!_frameService.SetFrameTopicRoute(frameId, topicId, BindingStream, persist))
+	{
+		GD.PushWarning($"Stream topic retarget rejected for frame '{frameId}' and topic '{topicId}'.");
+		return false;
+	}
+
+	SyncMessageBusSubscriptions();
+	EmitSignal(SignalName.FrameBindingsChanged);
+	return true;
+}
+
 public string GetFramePreset(string frameId)
 {
 if (_framePresetByFrame.TryGetValue(frameId, out var preset))
@@ -416,9 +432,6 @@ private void OnMessageBusMessageReceived(string topic, Dictionary payload)
 	if (!payload.TryGetValue("data", out var dataVariant) || dataVariant.VariantType != Variant.Type.Dictionary)
 		return;
 
-	if (BuildFrameTopic(payloadChartType) != topic)
-		return;
-
 	var payloadData = dataVariant.AsGodotDictionary();
 	foreach (var profile in _frameService.ListRuntimeFrameProfiles())
 	{
@@ -433,6 +446,12 @@ private void OnMessageBusMessageReceived(string topic, Dictionary payload)
 			continue;
 
 		var frameChartType = _frameService.GetFrameChartType(frameId);
+		if (!TryGetStreamTopicForFrame(frameId, frameChartType, out var expectedTopic))
+			continue;
+
+		if (!string.Equals(expectedTopic, topic, StringComparison.Ordinal))
+			continue;
+
 		if (NormalizeBusChartType(frameChartType) != payloadChartType)
 			continue;
 
@@ -1203,30 +1222,42 @@ private void SyncMessageBusSubscriptions()
 		if (chartType == "desktop")
 			continue;
 
-		expectedTopicsByFrame[frameId] = BuildFrameTopic(chartType);
+		if (!TryGetStreamTopicForFrame(frameId, chartType, out var topicId))
+			continue;
+
+		expectedTopicsByFrame[frameId] = topicId;
+	}
+
+	foreach (var expected in expectedTopicsByFrame)
+	{
+		if (_topicByFrame.TryGetValue(expected.Key, out var currentTopic))
+		{
+			if (currentTopic == expected.Value)
+				continue;
+
+			// Register new topic first, then remove the previous one to avoid a transient no-subscription gap.
+			_messageBusService.RegisterSubscriber(expected.Value, BuildSubscriberId(expected.Key));
+			_messageBusService.UnregisterSubscriber(currentTopic, BuildSubscriberId(expected.Key));
+			_topicByFrame[expected.Key] = expected.Value;
+			continue;
+		}
+
+		_messageBusService.RegisterSubscriber(expected.Value, BuildSubscriberId(expected.Key));
+		_topicByFrame[expected.Key] = expected.Value;
 	}
 
 	var removeIds = new List<string>();
 	foreach (var existing in _topicByFrame)
 	{
-		if (!expectedTopicsByFrame.TryGetValue(existing.Key, out var expectedTopic) || expectedTopic != existing.Value)
-		{
-			_messageBusService.UnregisterSubscriber(existing.Value, BuildSubscriberId(existing.Key));
-			removeIds.Add(existing.Key);
-		}
+		if (expectedTopicsByFrame.ContainsKey(existing.Key))
+			continue;
+
+		_messageBusService.UnregisterSubscriber(existing.Value, BuildSubscriberId(existing.Key));
+		removeIds.Add(existing.Key);
 	}
 
 	foreach (var frameId in removeIds)
 		_topicByFrame.Remove(frameId);
-
-	foreach (var expected in expectedTopicsByFrame)
-	{
-		if (_topicByFrame.TryGetValue(expected.Key, out var currentTopic) && currentTopic == expected.Value)
-			continue;
-
-		_messageBusService.RegisterSubscriber(expected.Value, BuildSubscriberId(expected.Key));
-		_topicByFrame[expected.Key] = expected.Value;
-	}
 }
 
 private void ClearMessageBusSubscriptions(MessageBusService service)
@@ -1239,6 +1270,24 @@ private void ClearMessageBusSubscriptions(MessageBusService service)
 private static string BuildFrameTopic(string chartType)
 {
 	return $"demo/stream/{NormalizeBusChartType(chartType)}";
+}
+
+private bool TryGetStreamTopicForFrame(string frameId, string chartType, out string topicId)
+{
+	topicId = BuildFrameTopic(chartType);
+	if (_frameService == null || string.IsNullOrWhiteSpace(frameId))
+		return false;
+
+	if (!_frameService.TryGetFrameRoutingProfile(frameId, out var routing))
+		return true;
+
+	if (!string.Equals(routing.BusId, BindingStream, StringComparison.OrdinalIgnoreCase))
+		return false;
+
+	if (!string.IsNullOrWhiteSpace(routing.TopicId))
+		topicId = routing.TopicId;
+
+	return !string.IsNullOrWhiteSpace(topicId);
 }
 
 private void ApplyPayloadToFrame(string frameId, ChartFrame3D frame, string frameChartType, GDDict payloadData)

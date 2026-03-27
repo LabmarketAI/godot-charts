@@ -77,6 +77,53 @@ public partial class FrameOrchestrationService : Node
 		return DetectChartType(frame);
 	}
 
+	public bool TryGetFrameRoutingProfile(string frameId, out FrameRoutingProfile routing)
+	{
+		if (_routingByFrameId.TryGetValue(frameId, out routing))
+			return true;
+
+		routing = default;
+		return false;
+	}
+
+	public bool SetFrameTopicRoute(string frameId, string topicId, string? busId = null, bool persist = true)
+	{
+		if (!_framesById.ContainsKey(frameId))
+			return false;
+
+		if (string.IsNullOrWhiteSpace(topicId))
+		{
+			GD.PushWarning($"Frame topic retarget rejected for '{frameId}': topic_id is required.");
+			return false;
+		}
+
+		var chartType = GetFrameChartType(frameId);
+		if (!_routingByFrameId.TryGetValue(frameId, out var current))
+			current = FrameRoutingProfileContract.CreateDefault(chartType);
+
+		var nextBusId = FrameRoutingProfileContract.NormalizeBusId(busId ?? current.BusId);
+		var nextTopicId = topicId.Trim();
+		if (string.IsNullOrWhiteSpace(nextTopicId))
+		{
+			GD.PushWarning($"Frame topic retarget rejected for '{frameId}': topic_id is empty after trim.");
+			return false;
+		}
+
+		_routingByFrameId[frameId] = current with
+		{
+			BusId = nextBusId,
+			TopicId = nextTopicId,
+		};
+
+		if (persist)
+		{
+			PersistWorkspaceFrames();
+			EmitSignal(SignalName.RuntimeFramesChanged);
+		}
+
+		return true;
+	}
+
 	public string GetMoveModeFrameId()
 	{
 		return _moveModeFrameId;

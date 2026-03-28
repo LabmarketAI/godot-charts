@@ -10,24 +10,23 @@ public partial class WristwatchConsoleHints : Node3D
 
 	[Export(PropertyHint.MultilineText)]
 	public string Instructions { get; set; } =
-		"Console Controls\n"
-		+ "F1 or B/Y: Toggle diegetic console\n"
-		+ "Press again: Hide console\n"
+		"B/Y or F1: Toggle console\n"
 		+ "\n"
-		+ "VR interaction\n"
-		+ "- Use left-hand pointer ray to target controls\n"
-		+ "- Press trigger while aiming at a button\n"
-		+ "- If clicks fail, open Issue #45 checklist\n"
+		+ "Place a new chart\n"
+		+ "1. Tap a chart widget in console\n"
+		+ "2. Aim right hand — preview follows\n"
+		+ "3. Thumbstick Y: adjust distance\n"
+		+ "4. Hold right grip, release to place\n"
 		+ "\n"
-		+ "Workaround\n"
-		+ "- Use desktop scene to interact with controls\n"
-		+ "- In VR use F1 or B/Y to show/hide panel state\n"
-		+ "- Menu toggles keyboard passthrough when supported\n"
+		+ "Move an existing frame\n"
+		+ "1. Select frame in console\n"
+		+ "2. Tap Toggle Move Mode\n"
+		+ "3. Hold either grip to drag\n"
+		+ "4. Release grip to set position\n"
+		+ "5. Yaw/Lift buttons for fine adjust\n"
 		+ "\n"
-		+ "Open the console to:\n"
-		+ "- Create and manage workspaces\n"
-		+ "- Create/delete runtime frames\n"
-		+ "- Set chart type and frame size";
+		+ "VR tip: Left pointer ray + trigger\n"
+		+ "to tap console buttons";
 
 	public override void _Ready()
 	{

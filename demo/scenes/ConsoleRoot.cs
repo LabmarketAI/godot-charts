@@ -484,7 +484,7 @@ if (_frameService == null || _placementStatusLabel == null)
 return;
 
 if (_frameService.IsChartPlacementActive())
-_placementStatusLabel.Text = $"Placement: {_frameService.GetPlacementChartType()} (right grip to place)";
+_placementStatusLabel.Text = $"Placement: {_frameService.GetPlacementChartType()} — aim right hand, thumbstick Y = distance, grip to place";
 else
 _placementStatusLabel.Text = "Placement: idle";
 }

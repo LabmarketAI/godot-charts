@@ -9,6 +9,16 @@ Add beautiful, interactive 3D charts to any Godot project with a few lines of GD
 
 ---
 
+## What you get out of the box
+
+Godot Charts ships eight 3D chart node types — `BarChart3D`, `LineChart3D`, `ScatterChart3D`, `SurfaceChart3D`, `HistogramChart3D`, `GraphNetworkChart2D`, `GraphNetworkChart3D` — all housed in `ChartFrame3D`, a movable, resizable 3D panel that auto-fits its children. Every chart type is a `@tool` node, so it renders live in the editor as you tweak properties in the Inspector. Data follows a Chart.js-style dictionary (`labels` + `datasets`), and three built-in data sources handle static dictionaries, CSV files, and live rolling windows (`StreamDataSource`). A `MessageBusService` singleton wires the stream sources to a publish/subscribe channel so external systems can push payloads at runtime without touching the chart code directly.
+
+The included demo project (`demo/`) shows every feature in two modes that share the same central "Data Room" scene. In **desktop mode** (`main.tscn`) you walk through the room with WASD/mouse and teleport between charts with the number keys. In **VR mode** (`main_vr.tscn`, requires OpenXR) you explore the same room with a full Godot XR Tools rig. Both modes expose a **diegetic console panel** (F1 / B-Y button) for creating and deleting chart frames at runtime, switching chart types, resizing frames, applying environment presets (daylight / studio / night), controlling the live data stream, and routing individual frames to different data topics. The console also includes a per-frame topic routing system with a manual lock so frames stay pinned to specific data channels even when the bus broadcasts to multiple topics. All layout and binding choices are saved to a workspace profile under `user://workspaces/` and restored on the next run.
+
+In VR, chart frames are fully interactive at runtime: select a chart type widget in the console to arm **placement mode**, then hold the right grip to drag the new frame into world space — the right thumbstick adjusts how far away the frame sits, and a cyan wireframe preview updates live including wall-raycast distance clamping. Releasing the grip finalizes the position. Existing frames can be grabbed with either grip in **move mode** (toggled from the console) and dragged to a new location, with the frame yaw aligning to the controller's forward heading. Transforms persist in the workspace automatically on release. The data room also includes a **live desktop capture panel** powered by the [godot-desktop-capture](https://github.com/LabmarketAI/godot-desktop-capture) GDExtension (DXGI on Windows, PipeWire on Linux), and a **widget library** with a schema validator, spec-to-schema translator, tokenized theme engine with runtime switching, and interactive 3D controls (buttons, sliders, labels) wired to the XR input stack.
+
+---
+
 ## Planning Docs
 
 - [Issue 56 widget-library implementation plan](docs/issue-56-widget-library-implementation-plan.md)

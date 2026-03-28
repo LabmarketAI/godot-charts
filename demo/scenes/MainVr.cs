@@ -40,6 +40,9 @@ public partial class MainVr : Node3D
 	private Vector3 _moveOffsetLocal = Vector3.Zero;
 	private float _moveHoldDistance = 1.6f;
 	private bool _placementGripHeld;
+	private bool _placementWasActive;
+	private float _placementDistance = PlacementDefaultDistance;
+	private Vector3 _placementPlanarForward = Vector3.Forward;
 	private Node3D? _placementPreviewRoot;
 	private MeshInstance3D? _placementPreviewMesh;
 	private Vector2 _placementPreviewSize = Vector2.Zero;
@@ -49,7 +52,8 @@ public partial class MainVr : Node3D
 	private const float PlacementDefaultDistance = 1.9f;
 	private const float PlacementMinDistance = 0.75f;
 	private const float PlacementMaxDistance = 4.25f;
- 	private const float PlacementHeight = 1.0f;
+	private const float PlacementHeight = 1.0f;
+	private const float PlacementDistanceSpeed = 2.5f;
 
 	public override void _Ready()
 	{
@@ -83,11 +87,11 @@ public partial class MainVr : Node3D
 	public override void _Process(double delta)
 	{
 		HandleControllerConsoleToggle();
-		HandleChartPlacementMode();
+		HandleChartPlacementMode((float)delta);
 		HandleFrameMoveMode();
 	}
 
-	private void HandleChartPlacementMode()
+	private void HandleChartPlacementMode(float delta)
 	{
 		if (!GetViewport().UseXR || _frameService == null)
 			return;
@@ -95,15 +99,25 @@ public partial class MainVr : Node3D
 		if (_rightController == null)
 			ResolveControllers();
 
-		if (!_frameService.IsChartPlacementActive())
+		var isActive = _frameService.IsChartPlacementActive();
+		if (!isActive)
 		{
+			if (_placementWasActive)
+				_placementDistance = PlacementDefaultDistance;
+			_placementWasActive = false;
 			_placementGripHeld = false;
 			if (_placementPreviewRoot != null)
 				_placementPreviewRoot.Visible = false;
 			return;
 		}
 
-		UpdatePlacementPreviewTransform();
+		if (!_placementWasActive)
+		{
+			_placementDistance = PlacementDefaultDistance;
+			_placementWasActive = true;
+		}
+
+		UpdatePlacementPreviewTransform(delta);
 
 		var gripPressed = _rightController != null && _rightController.IsButtonPressed("grip_click");
 		if (gripPressed)
@@ -120,9 +134,17 @@ public partial class MainVr : Node3D
 			var frameId = _frameService.CreateFrameAndReturnId(chartType, sizePreset);
 			if (!string.IsNullOrWhiteSpace(frameId) && _frameService.TryGetFrame(frameId, out var placedFrame))
 			{
+				// ChartFrame3D origin is at its bottom-left corner; the wireframe preview is
+				// centered.  Shift the target so the frame's visual center lands on the preview
+				// center rather than its origin.
+				var frameSize = FrameOrchestrationService.GetFrameSizeForPreset(sizePreset);
+				var frameLocalX = new Vector3(-_placementPlanarForward.Z, 0f, _placementPlanarForward.X);
+				var centerOffset = frameLocalX * (frameSize.X * 0.5f) + Vector3.Up * (frameSize.Y * 0.5f);
+				var correctedGlobal = _placementPreviewGlobal - centerOffset;
+
 				var targetLocal = placedFrame.Position;
 				if (placedFrame.GetParent() is Node3D parent)
-					targetLocal = parent.ToLocal(_placementPreviewGlobal);
+					targetLocal = parent.ToLocal(correctedGlobal);
 				_frameService.SetFrameTransform(frameId, targetLocal, _placementPreviewRotation, persist: true);
 			}
 
@@ -130,7 +152,7 @@ public partial class MainVr : Node3D
 		}
 	}
 
-	private void UpdatePlacementPreviewTransform()
+	private void UpdatePlacementPreviewTransform(float delta)
 	{
 		if (_rightController == null || _frameService == null)
 			return;
@@ -154,7 +176,18 @@ public partial class MainVr : Node3D
 		else
 			planarForward = planarForward.Normalized();
 
-		var distance = ComputePlacementDistance(planarForward);
+		// Right thumbstick Y adjusts placement distance (push up = farther, pull down = closer).
+		var stick = _rightController.GetVector2("primary");
+		_placementDistance = Mathf.Clamp(
+			_placementDistance + stick.Y * PlacementDistanceSpeed * delta,
+			PlacementMinDistance, PlacementMaxDistance);
+
+		// Wall raycast clamps distance down if there is an obstruction closer than the user target.
+		var wallDistance = ComputePlacementDistance(planarForward);
+		var distance = Mathf.Min(_placementDistance, wallDistance);
+
+		_placementPlanarForward = planarForward;
+
 		var previewGlobal = _rightController.GlobalPosition + planarForward * distance;
 		previewGlobal.Y = PlacementHeight;
 		var yaw = Mathf.RadToDeg(Mathf.Atan2(-planarForward.X, -planarForward.Z));

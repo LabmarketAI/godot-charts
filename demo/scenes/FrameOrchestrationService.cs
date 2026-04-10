@@ -27,7 +27,7 @@ public partial class FrameOrchestrationService : Node
 
 	public static readonly string[] SupportedChartTypes =
 	{
-		"bar", "line", "scatter", "surface", "histogram", "network", "circuit", "desktop",
+		"bar", "line", "scatter", "surface", "histogram", "network", "circuit", "desktop", "blank",
 	};
 
 	public static readonly string[] SupportedSizePresets =
@@ -461,6 +461,9 @@ public partial class FrameOrchestrationService : Node
 				node.QueueFree();
 		}
 
+		if (chartType == "blank")
+			return;
+
 		if (chartType == "desktop")
 		{
 			var desktopView = new RuntimeDesktopFrameView
@@ -515,7 +518,7 @@ public partial class FrameOrchestrationService : Node
 
 	private static string DetectChartType(ChartFrame3D frame)
 	{
-		var chartType = "bar";
+		var chartType = "blank";
 		foreach (var child in frame.GetChildren())
 		{
 			if (child is HistogramChart3D) chartType = "histogram";

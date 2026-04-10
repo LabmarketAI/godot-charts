@@ -1,0 +1,56 @@
+{
+  "topic": "demo/stream/network",
+  "datasets": [
+    {
+      "comment": "ML pipeline — baseline load",
+      "nodes": [
+        { "id": "ingest",   "label": "Ingest",   "x": -1.2, "y":  0.1, "z":  0.0 },
+        { "id": "feature",  "label": "Feature",  "x": -0.3, "y":  0.5, "z":  0.3 },
+        { "id": "train",    "label": "Train",    "x":  0.5, "y":  0.4, "z": -0.2 },
+        { "id": "validate", "label": "Validate", "x":  0.9, "y":  0.6, "z":  0.3 },
+        { "id": "serve",    "label": "Serve",    "x":  1.3, "y":  0.1, "z":  0.0 }
+      ],
+      "edges": [
+        { "source": "ingest",  "target": "feature",  "label": "events",   "weight": 0.5 },
+        { "source": "feature", "target": "train",    "label": "features", "weight": 0.6 },
+        { "source": "train",   "target": "validate", "label": "model",    "weight": 0.7 },
+        { "source": "validate","target": "serve",    "label": "approved",  "weight": 0.8 }
+      ]
+    },
+    {
+      "comment": "ML pipeline — high throughput surge",
+      "nodes": [
+        { "id": "ingest",   "label": "Ingest",   "x": -1.2, "y":  0.1, "z":  0.0 },
+        { "id": "feature",  "label": "Feature",  "x": -0.3, "y":  0.5, "z":  0.3 },
+        { "id": "train",    "label": "Train",    "x":  0.5, "y":  0.4, "z": -0.2 },
+        { "id": "validate", "label": "Validate", "x":  0.9, "y":  0.6, "z":  0.3 },
+        { "id": "serve",    "label": "Serve",    "x":  1.3, "y":  0.1, "z":  0.0 }
+      ],
+      "edges": [
+        { "source": "ingest",  "target": "feature",  "label": "events",   "weight": 1.0 },
+        { "source": "feature", "target": "train",    "label": "features", "weight": 1.0 },
+        { "source": "train",   "target": "validate", "label": "model",    "weight": 0.9 },
+        { "source": "validate","target": "serve",    "label": "approved",  "weight": 0.9 }
+      ]
+    },
+    {
+      "comment": "ML pipeline — A/B experiment branch added",
+      "nodes": [
+        { "id": "ingest",   "label": "Ingest",   "x": -1.2, "y":  0.1, "z":  0.0 },
+        { "id": "feature",  "label": "Feature",  "x": -0.3, "y":  0.5, "z":  0.3 },
+        { "id": "train",    "label": "Train",    "x":  0.5, "y":  0.4, "z": -0.2 },
+        { "id": "trainB",   "label": "Train B",  "x":  0.5, "y": -0.3, "z":  0.4 },
+        { "id": "validate", "label": "Validate", "x":  0.9, "y":  0.6, "z":  0.3 },
+        { "id": "serve",    "label": "Serve",    "x":  1.3, "y":  0.1, "z":  0.0 }
+      ],
+      "edges": [
+        { "source": "ingest",  "target": "feature",  "label": "events",   "weight": 0.8 },
+        { "source": "feature", "target": "train",    "label": "features", "weight": 0.6 },
+        { "source": "feature", "target": "trainB",   "label": "exp",      "weight": 0.4 },
+        { "source": "train",   "target": "validate", "label": "model A",  "weight": 0.7 },
+        { "source": "trainB",  "target": "validate", "label": "model B",  "weight": 0.5 },
+        { "source": "validate","target": "serve",    "label": "winner",   "weight": 0.9 }
+      ]
+    }
+  ]
+}

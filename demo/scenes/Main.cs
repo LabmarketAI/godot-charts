@@ -55,6 +55,7 @@ public partial class Main : Node3D
     private MessageBusService _messageBusService = null!;
     private DemoDataGenerator _demoDataGenerator = null!;
     private ConsoleRoot _consoleRoot = null!;
+    private readonly WebSocketBridgeService _wsBridge = new() { Name = "WebSocketBridgeService" };
 
     public override void _Ready()
     {
@@ -112,6 +113,9 @@ public partial class Main : Node3D
         _messageBusService = new MessageBusService { Name = "MessageBusService" };
         AddChild(_messageBusService);
         _bindingService.BindMessageBus(_messageBusService);
+
+        AddChild(_wsBridge);
+        _wsBridge.BindMessageBus(_messageBusService);
 
         _demoDataGenerator = new DemoDataGenerator { Name = "DemoDataGenerator" };
         AddChild(_demoDataGenerator);

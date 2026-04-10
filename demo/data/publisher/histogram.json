@@ -1,0 +1,21 @@
+{
+  "topic": "demo/stream/histogram",
+  "comment": "bin_edges has N+1 values for N bins. counts[i] is the bar height for bin i.",
+  "datasets": [
+    {
+      "comment": "Normal distribution centred at 2.5",
+      "bin_edges": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0],
+      "counts":    [2,   5,  14,  28,  42,  45,  38,  22,   9,   3,   1]
+    },
+    {
+      "comment": "Bimodal — two distinct populations",
+      "bin_edges": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0],
+      "counts":    [3,  18,  38,  28,   8,   6,  10,  30,  42,  20,   5]
+    },
+    {
+      "comment": "Right-skewed — mass on the left, long tail right",
+      "bin_edges": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0],
+      "counts":    [48,  40,  30,  20,  12,   8,   5,   3,   2,   1,   1]
+    }
+  ]
+}

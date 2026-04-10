@@ -1,0 +1,32 @@
+{
+  "topic": "demo/stream/bar",
+  "datasets": [
+    {
+      "comment": "Strong quarter — revenue dominates",
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      "datasets": [
+        { "name": "Revenue", "values": [82, 91, 78, 95, 88, 104] },
+        { "name": "Costs",   "values": [41, 44, 39, 47, 43,  51] },
+        { "name": "Profit",  "values": [41, 47, 39, 48, 45,  53] }
+      ]
+    },
+    {
+      "comment": "Crisis quarter — costs spike, profit collapses",
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      "datasets": [
+        { "name": "Revenue", "values": [60, 55, 48, 52, 58, 61] },
+        { "name": "Costs",   "values": [70, 74, 80, 76, 69, 65] },
+        { "name": "Profit",  "values": [-10, -19, -32, -24, -11, -4] }
+      ]
+    },
+    {
+      "comment": "Recovery — costs normalise, revenue climbs back",
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      "datasets": [
+        { "name": "Revenue", "values": [65, 72, 80, 87, 93, 99] },
+        { "name": "Costs",   "values": [62, 60, 57, 53, 50, 48] },
+        { "name": "Profit",  "values": [3, 12, 23, 34, 43, 51] }
+      ]
+    }
+  ]
+}

@@ -30,7 +30,9 @@ public partial class MainVr : Node3D
 	private WorkspaceStateService? _workspaceService;
 	private FrameOrchestrationService? _frameService;
 	private DataBindingService? _bindingService;
+	private MessageBusService? _messageBusService;
 	private ConsoleRoot? _consoleRoot;
+	private WebSocketBridgeService? _wsBridge;
 	private XRController3D? _leftController;
 	private XRController3D? _rightController;
 	private bool _consoleToggleHeld;
@@ -81,6 +83,7 @@ public partial class MainVr : Node3D
 		}
 
 		SetupKeyboardPassthrough();
+		SetupWebSocketBridge();
 		CallDeferred(MethodName.SetupDesktopCapture);
 	}
 
@@ -352,6 +355,10 @@ public partial class MainVr : Node3D
 		AddChild(_bindingService);
 		_bindingService.Initialize(_frameService, _workspaceService, GetNode<Node3D>("DataRoom"));
 
+		_messageBusService = new MessageBusService { Name = "MessageBusService" };
+		AddChild(_messageBusService);
+		_bindingService.BindMessageBus(_messageBusService);
+
 		var packed = GD.Load<PackedScene>("res://scenes/console_root.tscn");
 		_consoleRoot = packed.Instantiate<ConsoleRoot>();
 		_consoleRoot.Name = "ConsoleRoot";
@@ -501,6 +508,16 @@ public partial class MainVr : Node3D
 		}
 
 		tex.Set("enabled", true);
+	}
+
+	private void SetupWebSocketBridge()
+	{
+		if (_messageBusService == null)
+			return;
+
+		_wsBridge = new WebSocketBridgeService { Name = "WebSocketBridgeService" };
+		AddChild(_wsBridge);
+		_wsBridge.BindMessageBus(_messageBusService);
 	}
 
 	private void ResolveControllers()

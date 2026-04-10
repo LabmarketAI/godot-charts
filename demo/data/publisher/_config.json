@@ -1,0 +1,5 @@
+{
+  "port": 7780,
+  "interval_ms": 700,
+  "enabled_types": ["bar", "line", "scatter", "surface", "histogram", "network"]
+}

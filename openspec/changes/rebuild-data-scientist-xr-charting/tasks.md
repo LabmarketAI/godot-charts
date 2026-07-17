@@ -10,6 +10,33 @@
 - [ ] 1.8 Define the dependency-first scorecard and decision-record template covering semantic fit, maintenance, license, security, API stability, Godot/WebXR/platform compatibility, binaries, transitive dependencies, size, performance, testability, and fallback.
 - [ ] 1.9 Survey the Godot Asset Library and maintained upstream ecosystems for rendering, XR interaction, UI, networking/message buses, authentication/browser flows, serialization/schema validation, tables, layout, graph algorithms, persistence, testing, and asset pipelines; record `adopt`, `wrap`, `optional integration`, or `build minimal` decisions before implementation tasks begin.
 
+## Milestone M1. Architectural Spine
+
+M1 is the first implementation gate. It SHALL remain deliberately narrow: one recorded Python-originated scatter plot and its bounded table arrive through the normalized session protocol, render incrementally in a clean standard-Godot typed-GDScript project, preserve stable row identity, support inspection and linked selection, survive a compatible replacement revision, expose diagnostics/provenance, and replay deterministically in automated tests. M1 does not require live Jupyter authentication, a network message-bus choice, the full chart catalog, native GIS packages, production XR assets, or a headset.
+
+- [ ] M1.1 Complete the legacy audit and dependency scorecards needed by this slice; record keep/adapt/rewrite/remove and adopt/wrap/optional/build-minimal decisions.
+- [ ] M1.2 Establish clean pure-model, Godot-renderer, input-intent, protocol/replay, and optional-integration boundaries plus a standard-Godot CI fixture with no .NET or native runtime dependency.
+- [ ] M1.3 Publish the minimum versioned schemas and golden fixtures for session handshake/capabilities, plot-message replacement, bounded table request/result, row identity, selection, provenance, diagnostics, and replacement revision.
+- [ ] M1.4 Produce one deterministic Python-side fixture from a supported Matplotlib scatter plot and DataFrame-like source, including missing values and stable row/layer/view/plot identities.
+- [ ] M1.5 Implement deterministic in-process recorded replay with ordering, duplicate handling, revision checks, bounded limits, pause/step/restart, and no network or live-kernel requirement.
+- [ ] M1.6 Implement the minimum typed-GDScript retained figure/view/layer model, continuous/categorical scales, axes/guides, validation, serialization, and incremental diff contract required by the fixture.
+- [ ] M1.7 Render the scatter plot incrementally in standard Godot with stable picking identities, bounded resource lifecycle, readable inspection, missing-value behavior, and no destructive full-tree rebuild on a compatible update.
+- [ ] M1.8 Implement a bounded virtualized table view for the same rows and link table/chart inspection and selection through normalized row identities without mutating source data.
+- [ ] M1.9 Apply a compatible full replacement revision while preserving eligible frame, selection, picking, and table state; diagnose and reset only the state whose identity is no longer valid.
+- [ ] M1.10 Add public diagnostics for source/adapter/schema/revision/provenance, replay status, approximations, rejected fields, render lifecycle, and row-selection linkage.
+- [ ] M1.11 Prove deterministic replay, numerical/semantic assertions, public API usage, headless lifecycle, selection linkage, replacement behavior, resource stability, clean packaging, and desktop performance in CI.
+- [ ] M1.12 Publish the minimal quickstart and reference scene from released public APIs, record measured results and remaining risks, and require an explicit M1 review before live transport, Jupyter authentication, additional chart types, or WebXR implementation begins.
+
+### M1 Exit Criteria
+
+- A clean standard-Godot project installs and runs the typed-GDScript addon without .NET, native binaries, network access, or demo-private APIs.
+- The checked-in recorded session deterministically produces the expected scatter plot and bounded table from normalized schemas.
+- Chart and table resolve the same stable rows for inspection and single/multi selection, including declared missing-value behavior.
+- A compatible replacement revision updates incrementally and preserves eligible analytical state without scene-tree or rendering-resource growth.
+- Invalid, oversized, out-of-order, duplicate, and identity-breaking fixtures produce structured diagnostics and preserve the last-good state.
+- CI passes schema, numerical, semantic, serialization, lifecycle, selection, revision, packaging, and measured desktop-budget checks.
+- The quickstart and reference scene use only public contracts, and the M1 review records dependency decisions, measured budgets, deferred capabilities, and authorization to proceed.
+
 ## 2. Test and Package Foundations
 
 - [ ] 2.1 Create the clean module boundaries for pure plot core, Godot renderer/editor adapter, input adapters, and optional integrations.

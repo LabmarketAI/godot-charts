@@ -168,8 +168,8 @@ WebXR uses the same intent and control-binding layer as native XR, behind a capa
 ## Migration Plan
 
 1. Freeze feature additions to legacy core; inventory APIs and known consumers.
-2. Run audit/spikes and record the language, packaging, renderer, and compatibility decisions.
-3. Build a scatter-plot vertical slice through specification, scale, renderer, and desktop/XR selection contracts.
+2. Run audit/dependency spikes and record language, packaging, renderer, compatibility, and adopt/wrap/optional/build-minimal decisions needed by M1.
+3. Complete M1: deterministically replay one Python-originated scatter plot and bounded table through normalized schemas into a clean standard-Godot typed-GDScript addon, with stable row identity, linked inspection/selection, incremental compatible replacement, diagnostics/provenance, resource-stability checks, and public quickstart.
 4. Add remaining MVP marks, guides, streaming, linked interaction, and release gates.
 5. Publish a preview namespace/version alongside legacy code and migrate the gallery.
 6. Decide whether to ship a bounded compatibility adapter; deprecate and then remove legacy/demo-owned core behavior.

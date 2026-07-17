@@ -73,6 +73,8 @@ GODOT_BIN=/path/to/Godot_v4.6.3-stable_linux.x86_64 ./scripts/test-m1-contract.s
 
 The generated directory is the complete preview addon and installs directly at `res://addons/godot-charts/`. The current repository checkout still carries legacy code beside the rebuild for migration evidence; do not package the entire canonical directory as the M1 preview.
 
+For a self-contained recorded-session scene, follow [the M1 five-minute quickstart](examples/m1/README.md).
+
 | M1 dependency | Scope | Required by consumers | Version policy |
 |---|---|---|---|
 | Standard Godot | Runtime/editor | Yes | 4.6.3 stable floor; no .NET build |

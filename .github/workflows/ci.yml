@@ -79,4 +79,6 @@ jobs:
       - name: Audit preview package and run headless tests
         env:
           GODOT_BIN: /tmp/godot/Godot_v4.6.3-stable_linux.x86_64
-        run: bash scripts/test-m1-contract.sh
+        run: |
+          bash scripts/test-m1-contract.sh
+          bash scripts/test-m1-example.sh

@@ -38,6 +38,7 @@ M1 is the first implementation gate. It SHALL remain deliberately narrow: one re
 - [x] M1.11 Prove deterministic replay, numerical/semantic assertions, public API usage, headless lifecycle, selection linkage, replacement behavior, resource stability, clean packaging, and desktop performance in CI.
   - Evidence: the allowlisted preview artifact rejects C#/.NET/native/demo dependencies and loads as a standard-Godot editor plugin. GitHub Actions run `M1 Pure GDScript (Godot 4.6.3)` with pinned fixture dependencies and official Godot checksum; remote run `29549390094` passed fixture regeneration, schemas, clean packaging, numerical/model/replay/render/table/session/diagnostics behavior, resource stability, and measured update budgets.
 - [ ] M1.12 Publish the minimal quickstart and reference scene from released public APIs, record measured results and remaining risks, and require an explicit M1 review before live transport, Jupyter authentication, additional chart types, or WebXR implementation begins.
+  - Started: `examples/m1/`, `scripts/prepare-m1-example.sh`, and `m1-review.md` provide the self-contained public reference scene, five-minute preparation path, measurements, deferred risks, and review boundary. Official-Godot remote CI confirmation and product-owner acceptance remain open.
 
 ### M1 Exit Criteria
 

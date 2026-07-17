@@ -1,0 +1,44 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://main.gd" id="1_main"]
+[ext_resource type="Script" path="res://addons/godot-charts/renderers/scatter_renderer_3d.gd" id="2_scatter"]
+[ext_resource type="Script" path="res://addons/godot-charts/tables/bounded_table_view.gd" id="3_table"]
+
+[node name="M1Quickstart" type="Node"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.970143, 0.242536, 0, -0.242536, 0.970143, 0, 2, 8)
+current = true
+
+[node name="ScatterRenderer3D" type="Node3D" parent="."]
+position = Vector3(-1.5, 0, 0)
+script = ExtResource("2_scatter")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="TablePanel" type="ColorRect" parent="CanvasLayer"]
+anchors_preset = 6
+anchor_left = 0.62
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.04, 0.06, 0.1, 0.92)
+
+[node name="TableView" type="Control" parent="CanvasLayer"]
+anchors_preset = 6
+anchor_left = 0.64
+anchor_top = 0.12
+anchor_right = 0.98
+anchor_bottom = 0.96
+script = ExtResource("3_table")
+max_visible_rows = 10
+
+[node name="Status" type="Label" parent="CanvasLayer"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 900.0
+offset_bottom = 52.0
+text = "Loading recorded analytical session…"
+theme_override_font_sizes/font_size = 18

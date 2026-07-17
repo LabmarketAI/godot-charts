@@ -121,7 +121,8 @@ M1 is the first implementation gate. It SHALL remain deliberately narrow: one re
 - [ ] 3A.6 Implement Altair/Vega-Lite adaptation from versioned JSON specs with inline/named data, supported transforms, layers, facets, concatenation, encodings, scales, guides, and parameters.
 - [ ] 3A.7 Implement Bokeh adaptation from standalone/document JSON for supported glyphs, column data sources, ranges, axes, layouts, and selections without executing callbacks.
 - [ ] 3A.8 Implement the pure-GDScript envelope validator/normalizer and full/patch receiver with idempotency, ordering, size limits, unknown-field handling, and structured rejection events.
-- [ ] 3A.9 Implement one optional message-bus bridge as a separate integration and prove that recorded envelopes replay identically through in-process and bus transports.
+- [x] 3A.9 Implement one optional message-bus bridge as a separate integration and prove that recorded envelopes replay identically through in-process and bus transports.
+  - Evidence: `integrations/websocket_session_client.gd` wraps standard Godot `WebSocketPeer` without changing core or envelope contracts. `tools/live/fixture_server.py` publishes the checked-in replay manifest over localhost, and `test-live-transport.sh` proves handshake/session isolation, bounded/redacted transport state, duplicate semantics, replacement revision, selection preservation, and the same session/scatter/table result in official standard Godot CI. Authentication and workspace selection remain explicitly outside this bridge.
 - [ ] 3A.10 Add cross-library golden fixtures and semantic/visual conformance reports covering supported, approximated, fallback, and rejected features.
 
 ## 3B. Session Data and Locally Authored Plots

@@ -37,6 +37,25 @@ func load_messages(messages: Array) -> void:
 	restart()
 
 
+func begin_live() -> void:
+	_messages.clear()
+	restart()
+	status = Status.RUNNING
+
+
+func receive_message(message: Dictionary) -> bool:
+	if status != Status.RUNNING:
+		status = Status.RUNNING
+	var applied_before := applied_messages
+	var duplicates_before := duplicate_messages
+	_apply(message.duplicate(true))
+	return applied_messages > applied_before or duplicate_messages > duplicates_before
+
+
+func complete_live() -> void:
+	status = Status.COMPLETE
+
+
 func restart() -> void:
 	status = Status.READY
 	cursor = 0

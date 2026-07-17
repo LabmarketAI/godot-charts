@@ -82,6 +82,21 @@ For a self-contained recorded-session scene, follow [the M1 five-minute quicksta
 | pandas | Fixture generation | No | Development-only, pinned in `tools/m1/requirements.txt` |
 | Python JSON Schema | Contract validation | No | Development-only, pinned in `tools/m1/requirements.txt` |
 
+### Optional live WebSocket transport
+
+The preview addon includes `WebSocketSessionClient`, an optional standard-Godot adapter that feeds the exact same normalized envelopes into the replay-tested session consumer. It uses Godot's built-in `WebSocketPeer`; consumers do not need a native extension, .NET, or a third-party Godot plugin. The adapter requires a handshake as the first envelope, rejects cross-session messages, enforces bounded messages and polling, redacts endpoint paths and queries from its trace snapshot, and keeps authentication outside the plot contract.
+
+Run the localhost integration fixture with:
+
+```bash
+python -m venv .venv
+.venv/bin/python -m pip install -r tools/live/requirements.txt
+GODOT_BIN=/path/to/Godot_v4.6.3-stable_linux.x86_64 \
+  PYTHON_BIN=.venv/bin/python ./scripts/test-live-transport.sh
+```
+
+The Python `websockets` package is pinned for the fixture publisher only. It is not an addon runtime dependency. Authentication, remote workspace discovery, and Jupyter kernel selection remain separate follow-up integrations.
+
 ### Release archive or Godot Asset Library — preferred
 
 Release and Asset Library packages contain the canonical `addons/godot-charts/` tree. In Godot, use **AssetLib → Import** for a downloaded package, or merge the package's `addons/` directory into the root of your project. Then enable **Godot Charts** under **Project → Project Settings → Plugins**.

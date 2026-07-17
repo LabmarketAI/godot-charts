@@ -1,0 +1,11 @@
+[application]
+config/name="Godot Charts Live Transport Test"
+run/main_scene=""
+
+[display]
+window/size/viewport_width=800
+window/size/viewport_height=600
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

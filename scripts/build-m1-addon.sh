@@ -15,7 +15,7 @@ if [[ -e "$destination" ]]; then
 fi
 
 mkdir -p "$destination"
-for directory in core diagnostics interactions protocol renderers schemas session tables; do
+for directory in core diagnostics integrations interactions protocol renderers schemas session tables; do
     cp -R "$repo_root/addons/godot-charts/$directory" "$destination/$directory"
 done
 cp "$repo_root/addons/godot-charts/LICENSE" "$destination/LICENSE"

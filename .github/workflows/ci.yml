@@ -55,10 +55,14 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-          cache-dependency-path: tools/m1/requirements.txt
+          cache-dependency-path: |
+            tools/m1/requirements.txt
+            tools/live/requirements.txt
 
       - name: Install fixture-only Python dependencies
-        run: python -m pip install -r tools/m1/requirements.txt
+        run: |
+          python -m pip install -r tools/m1/requirements.txt
+          python -m pip install -r tools/live/requirements.txt
 
       - name: Regenerate and validate M1 fixtures
         run: |
@@ -82,3 +86,4 @@ jobs:
         run: |
           bash scripts/test-m1-contract.sh
           bash scripts/test-m1-example.sh
+          PYTHON_BIN=python bash scripts/test-live-transport.sh

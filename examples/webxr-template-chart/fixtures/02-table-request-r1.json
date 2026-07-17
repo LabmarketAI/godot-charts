@@ -1,0 +1,21 @@
+{
+  "created_at": "2026-07-16T12:00:00Z",
+  "message_id": "message-table-request-r1",
+  "operation": "table.request",
+  "payload": {
+    "column_ids": [
+      "year",
+      "enrolled",
+      "sites",
+      "phase"
+    ],
+    "dataset_id": "dataset-annual-trials",
+    "dataset_revision": 1,
+    "limit": 5,
+    "offset": 0,
+    "request_id": "request-table-window-1"
+  },
+  "schema": "godot-charts/table-request/1.0",
+  "sequence": 2,
+  "session_id": "session-m1-recorded"
+}

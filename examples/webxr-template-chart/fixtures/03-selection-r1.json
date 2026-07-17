@@ -1,0 +1,20 @@
+{
+  "created_at": "2026-07-16T12:00:00Z",
+  "message_id": "message-selection-r1",
+  "operation": "selection.replace",
+  "payload": {
+    "dataset_id": "dataset-annual-trials",
+    "dataset_revision": 1,
+    "mode": "multi",
+    "origin": "replay",
+    "plot_id": "plot-annual-trials",
+    "row_ids": [
+      "trial-2022",
+      "trial-2024"
+    ],
+    "selection_id": "selection-primary"
+  },
+  "schema": "godot-charts/selection/1.0",
+  "sequence": 4,
+  "session_id": "session-m1-recorded"
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://labmarket.ai/godot-charts/m1/common.schema.json",
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "revision": { "type": "integer", "minimum": 0 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["library", "library_version", "adapter", "adapter_version"],
+      "properties": {
+        "library": { "$ref": "#/$defs/identifier" },
+        "library_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "adapter": { "$ref": "#/$defs/identifier" },
+        "adapter_version": { "type": "string", "minLength": 1, "maxLength": 64 }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_type", "source_id"],
+      "properties": {
+        "source_type": { "enum": ["recorded_fixture", "python_object", "session_data"] },
+        "source_id": { "$ref": "#/$defs/identifier" },
+        "dataset_id": { "$ref": "#/$defs/identifier" },
+        "dataset_revision": { "$ref": "#/$defs/revision" }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "code", "message", "path"],
+      "properties": {
+        "severity": { "enum": ["info", "warning", "error"] },
+        "code": { "$ref": "#/$defs/identifier" },
+        "message": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "path": { "type": "string", "maxLength": 512 },
+        "remedy": { "type": "string", "maxLength": 1024 }
+      }
+    },
+    "row_id": { "$ref": "#/$defs/identifier" },
+    "nullable_scalar": {
+      "type": ["string", "number", "integer", "boolean", "null"]
+    }
+  }
+}

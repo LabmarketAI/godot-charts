@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://labmarket.ai/godot-charts/m1/selection.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "message_id", "session_id", "sequence", "operation", "created_at", "payload"],
+  "properties": {
+    "schema": { "const": "godot-charts/selection/1.0" },
+    "message_id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "session_id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "operation": { "const": "selection.replace" },
+    "created_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selection_id", "plot_id", "dataset_id", "dataset_revision", "row_ids", "mode"],
+      "properties": {
+        "selection_id": { "$ref": "common.schema.json#/$defs/identifier" },
+        "plot_id": { "$ref": "common.schema.json#/$defs/identifier" },
+        "dataset_id": { "$ref": "common.schema.json#/$defs/identifier" },
+        "dataset_revision": { "$ref": "common.schema.json#/$defs/revision" },
+        "row_ids": {
+          "type": "array",
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": { "$ref": "common.schema.json#/$defs/row_id" }
+        },
+        "mode": { "enum": ["single", "multi"] },
+        "origin": { "enum": ["chart", "table", "replay"] }
+      }
+    }
+  }
+}

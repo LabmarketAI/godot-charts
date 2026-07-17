@@ -1,0 +1,26 @@
+{
+  "created_at": "2026-07-16T12:00:00Z",
+  "message_id": "message-handshake-1",
+  "operation": "hello",
+  "payload": {
+    "capabilities": [
+      "plot.replace",
+      "table.result",
+      "selection.replace",
+      "diagnostics"
+    ],
+    "limits": {
+      "max_columns": 64,
+      "max_layers": 16,
+      "max_message_bytes": 1048576,
+      "max_rows": 10000
+    },
+    "peer_id": "python-fixture-producer",
+    "protocol_versions": [
+      "1.0"
+    ]
+  },
+  "schema": "godot-charts/session-handshake/1.0",
+  "sequence": 0,
+  "session_id": "session-m1-recorded"
+}

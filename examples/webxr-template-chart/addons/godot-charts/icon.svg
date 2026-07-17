@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Background -->
+  <rect width="64" height="64" rx="12" fill="#1a1a2e"/>
+  <!-- 3-D bar chart silhouette -->
+  <rect x="8"  y="36" width="10" height="20" rx="2" fill="#3399FF"/>
+  <rect x="22" y="24" width="10" height="32" rx="2" fill="#FF6633"/>
+  <rect x="36" y="30" width="10" height="26" rx="2" fill="#36C468"/>
+  <rect x="50" y="18" width="10" height="38" rx="2" fill="#F7BA0B"/>
+  <!-- X axis -->
+  <line x1="4" y1="56" x2="60" y2="56" stroke="#cccccc" stroke-width="2"/>
+  <!-- Y axis -->
+  <line x1="4" y1="8"  x2="4"  y2="56" stroke="#cccccc" stroke-width="2"/>
+</svg>

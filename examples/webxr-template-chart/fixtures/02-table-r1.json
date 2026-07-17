@@ -1,0 +1,95 @@
+{
+  "created_at": "2026-07-16T12:00:00Z",
+  "message_id": "message-table-r1",
+  "operation": "table.result",
+  "payload": {
+    "columns": [
+      {
+        "data_type": "float64",
+        "id": "year",
+        "label": "Year",
+        "nullable": false
+      },
+      {
+        "data_type": "float64",
+        "id": "enrolled",
+        "label": "Enrolled",
+        "nullable": true
+      },
+      {
+        "data_type": "float64",
+        "id": "sites",
+        "label": "Sites",
+        "nullable": false
+      },
+      {
+        "data_type": "string",
+        "id": "phase",
+        "label": "Phase",
+        "nullable": false
+      }
+    ],
+    "dataset_id": "dataset-annual-trials",
+    "limit": 5,
+    "offset": 0,
+    "request_id": "request-table-window-1",
+    "revision": 1,
+    "rows": [
+      {
+        "row_id": "trial-2021",
+        "values": [
+          2021.0,
+          120.0,
+          4.0,
+          "I"
+        ]
+      },
+      {
+        "row_id": "trial-2022",
+        "values": [
+          2022.0,
+          155.0,
+          5.0,
+          "I"
+        ]
+      },
+      {
+        "row_id": "trial-2023",
+        "values": [
+          2023.0,
+          null,
+          6.0,
+          "II"
+        ]
+      },
+      {
+        "row_id": "trial-2024",
+        "values": [
+          2024.0,
+          210.0,
+          8.0,
+          "II"
+        ]
+      },
+      {
+        "row_id": "trial-2025",
+        "values": [
+          2025.0,
+          235.0,
+          9.0,
+          "III"
+        ]
+      }
+    ],
+    "total_rows": 5
+  },
+  "provenance": {
+    "dataset_id": "dataset-annual-trials",
+    "dataset_revision": 1,
+    "source_id": "matplotlib-figure-annual-trials",
+    "source_type": "python_object"
+  },
+  "schema": "godot-charts/table-result/1.0",
+  "sequence": 3,
+  "session_id": "session-m1-recorded"
+}

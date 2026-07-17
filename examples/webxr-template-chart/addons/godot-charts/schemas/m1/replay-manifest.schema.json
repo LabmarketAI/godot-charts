@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://labmarket.ai/godot-charts/m1/replay-manifest.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "messages", "expected"],
+  "properties": {
+    "schema": { "const": "godot-charts/replay-manifest/1.0" },
+    "messages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000,
+      "items": { "type": "string", "pattern": "^[A-Za-z0-9._-]+\\.json$" }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applied_messages", "duplicate_messages", "active_plot_revision", "preserved_row_ids"],
+      "properties": {
+        "applied_messages": { "type": "integer", "minimum": 0 },
+        "duplicate_messages": { "type": "integer", "minimum": 0 },
+        "active_plot_revision": { "type": "integer", "minimum": 0 },
+        "preserved_row_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "common.schema.json#/$defs/row_id" }
+        }
+      }
+    }
+  }
+}

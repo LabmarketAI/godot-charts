@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="PersistentZoneDatabase" load_steps=5 format=3 uid="uid://cx1d62bw62y0k"]
+
+[ext_resource type="Script" path="res://components/persistent/persistent_zone_database.gd" id="1_fm6ij"]
+[ext_resource type="Resource" uid="uid://to5lown6orfd" path="res://game/zones/outside/outside_zone_info.tres" id="2_453gu"]
+[ext_resource type="Resource" uid="uid://d1lgdwh7pv220" path="res://game/zones/house_interior/house_interior_zone_info.tres" id="3_e8q3n"]
+[ext_resource type="Resource" uid="uid://cpugbtukttkfj" path="res://game/zones/house_back_yard/house_back_yard_zone_info.tres" id="4_ukd4u"]
+
+[resource]
+script = ExtResource("1_fm6ij")
+zones = Array[Resource("res://components/persistent/persistent_zone_info.gd")]([ExtResource("2_453gu"), ExtResource("3_e8q3n"), ExtResource("4_ukd4u")])

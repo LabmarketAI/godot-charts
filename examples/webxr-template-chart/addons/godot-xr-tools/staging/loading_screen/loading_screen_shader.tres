@@ -1,0 +1,97 @@
+[gd_resource type="VisualShader" format=3 uid="uid://4i0pwdtfmtsv"]
+
+[sub_resource type="VisualShaderNodeCompare" id="5"]
+output_port_for_preview = 0
+default_input_values = [0, Vector2(0, 0), 1, Vector2(0, 0), 2, 1e-05]
+type = 3
+function = 4
+condition = 1
+
+[sub_resource type="VisualShaderNodeFloatParameter" id="6"]
+parameter_name = "progress"
+
+[sub_resource type="VisualShaderNodeVectorCompose" id="7"]
+
+[sub_resource type="VisualShaderNodeFloatOp" id="8"]
+output_port_for_preview = 0
+operator = 6
+
+[sub_resource type="VisualShaderNodeColorParameter" id="9"]
+parameter_name = "bar_color"
+
+[sub_resource type="VisualShaderNodeTexture2DParameter" id="17"]
+parameter_name = "bar_texture"
+texture_type = 1
+
+[sub_resource type="VisualShaderNodeVectorOp" id="18"]
+operator = 2
+
+[sub_resource type="VisualShaderNodeFloatOp" id="19"]
+operator = 2
+
+[sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_hpnli"]
+output_port_for_preview = 0
+expanded_output_ports = [0]
+source = 5
+texture_type = 1
+
+[sub_resource type="VisualShaderNodeVec3Parameter" id="VisualShaderNodeVec3Parameter_fhc2j"]
+parameter_name = "cutout"
+default_value_enabled = true
+default_value = Vector3(4.85, 0.33, 0)
+
+[sub_resource type="VisualShaderNodeInput" id="10"]
+input_name = "uv"
+
+[sub_resource type="VisualShaderNodeVectorOp" id="11"]
+default_input_values = [0, Vector3(0, 0, 0), 1, Vector3(10, 1, 0)]
+operator = 2
+
+[sub_resource type="VisualShaderNodeVectorOp" id="12"]
+default_input_values = [0, Vector3(0, 0, 0), 1, Vector3(5, 0.5, 0)]
+operator = 1
+
+[sub_resource type="VisualShaderNodeVectorFunc" id="13"]
+function = 4
+
+[sub_resource type="VisualShaderNodeCompare" id="15"]
+output_port_for_preview = 0
+default_input_values = [0, Vector2(0, 0), 1, Vector2(4.85, 0.33), 2, 1e-05]
+type = 3
+function = 2
+condition = 1
+
+[resource]
+flags/unshaded = true
+nodes/fragment/0/position = Vector2(1220, 440)
+nodes/fragment/3/node = SubResource("10")
+nodes/fragment/3/position = Vector2(-1020, 580)
+nodes/fragment/4/node = SubResource("11")
+nodes/fragment/4/position = Vector2(-620, 400)
+nodes/fragment/5/node = SubResource("12")
+nodes/fragment/5/position = Vector2(-440, 400)
+nodes/fragment/6/node = SubResource("13")
+nodes/fragment/6/position = Vector2(-240, 420)
+nodes/fragment/8/node = SubResource("15")
+nodes/fragment/8/position = Vector2(240, 460)
+nodes/fragment/11/node = SubResource("5")
+nodes/fragment/11/position = Vector2(240, 860)
+nodes/fragment/12/node = SubResource("6")
+nodes/fragment/12/position = Vector2(-640, 980)
+nodes/fragment/13/node = SubResource("7")
+nodes/fragment/13/position = Vector2(-280, 960)
+nodes/fragment/14/node = SubResource("8")
+nodes/fragment/14/position = Vector2(480, 680)
+nodes/fragment/15/node = SubResource("9")
+nodes/fragment/15/position = Vector2(580, -40)
+nodes/fragment/16/node = SubResource("17")
+nodes/fragment/16/position = Vector2(40, -100)
+nodes/fragment/17/node = SubResource("18")
+nodes/fragment/17/position = Vector2(980, 80)
+nodes/fragment/18/node = SubResource("19")
+nodes/fragment/18/position = Vector2(940, 500)
+nodes/fragment/19/node = SubResource("VisualShaderNodeTexture_hpnli")
+nodes/fragment/19/position = Vector2(480, 260)
+nodes/fragment/20/node = SubResource("VisualShaderNodeVec3Parameter_fhc2j")
+nodes/fragment/20/position = Vector2(-280, 600)
+nodes/fragment/connections = PackedInt32Array(3, 0, 4, 0, 4, 0, 5, 0, 5, 0, 6, 0, 6, 0, 8, 0, 3, 0, 11, 0, 13, 0, 11, 1, 12, 0, 13, 0, 8, 0, 14, 0, 11, 0, 14, 1, 15, 0, 17, 0, 17, 0, 0, 0, 18, 0, 0, 1, 14, 0, 18, 1, 16, 0, 19, 2, 19, 4, 18, 0, 19, 0, 17, 1, 20, 0, 8, 1)

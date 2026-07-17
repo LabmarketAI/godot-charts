@@ -9,6 +9,10 @@
 export.cfg
 export_credentials.cfg
 
+# The tracked WebXR template keeps Godot UID metadata because XR Tools autoloads
+# in project.godot reference scripts by uid:// IDs.
+!examples/webxr-template-chart/**/*.uid
+
 # Imported translations (automatically generated from CSV files)
 *.translation
 

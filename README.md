@@ -46,59 +46,59 @@ In VR, chart frames are fully interactive at runtime: select a chart type widget
 
 ## Installation
 
-### Option A — Git submodule (recommended for staying up to date)
+Godot discovers this editor plugin only when `plugin.cfg` has this exact path inside your project:
 
-From inside your Godot 4 project's root directory:
-
-```bash
-git submodule add https://github.com/LabmarketAI/godot-charts addons/godot-charts
-git submodule update --init
+```text
+your-project/
+├── project.godot
+└── addons/
+    └── godot-charts/
+        ├── plugin.cfg
+        ├── plugin.gd
+        └── ...
 ```
 
-The checkout lands at `res://addons/godot-charts/`, exactly where Godot expects it.
-Enable the plugin under **Project → Project Settings → Plugins → Godot Charts**.
+If you see `addons/godot-charts/addons/godot-charts/plugin.cfg`, the repository was installed one directory too deep. Move the inner `godot-charts` directory to `res://addons/godot-charts/`.
 
-To pull future updates:
+> **Current runtime note:** the legacy implementation in this repository still contains C# chart classes and requires a compatible Godot .NET project and build. The active rebuild specification replaces those classes with a pure typed-GDScript addon for standard Godot and WebXR. Check the release notes for the runtime requirements of the version you install.
+
+### Release archive or Godot Asset Library — preferred
+
+Release and Asset Library packages contain the canonical `addons/godot-charts/` tree. In Godot, use **AssetLib → Import** for a downloaded package, or merge the package's `addons/` directory into the root of your project. Then enable **Godot Charts** under **Project → Project Settings → Plugins**.
+
+This matches Godot's documented addon convention and avoids repository nesting.
+
+### Clone and install — source builds
+
+Clone the repository outside your consumer project's `addons/` directory, then use the installer to copy only the canonical addon:
 
 ```bash
-git submodule update --remote addons/godot-charts
-```
-
-### Option B — Install script (zero-dependency, CI-friendly)
-
-Clone the repo once, then run `install.sh` to copy the addon into any project:
-
-```bash
-git clone https://github.com/LabmarketAI/godot-charts
+git clone https://github.com/LabmarketAI/godot-charts.git
 ./godot-charts/install.sh /path/to/your-godot-project
 ```
 
-This copies `addons/godot-charts/` into the target project and prints a reminder
-to enable the plugin.
+This produces `/path/to/your-godot-project/addons/godot-charts/plugin.cfg`.
 
-### Option C — Symlink (best for iterating on the plugin itself)
+### Manual source copy
 
 ```bash
-# from inside your consumer project
-ln -s /path/to/godot-charts/addons/godot-charts addons/godot-charts
+mkdir -p /path/to/your-godot-project/addons
+cp -R godot-charts/addons/godot-charts /path/to/your-godot-project/addons/
 ```
 
-Edits to the plugin are immediately reflected in the consumer project without
-copying any files.
+Copy the directory named `godot-charts`, not the repository root.
 
-### Option D — From the Godot Asset Library (coming soon)
+### Development symlink
 
-1. Open your Godot 4 project.
-2. Navigate to **AssetLib** and search for *"Godot Charts"*.
-3. Click **Download** → **Install**.
-4. Enable the plugin under **Project → Project Settings → Plugins**.
+On platforms where directory symlinks are appropriate:
 
-### Option E — Manual ZIP download
+```bash
+mkdir -p /path/to/your-godot-project/addons
+ln -s /absolute/path/to/godot-charts/addons/godot-charts \
+  /path/to/your-godot-project/addons/godot-charts
+```
 
-1. Download the repository as a ZIP file from [GitHub](https://github.com/LabmarketAI/godot-charts).
-2. Extract the `addons/godot-charts/` folder from the ZIP.
-3. Place it in your project's `addons/` directory.
-4. Enable the plugin under **Project → Project Settings → Plugins**.
+Do **not** add this entire repository as a submodule at `addons/godot-charts`; this repository also contains `demo/`, `tests/`, and planning material, so that command creates the invalid extra directory layer. Consumers that require submodule pinning should place the repository under a vendor directory and create their own copy/symlink step, or consume a packaged release.
 
 ---
 
@@ -150,26 +150,19 @@ The addon is automatically available at `res://addons/godot-charts/`:
 
 ### Repository structure & development workflow
 
-This repository contains **two copies** of the addon to maintain the distributable nature of Godot addons:
+This repository currently contains a canonical addon and a legacy demo mirror:
 
-- **`addons/godot-charts/`** — Primary addon source (what gets distributed)
-- **`demo/addons/godot-charts/`** — Copy used by the demo project
+- **`addons/godot-charts/`** — canonical source and the only directory packaged for consumers
+- **`demo/addons/godot-charts/`** — generated mirror required because `demo/` is a separate Godot project
 
-**Local developers should only edit in `addons/godot-charts/`.**  
-The demo copy is kept automatically in sync via CI/CD, so changes you make to the primary addon are reflected in the demo after each push.
+Never edit the demo mirror directly. After changing the canonical addon, synchronize it locally before running or committing demo work:
 
-**How sync works:**
-1. You edit files in `addons/godot-charts/` locally
-2. You commit and push your changes
-3. GitHub Actions runs `scripts/sync-demo-addon.sh` to copy updated files to `demo/addons/godot-charts/`
-4. The sync commit is automatically created and pushed
-5. Everyone pulls the synced changes
+```bash
+bash scripts/sync-demo-addon.sh
+bash scripts/check-demo-addon-sync.sh
+```
 
-This ensures:
-- ✅ Single source of truth (primary addon location)
-- ✅ No manual sync required from developers
-- ✅ Demo always uses the latest addon code
-- ✅ Clean separation between distributable and demo code
+CI verifies that the mirror matches. The rebuild will prefer a generated or linked test fixture so duplicated addon source does not remain a long-term architectural requirement.
 
 ### Installing addon updates in development
 

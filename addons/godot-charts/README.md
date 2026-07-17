@@ -19,30 +19,36 @@ Add beautiful, interactive 3D charts to any Godot project with a few lines of GD
 
 ## Installation
 
-### From Git (recommended)
+Godot must find this file at:
 
-Navigate to your Godot 4 project's root directory and run:
-
-```bash
-cd addons/
-git clone https://github.com/LabmarketAI/godot-charts.git godot_charts
+```text
+res://addons/godot-charts/plugin.cfg
 ```
 
-Then open your project in Godot 4 and enable the plugin under **Project → Project Settings → Plugins**.
+Install the release through the Godot Asset Library/package importer, or copy this entire `godot-charts` directory into your project's `addons/` directory. The resulting layout must be:
 
-### From the Godot Asset Library (coming soon)
+```text
+your-project/
+├── project.godot
+└── addons/
+    └── godot-charts/
+        ├── plugin.cfg
+        ├── plugin.gd
+        ├── charts/
+        └── ...
+```
 
-1. Open your Godot 4 project.
-2. Navigate to **AssetLib** and search for *"Godot Charts"*.
-3. Click **Download** → **Install**.
-4. Enable the plugin under **Project → Project Settings → Plugins**.
+Then enable **Godot Charts** under **Project → Project Settings → Plugins**.
 
-### Manual Download
+If you downloaded the full source repository, copy only `addons/godot-charts/`; do not clone the repository itself into your project's `addons/godot-charts/` path. Doing so creates `addons/godot-charts/addons/godot-charts/`, which Godot will not treat as the intended plugin location.
 
-1. Download the repository as a ZIP file from [GitHub](https://github.com/LabmarketAI/godot-charts).
-2. Extract and rename the folder to `godot_charts`.
-3. Place it in your project's `addons/` directory.
-4. Enable the plugin under **Project → Project Settings → Plugins**.
+> **Current runtime note:** this legacy release still contains C# chart implementations and requires a compatible Godot .NET project and build. The planned rebuild will ship as pure typed GDScript for standard Godot and WebXR; consult the installed release notes for its exact requirements.
+
+From a source checkout, the root installer performs the correct copy:
+
+```bash
+./install.sh /path/to/your-godot-project
+```
 
 ---
 

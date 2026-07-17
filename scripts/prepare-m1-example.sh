@@ -17,6 +17,7 @@ fi
 mkdir -p "$destination/addons" "$destination/fixtures"
 "$repo_root/scripts/build-m1-addon.sh" "$destination/addons/godot-charts"
 cp "$repo_root/examples/m1/project.godot" "$destination/project.godot"
+cp "$repo_root/examples/m1/export_presets.cfg" "$destination/export_presets.cfg"
 cp "$repo_root/examples/m1/main.tscn" "$destination/main.tscn"
 cp "$repo_root/examples/m1/main.gd" "$destination/main.gd"
 cp "$repo_root/tests/m1/fixtures/"*.json "$destination/fixtures/"

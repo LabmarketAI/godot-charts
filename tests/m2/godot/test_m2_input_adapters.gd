@@ -24,6 +24,7 @@ func _initialize() -> void:
 	_assert(not desktop.controller.is_capturing() and not xr.controller.is_capturing(), "both adapters release capture")
 	var desktop_lifecycle: Dictionary = desktop.view.lifecycle_snapshot()
 	var xr_lifecycle: Dictionary = xr.view.lifecycle_snapshot()
+	var interaction_benchmark_start := Time.get_ticks_usec()
 	for iteration: int in 100:
 		var delta := Vector3(0.01 if iteration % 2 == 0 else -0.01, 0.0, 0.0)
 		_assert(desktop.adapter.handle_mouse("begin_move") and desktop.adapter.handle_mouse("preview_move", {"delta": delta}) and desktop.adapter.handle_mouse("commit"), "desktop stress command commits: %d" % iteration)
@@ -34,6 +35,9 @@ func _initialize() -> void:
 	_assert(xr.view.lifecycle_snapshot() == xr_lifecycle, "mocked-XR manipulation replay does not grow frame resources")
 	_assert(desktop.controller.history_snapshot()["size"] == desktop.controller.history_limit, "desktop replay history remains bounded")
 	_assert(xr.controller.history_snapshot()["size"] == xr.controller.history_limit, "mocked-XR replay history remains bounded")
+	var interaction_benchmark_ms := float(Time.get_ticks_usec() - interaction_benchmark_start) / 1000.0
+	_assert(interaction_benchmark_ms < 5000.0, "100 paired desktop/mocked-XR transactions stay within the 5 second headless budget")
+	print("M2 benchmark paired_transactions=100 elapsed_ms=%.3f per_pair_ms=%.3f" % [interaction_benchmark_ms, interaction_benchmark_ms / 100.0])
 
 	_assert(not desktop.adapter.handle_mouse("unsupported"), "desktop rejects unknown mouse actions")
 	_assert(not xr.adapter.handle_grab("unsupported"), "mocked-XR rejects unknown grab actions")

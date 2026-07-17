@@ -14,6 +14,12 @@ script = ExtResource("1_main")
 transform = Transform3D(1, 0, 0, 0, 0.970143, 0.242536, 0, -0.242536, 0.970143, 0, 2, 8)
 current = true
 
+[node name="XROrigin3D" type="XROrigin3D" parent="."]
+position = Vector3(0, 0, 6)
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+position = Vector3(0, 1.6, 0)
+
 [node name="AnalyticalFrame3D" type="Node3D" parent="."]
 position = Vector3(-1.5, 0, 0)
 script = ExtResource("4_frame")
@@ -40,9 +46,52 @@ script = ExtResource("3_table")
 max_visible_rows = 10
 
 [node name="Status" type="Label" parent="CanvasLayer"]
+anchor_right = 0.6
 offset_left = 24.0
 offset_top = 20.0
-offset_right = 900.0
-offset_bottom = 78.0
+offset_right = -12.0
+offset_bottom = 52.0
 text = "Loading recorded analytical session…"
+autowrap_mode = 2
 theme_override_font_sizes/font_size = 18
+
+[node name="Controls" type="Label" parent="CanvasLayer"]
+mouse_filter = 2
+anchor_right = 0.6
+offset_left = 24.0
+offset_top = 58.0
+offset_right = -12.0
+offset_bottom = 130.0
+text = "1 Content   2 Frame   3 Navigate\nNavigate: W/A/S/D forward/left/back/right   Q/E down/up\nFrame: F select   M move   B resize   arrows or +/- preview\nEnter commit   Esc cancel   Z/Y undo/redo   R reset   Space next revision"
+theme_override_colors/font_color = Color(0.78, 0.86, 0.94, 1)
+theme_override_font_sizes/font_size = 14
+
+[node name="ImmersiveButton" type="Button" parent="CanvasLayer"]
+visible = false
+anchor_left = 0.0
+offset_left = 24.0
+offset_top = 140.0
+offset_right = 150.0
+offset_bottom = 184.0
+text = "Enter VR"
+
+[node name="WebXrStatus" type="Label" parent="CanvasLayer"]
+mouse_filter = 2
+anchor_right = 0.6
+offset_left = 164.0
+offset_top = 140.0
+offset_right = -12.0
+offset_bottom = 184.0
+text = "Checking browser immersive capabilities…"
+autowrap_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.82, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="PointerControls" type="HFlowContainer" parent="CanvasLayer"]
+anchor_right = 0.6
+offset_left = 24.0
+offset_top = 196.0
+offset_right = -12.0
+offset_bottom = 410.0
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6

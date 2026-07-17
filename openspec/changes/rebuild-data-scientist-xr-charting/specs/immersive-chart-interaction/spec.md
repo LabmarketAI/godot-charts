@@ -35,6 +35,10 @@ The library SHALL support spatial views whose data coordinates map deterministic
 ### Requirement: Distinct navigation and analytical transforms
 The library SHALL distinguish observer locomotion, view orbit/pan, analytical scale-domain zoom, and whole-plot world transformation as separate reversible operations with independently configurable permissions and bounds.
 
+#### Scenario: Navigate the desktop reference scene
+- **WHEN** a keyboard user selects navigate mode and presses the documented WASD or vertical movement keys
+- **THEN** the observer camera moves, the new pose is recorded as local navigation state, the frame transform and analytical scale domains remain unchanged, and a persistent visible control legend identifies how to leave navigation mode
+
 #### Scenario: Zoom an axis domain
 - **WHEN** a user narrows the X domain using scroll, joystick, gesture, or a scale handle
 - **THEN** the X scale updates with its new domain visibly indicated while observer pose and plot world transform remain unchanged

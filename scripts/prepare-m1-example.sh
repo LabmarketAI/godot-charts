@@ -14,9 +14,20 @@ if [[ -e "$destination" ]]; then
     exit 1
 fi
 
-mkdir -p "$destination/addons" "$destination/fixtures"
+mkdir -p "$destination/addons" "$destination/assets" "$destination/fixtures"
 "$repo_root/scripts/build-m1-addon.sh" "$destination/addons/godot-charts"
+if [[ -d "$repo_root/demo/addons/godot-xr-tools" ]]; then
+    cp -R "$repo_root/demo/addons/godot-xr-tools" "$destination/addons/godot-xr-tools"
+else
+    echo "Missing vendored Godot XR Tools addon: $repo_root/demo/addons/godot-xr-tools" >&2
+    exit 1
+fi
+cp "$repo_root/demo/assets/Floor.glb" "$destination/assets/Floor.glb"
+cp "$repo_root/demo/assets/Floor_marble_diffuse.jpg" "$destination/assets/Floor_marble_diffuse.jpg"
+cp "$repo_root/demo/assets/Floor_marble_glossiness.png" "$destination/assets/Floor_marble_glossiness.png"
+cp "$repo_root/demo/assets/Floor_marble_normal.jpg" "$destination/assets/Floor_marble_normal.jpg"
 cp "$repo_root/examples/m1/project.godot" "$destination/project.godot"
+cp "$repo_root/demo/openxr_action_map.tres" "$destination/openxr_action_map.tres"
 cp "$repo_root/examples/m1/export_presets.cfg" "$destination/export_presets.cfg"
 cp "$repo_root/examples/m1/main.tscn" "$destination/main.tscn"
 cp "$repo_root/examples/m1/main.gd" "$destination/main.gd"

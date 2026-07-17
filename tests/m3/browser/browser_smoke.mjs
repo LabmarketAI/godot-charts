@@ -54,7 +54,13 @@ function command(method, params = {}) {
 
 async function evaluate(expression) {
   const result = await command("Runtime.evaluate", { expression, returnByValue: true, awaitPromise: true });
-  if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);
+  if (result.exceptionDetails) {
+    const details = result.exceptionDetails;
+    const exception = details.exception?.description ?? details.exception?.value ?? details.text;
+    const callFrames = details.stackTrace?.callFrames ?? [];
+    const stack = callFrames.map((frame) => `${frame.functionName || "<anonymous>"}@${frame.url}:${frame.lineNumber + 1}:${frame.columnNumber + 1}`).join(" | ");
+    throw new Error(`Browser evaluation failed: ${exception}${stack ? ` Stack: ${stack}` : ""}`);
+  }
   return result.result.value;
 }
 
@@ -90,7 +96,23 @@ await command("Log.enable");
 await command("Network.enable");
 await command("Page.bringToFront");
 await command("Emulation.setFocusEmulationEnabled", { enabled: true });
-await evaluate('document.querySelector("canvas").focus()');
+await evaluate(`new Promise((resolve, reject) => {
+  const started = performance.now();
+  function wait() {
+    const canvas = document.querySelector("canvas");
+    if (canvas) {
+      canvas.focus();
+      resolve(true);
+      return;
+    }
+    if (performance.now() - started > 10000) {
+      reject(new Error("Timed out waiting for Godot canvas"));
+      return;
+    }
+    requestAnimationFrame(wait);
+  }
+  wait();
+})`);
 
 const initial = await waitForSmoke((value) => value.revision === 1 && value.rendered_points === 4 && value.webxr_state !== "checking");
 if (initial.revision !== 1 || initial.rendered_points !== 4 || initial.mode !== "content") {

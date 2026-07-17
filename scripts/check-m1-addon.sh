@@ -20,7 +20,14 @@ if [[ -n "$forbidden" ]]; then
     exit 1
 fi
 
-if rg -n 'res://demo/|NuGet|Godot\.NET|System\.' "$addon"; then
+if command -v rg >/dev/null 2>&1; then
+    dependency_match="$(rg -n 'res://demo/|NuGet|Godot\.NET|System\.' "$addon" || true)"
+else
+    dependency_match="$(grep -RInE 'res://demo/|NuGet|Godot\.NET|System\.' "$addon" || true)"
+fi
+
+if [[ -n "$dependency_match" ]]; then
+    echo "$dependency_match" >&2
     echo "M1 addon contains a forbidden demo or .NET dependency reference." >&2
     exit 1
 fi

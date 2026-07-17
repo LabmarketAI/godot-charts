@@ -2,6 +2,10 @@
 config/name="Godot Charts M2 Interactive Frame Quickstart"
 run/main_scene="res://main.tscn"
 
+[autoload]
+XRToolsUserSettings="*res://addons/godot-xr-tools/user_settings/user_settings.gd"
+XRToolsRumbleManager="*res://addons/godot-xr-tools/rumble/rumble_manager.gd"
+
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720
@@ -14,3 +18,8 @@ enabled=PackedStringArray("res://addons/godot-charts/plugin.cfg")
 
 [rendering]
 renderer/rendering_method="gl_compatibility"
+
+[xr]
+openxr/enabled=true
+openxr/action_map="res://openxr_action_map.tres"
+shaders/enabled=true

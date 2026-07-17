@@ -15,7 +15,10 @@ const WebSocketClient = preload("res://addons/godot-charts/integrations/websocke
 @onready var frame: Node3D = $AnalyticalFrame3D
 @onready var scatter: Node3D = $ScatterRenderer3D
 @onready var camera: Camera3D = $Camera3D
+@onready var xr_origin: XROrigin3D = $XROrigin3D
 @onready var xr_camera: XRCamera3D = $XROrigin3D/XRCamera3D
+@onready var left_hand: XRController3D = $XROrigin3D/LeftHand
+@onready var right_hand: XRController3D = $XROrigin3D/RightHand
 @onready var table: Control = $CanvasLayer/TableView
 @onready var table_panel: ColorRect = $CanvasLayer/TablePanel
 @onready var status_label: Label = $CanvasLayer/Status
@@ -62,6 +65,8 @@ func _ready() -> void:
 		var webxr_input_bound: bool = _webxr_input.bind(_controller, _webxr.interface_handle())
 		assert(webxr_input_bound)
 	immersive_button.pressed.connect(_toggle_immersive)
+	_connect_xr_controller_logging(left_hand, "left")
+	_connect_xr_controller_logging(right_hand, "right")
 	_configure_pointer_controls()
 	get_viewport().size_changed.connect(_apply_responsive_layout)
 	_apply_responsive_layout()
@@ -96,6 +101,8 @@ func _set_xr_enabled(enabled: bool) -> void:
 	get_viewport().use_xr = enabled
 	xr_camera.current = enabled
 	camera.current = not enabled
+	if enabled:
+		_prime_vr_frame_interaction()
 
 
 func _on_webxr_state_changed(snapshot: Dictionary) -> void:
@@ -111,7 +118,7 @@ func _on_webxr_state_changed(snapshot: Dictionary) -> void:
 			"checking": detail = "Checking this browser for immersive VR…"
 			"ready": detail = "WebXR immersive VR is available. Enter VR requires a user click."
 			"starting": detail = "Starting the immersive session…"
-			"active": detail = "Immersive VR active · reference space %s" % snapshot["reference_space_type"]
+			"active": detail = "Immersive VR active · Quest thumbsticks use XR Tools locomotion · reference space %s" % snapshot["reference_space_type"]
 			_: detail = "WebXR is unavailable here. All flat-web controls remain usable."
 	webxr_status.text = detail
 	_publish_web_smoke_state()
@@ -156,6 +163,38 @@ func _input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	if _webxr_input != null and _webxr.state == _webxr.State.ACTIVE:
 		_webxr_input.update()
+
+
+func _connect_xr_controller_logging(controller: XRController3D, hand: String) -> void:
+	if controller.has_signal("button_pressed"):
+		controller.button_pressed.connect(func(action: StringName) -> void:
+			_webxr_host_log("info", "xr-button-pressed", {"hand": hand, "action": str(action)})
+		)
+	if controller.has_signal("button_released"):
+		controller.button_released.connect(func(action: StringName) -> void:
+			_webxr_host_log("info", "xr-button-released", {"hand": hand, "action": str(action)})
+		)
+	if controller.has_signal("input_float_changed"):
+		controller.input_float_changed.connect(func(action: StringName, value: float) -> void:
+			if absf(value) >= 0.05:
+				_webxr_host_log("info", "xr-float", {"hand": hand, "action": str(action), "value": value})
+		)
+	if controller.has_signal("input_vector2_changed"):
+		controller.input_vector2_changed.connect(func(action: StringName, value: Vector2) -> void:
+			if value.length() >= 0.05:
+				_webxr_host_log("info", "xr-vector2", {"hand": hand, "action": str(action), "x": value.x, "y": value.y})
+		)
+
+
+func _prime_vr_frame_interaction() -> void:
+	_desktop.handle_keyboard("mode_frame")
+	if not _controller.selected:
+		_desktop.handle_mouse("select_frame")
+	_update_status("VR scene active")
+	_webxr_host_log("info", "webxr-session-active", {
+		"left_tracker": str(left_hand.tracker),
+		"right_tracker": str(right_hand.tracker),
+	})
 
 
 func _configure_optional_live_transport() -> void:
@@ -294,6 +333,25 @@ func _update_status(prefix: String) -> void:
 		snapshot["renderer"]["rendered_points"]
 	]
 	_publish_web_smoke_state()
+
+
+func _webxr_host_log(level: String, message: String, fields: Dictionary = {}) -> void:
+	var payload := {
+		"source": "godot",
+		"level": level,
+		"message": message,
+		"webxr_state": _webxr.snapshot()["state"] if _webxr != null else "unavailable",
+	}
+	for key: Variant in fields.keys():
+		payload[str(key)] = fields[key]
+	print("[webxr] ", JSON.stringify(payload))
+	if not OS.has_feature("web"):
+		return
+	var body := JSON.stringify(payload)
+	JavaScriptBridge.eval(
+		"fetch('/__webxr_log',{method:'POST',headers:{'content-type':'application/json'},body:%s,keepalive:true}).catch(()=>{});" % JSON.stringify(body),
+		true
+	)
 
 
 func _publish_web_smoke_state() -> void:

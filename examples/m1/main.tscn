@@ -1,27 +1,76 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://addons/godot-charts/renderers/scatter_renderer_3d.gd" id="2_scatter"]
 [ext_resource type="Script" path="res://addons/godot-charts/tables/bounded_table_view.gd" id="3_table"]
 [ext_resource type="Script" path="res://addons/godot-charts/renderers/analytical_frame_3d.gd" id="4_frame"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/player/player_body.tscn" id="5_player_body"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_move_direct"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="7_move_turn"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn" id="8_left_hand"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="9_right_hand"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/functions/function_teleport.tscn" id="10_teleport"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="11_pointer"]
+[ext_resource type="PackedScene" path="res://assets/Floor.glb" id="12_floor"]
 
-[node name="M1Quickstart" type="Node"]
+[sub_resource type="Environment" id="Environment_m1"]
+background_mode = 1
+background_color = Color(0.055, 0.065, 0.075, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.7, 0.76, 0.82, 1)
+ambient_light_energy = 0.65
+
+[node name="M1Quickstart" type="Node3D"]
 script = ExtResource("1_main")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_m1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.353553, 0.612372, 0, 0.866025, 0.5, -0.707107, -0.353553, 0.612372, 0, 5, 6)
+light_energy = 2.0
+
+[node name="Floor" parent="." instance=ExtResource("12_floor")]
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.970143, 0.242536, 0, -0.242536, 0.970143, 0, 2, 8)
 current = true
 
 [node name="XROrigin3D" type="XROrigin3D" parent="."]
-position = Vector3(0, 0, 6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9497476, 5)
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
-position = Vector3(0, 1.6, 0)
+position = Vector3(0, 1.7, 0)
+
+[node name="LeftHand" type="XRController3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 1.5, -0.3)
+tracker = &"left_hand"
+
+[node name="LeftHandModel" parent="XROrigin3D/LeftHand" instance=ExtResource("8_left_hand")]
+
+[node name="FunctionPointer" parent="XROrigin3D/LeftHand" instance=ExtResource("11_pointer")]
+
+[node name="MovementDirect" parent="XROrigin3D/LeftHand" instance=ExtResource("6_move_direct")]
+strafe = true
+max_speed = 2.0
+
+[node name="MovementTurn" parent="XROrigin3D/LeftHand" instance=ExtResource("7_move_turn")]
+turn_mode = 1
+step_turn_angle = 30.0
+
+[node name="RightHand" type="XRController3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 1.5, -0.3)
+tracker = &"right_hand"
+
+[node name="RightHandModel" parent="XROrigin3D/RightHand" instance=ExtResource("9_right_hand")]
+
+[node name="FunctionTeleport" parent="XROrigin3D/RightHand" instance=ExtResource("10_teleport")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1)
+
+[node name="PlayerBody" parent="XROrigin3D" instance=ExtResource("5_player_body")]
 
 [node name="AnalyticalFrame3D" type="Node3D" parent="."]
-position = Vector3(-1.5, 0, 0)
+position = Vector3(0, 7.35, 1.8)
 script = ExtResource("4_frame")
 
 [node name="ScatterRenderer3D" type="Node3D" parent="."]

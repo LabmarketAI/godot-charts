@@ -27,6 +27,7 @@ var _saw_handshake: bool = false
 var _expected_session_id: String = ""
 var _backoff_remaining: float = 0.0
 var _next_backoff: float = 0.5
+var _ever_opened: bool = false
 
 
 func connect_session(url: String, replay: RefCounted) -> Error:
@@ -40,6 +41,7 @@ func connect_session(url: String, replay: RefCounted) -> Error:
 	received_bytes = 0
 	reconnect_attempts = 0
 	diagnostics.clear()
+	_ever_opened = false
 	_next_backoff = reconnect_initial_seconds
 	if _replay == null or not _replay.has_method("receive_message"):
 		_fail("invalid-consumer", "Live transport requires a streaming protocol consumer.")
@@ -80,6 +82,7 @@ func poll_transport(delta: float = 0.0) -> void:
 	if _peer.get_available_packet_count() > 0:
 		_drain_packets()
 	if ready_state == WebSocketPeer.STATE_OPEN and state != State.OPEN:
+		_ever_opened = true
 		_set_state(State.OPEN)
 	if ready_state == WebSocketPeer.STATE_CLOSED:
 		var close_code := _peer.get_close_code()
@@ -87,6 +90,8 @@ func poll_transport(delta: float = 0.0) -> void:
 		_peer = null
 		if _replay != null and _replay.has_method("complete_live"):
 			_replay.complete_live()
+		if not _ever_opened:
+			_report("warning", "connection-failed", "WebSocket connection to %s closed before opening." % _safe_endpoint)
 		if auto_reconnect:
 			_backoff_remaining = _next_backoff
 			_next_backoff = minf(_next_backoff * 2.0, reconnect_max_seconds)

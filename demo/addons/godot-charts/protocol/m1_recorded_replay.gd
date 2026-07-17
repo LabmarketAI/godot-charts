@@ -117,13 +117,15 @@ func _apply(message: Dictionary) -> void:
 		return
 
 	var applied := true
-	match message["schema"]:
-		"godot-charts/plot-message/1.0":
-			applied = _apply_plot(message)
-		"godot-charts/selection/1.0":
-			var payload: Dictionary = message["payload"]
-			selection_row_ids = PackedStringArray(payload["row_ids"])
-			selection_replaced.emit(selection_row_ids.duplicate(), str(payload.get("origin", "replay")))
+	# JSON values are Variants. Normalize the discriminator before dispatch so the
+	# native and WebAssembly builds take the same branch.
+	var schema: String = str(message["schema"])
+	if schema == "godot-charts/plot-message/1.0":
+		applied = _apply_plot(message)
+	elif schema == "godot-charts/selection/1.0":
+		var payload: Dictionary = message["payload"]
+		selection_row_ids = PackedStringArray(payload["row_ids"])
+		selection_replaced.emit(selection_row_ids.duplicate(), str(payload.get("origin", "replay")))
 	if not applied:
 		return
 	_seen_message_ids[message_id] = true

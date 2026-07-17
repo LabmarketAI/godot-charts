@@ -6,6 +6,7 @@ godot_bin="${GODOT_BIN:-$HOME/godot/bin/godot.linuxbsd.editor.x86_64}"
 test_project="$(mktemp -d /tmp/godot-charts-m1.XXXXXX)"
 trap 'rm -rf "$test_project"' EXIT
 
+"$repo_root/scripts/check-m1-boundaries.sh"
 mkdir -p "$test_project/addons" "$test_project/tests/m1"
 "$repo_root/scripts/build-m1-addon.sh" "$test_project/addons/godot-charts"
 cp -R "$repo_root/tests/m1/fixtures" "$test_project/tests/m1/fixtures"

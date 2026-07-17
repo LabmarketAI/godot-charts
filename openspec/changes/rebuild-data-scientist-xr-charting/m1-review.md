@@ -1,6 +1,6 @@
 # M1 Exit Review
 
-Status: implementation review ready; product-owner authorization to proceed beyond M1 is pending.
+Status: accepted for M1 closure by product-owner continuation on 2026-07-16.
 
 ## Delivered vertical slice
 
@@ -34,4 +34,4 @@ These headless measurements are regression budgets, not general desktop or XR ca
 
 ## Review decision
 
-The implemented analytical spine is technically suitable for completing the remaining M1.1/M1.2 governance work and final reference-scene CI confirmation. It does not yet authorize live transport, Jupyter authentication, broader chart coverage, or XR/WebXR implementation. That authorization requires the product owner to accept this review and the remaining M1 risks explicitly.
+The analytical spine, remaining M1.1/M1.2 governance work, and reference-scene CI are complete. Product-owner continuation accepted the documented risks and closes M1. This acceptance authorizes planning the next bounded vertical slice; it does not silently select a live transport, authentication mechanism, chart-family expansion, or XR/WebXR implementation without the corresponding dependency and capability gates.

@@ -22,6 +22,18 @@ func _initialize() -> void:
 	_assert(desktop.controller.mode == "frame" and desktop.controller.selected, "desktop restores frame focus after mode switch")
 	_assert(xr.controller.mode == "frame" and xr.controller.selected, "mocked-XR restores frame focus after mode switch")
 	_assert(not desktop.controller.is_capturing() and not xr.controller.is_capturing(), "both adapters release capture")
+	var desktop_lifecycle: Dictionary = desktop.view.lifecycle_snapshot()
+	var xr_lifecycle: Dictionary = xr.view.lifecycle_snapshot()
+	for iteration: int in 100:
+		var delta := Vector3(0.01 if iteration % 2 == 0 else -0.01, 0.0, 0.0)
+		_assert(desktop.adapter.handle_mouse("begin_move") and desktop.adapter.handle_mouse("preview_move", {"delta": delta}) and desktop.adapter.handle_mouse("commit"), "desktop stress command commits: %d" % iteration)
+		_assert(xr.adapter.handle_grab("begin_move") and xr.adapter.handle_grab("preview_move", {"delta": delta}) and xr.adapter.handle_grab("commit"), "mocked-XR stress command commits: %d" % iteration)
+	_assert(desktop.state.to_dictionary() == xr.state.to_dictionary(), "stress replay preserves adapter state parity")
+	_assert(desktop.controller.command_trace == xr.controller.command_trace, "stress replay preserves exact trace parity")
+	_assert(desktop.view.lifecycle_snapshot() == desktop_lifecycle, "desktop manipulation replay does not grow frame resources")
+	_assert(xr.view.lifecycle_snapshot() == xr_lifecycle, "mocked-XR manipulation replay does not grow frame resources")
+	_assert(desktop.controller.history_snapshot()["size"] == desktop.controller.history_limit, "desktop replay history remains bounded")
+	_assert(xr.controller.history_snapshot()["size"] == xr.controller.history_limit, "mocked-XR replay history remains bounded")
 
 	_assert(not desktop.adapter.handle_mouse("unsupported"), "desktop rejects unknown mouse actions")
 	_assert(not xr.adapter.handle_grab("unsupported"), "mocked-XR rejects unknown grab actions")

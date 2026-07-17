@@ -18,6 +18,7 @@ async def main() -> None:
     parser.add_argument("--port", type=int, default=0)
     parser.add_argument("--ready-file", type=Path, required=True)
     parser.add_argument("--delay-ms", type=float, default=20.0)
+    parser.add_argument("--connections", type=int, default=1)
     args = parser.parse_args()
 
     manifest = json.loads((args.fixture_root / "replay-manifest.json").read_text())
@@ -26,14 +27,18 @@ async def main() -> None:
         for filename in manifest["messages"]
     ]
     served = asyncio.Event()
+    served_connections = 0
 
     async def publish(connection: ServerConnection) -> None:
+        nonlocal served_connections
         for message in messages:
             await connection.send(message)
             if args.delay_ms:
                 await asyncio.sleep(args.delay_ms / 1000.0)
         await connection.close(1000, "fixture complete")
-        served.set()
+        served_connections += 1
+        if served_connections >= args.connections:
+            served.set()
 
     async with serve(
         publish,

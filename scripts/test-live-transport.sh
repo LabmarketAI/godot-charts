@@ -23,7 +23,8 @@ cp "$repo_root/tests/live/godot/test_live_transport.gd" "$test_project/test_live
 ready_file="$test_project/server-ready.json"
 "$python_bin" "$repo_root/tools/live/fixture_server.py" \
     --fixture-root "$repo_root/tests/m1/fixtures" \
-    --ready-file "$ready_file" &
+    --ready-file "$ready_file" \
+    --connections 2 &
 server_pid=$!
 for _ in {1..100}; do
     [[ -s "$ready_file" ]] && break

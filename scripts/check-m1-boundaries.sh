@@ -14,6 +14,11 @@ if rg -n '^extends (Node|Node3D|Control|Resource|EditorPlugin)|res://addons/godo
     exit 1
 fi
 
+if rg -n '^extends (Node|Node3D|Control|Resource|EditorPlugin)|res://addons/godot-charts/(protocol|renderers|tables|session|diagnostics|integrations|charts|circuits|utils|widgets)/' "$addon/interactions"; then
+    echo "Interaction boundary violation: interactions must remain RefCounted and device/presentation independent." >&2
+    exit 1
+fi
+
 if rg -n 'res://addons/godot-charts/(renderers|tables|interactions|session|diagnostics|charts|circuits|utils|widgets)/' "$addon/protocol"; then
     echo "Protocol boundary violation: protocol may depend on core/protocol only." >&2
     exit 1

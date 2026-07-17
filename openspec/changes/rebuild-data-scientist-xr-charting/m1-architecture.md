@@ -17,9 +17,9 @@ frames (state) -> frame/core state; future frame presentation -> renderer/table 
 | `core/` | Figure/view/layer/table/guide/scale state, validation, serialization, diffs | Nodes, controls, meshes, replay, transport, XR, authentication |
 | `frames/` | Scene-independent frame/binding identity, transform, bounds/aspect, chrome/status references, authored reset and local-view state | Nodes, rendering, transport, replay, persistence, device APIs, legacy/demo orchestration |
 | `protocol/` | Envelope validation, ordering, limits, revisions, deterministic replay | Network sockets, Python objects, scene rendering |
-| `renderers/` | Godot nodes, meshes, materials, data-to-world instances, pick records | Source schemas, transport, session policy |
+| `renderers/` | Godot nodes, meshes, materials, data-to-world instances, pick records, and retained frame presentation projected from frame state | Source schemas, transport, session policy, persistence, or device input policy |
 | `tables/` | Bounded Godot table projection and row inspection | Source mutation, dataframe execution, transport |
-| `interactions/` | Device-independent normalized row selection | Mouse/controller/hand APIs, rendering ownership |
+| `interactions/` | Device-independent normalized row selection plus frame modes, capture, reversible commands, and bounded history | Mouse/controller/hand APIs, rendering ownership, transport, persistence |
 | `session/` | Atomic coordination of validated model, renderer, table, and selection revisions | Authentication, network transport, source execution |
 | `diagnostics/` | Read-only snapshots of public component state | A second mutable state store or credentials |
 | `integrations/` | Future optional transport, backend, XR, authentication, and GIS adapters | Mandatory baseline behavior; absent in M1 |

@@ -65,6 +65,24 @@ func capture_authored_state() -> void:
 	authored_transform = transform
 
 
+func replace_from(other: RefCounted) -> bool:
+	if other == null or not other.has_method("validate") or not other.validate().is_empty():
+		return false
+	id = other.id
+	transform = other.transform
+	authored_transform = other.authored_transform
+	bounds = other.bounds
+	aspect_policy = other.aspect_policy
+	title = other.title
+	source_status = other.source_status
+	theme_ref = other.theme_ref
+	visible = other.visible
+	locked = other.locked
+	binding = Binding.from_dictionary(other.binding.to_dictionary())
+	local_view_state = other.local_view_state.duplicate(true)
+	return true
+
+
 func to_dictionary() -> Dictionary:
 	return {
 		"schema": "godot-charts/frame-state/1.0",

@@ -9,6 +9,8 @@ trap 'rm -rf "$test_project"' EXIT
 "$repo_root/scripts/check-m1-boundaries.sh"
 mkdir -p "$test_project/addons"
 "$repo_root/scripts/build-m1-addon.sh" "$test_project/addons/godot-charts"
+mkdir -p "$test_project/tests/m1"
+cp -R "$repo_root/tests/m1/fixtures" "$test_project/tests/m1/fixtures"
 cp "$repo_root/tests/m2/godot/project.godot" "$test_project/project.godot"
 cp "$repo_root/tests/m2/godot/test_m2_frame_state.gd" "$test_project/test_m2_frame_state.gd"
 mkdir -p "$test_project/home" "$test_project/data" "$test_project/cache"

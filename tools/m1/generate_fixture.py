@@ -29,7 +29,9 @@ ROW_IDS = ["trial-2021", "trial-2022", "trial-2023", "trial-2024", "trial-2025"]
 
 def write_json(name: str, value: Any) -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    (OUTPUT / name).write_text(
+    target = OUTPUT / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
         json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
     )
@@ -75,8 +77,9 @@ def provenance(revision: int) -> dict[str, Any]:
 def plot_message(frame: pd.DataFrame, revision: int, sequence: int) -> dict[str, Any]:
     figure = plt.figure(figsize=(6.4, 4.8))
     axes = figure.add_subplot(projection="3d")
+    palette = {"I": "#3b82f6", "II": "#f59e0b", "III": "#10b981"}
     collection = axes.scatter(
-        frame["year"], frame["sites"], frame["enrolled"], c="#3b82f6"
+        frame["year"], frame["sites"], frame["enrolled"], c=[palette[value] for value in frame["phase"]]
     )
     axes.set(title="Annual clinical trial enrollment", xlabel="Year", ylabel="Sites", zlabel="Enrollment")
     figure.canvas.draw()
@@ -128,7 +131,14 @@ def plot_message(frame: pd.DataFrame, revision: int, sequence: int) -> dict[str,
                             "x": {"type": "linear", "domain": [2021.0, 2025.0]},
                             "y": {"type": "linear", "domain": [4.0, 9.0]},
                             "z": {"type": "linear", "domain": [120.0, 250.0]},
+                            "color": {"type": "categorical", "domain": list(palette), "range": list(palette.values())},
                         },
+                        "guides": [
+                            {"id": "guide-x", "type": "axis", "channel": "x", "title": axes.get_xlabel()},
+                            {"id": "guide-y", "type": "axis", "channel": "y", "title": axes.get_ylabel()},
+                            {"id": "guide-z", "type": "axis", "channel": "z", "title": axes.get_zlabel()},
+                            {"id": "guide-phase", "type": "legend", "channel": "color", "title": "Phase"},
+                        ],
                     }
                 ],
                 "data": [
@@ -148,7 +158,7 @@ def plot_message(frame: pd.DataFrame, revision: int, sequence: int) -> dict[str,
     return message
 
 
-def table_message(frame: pd.DataFrame) -> dict[str, Any]:
+def table_message(frame: pd.DataFrame, sequence: int) -> dict[str, Any]:
     columns = [
         {"id": name, "label": name.title(), "data_type": "string" if name == "phase" else "float64", "nullable": bool(frame[name].isna().any())}
         for name in frame.columns
@@ -157,7 +167,7 @@ def table_message(frame: pd.DataFrame) -> dict[str, Any]:
         "schema": "godot-charts/table-result/1.0",
         "message_id": "message-table-r1",
         "session_id": SESSION_ID,
-        "sequence": 2,
+        "sequence": sequence,
         "operation": "table.result",
         "created_at": CREATED_AT,
         "provenance": provenance(1),
@@ -198,14 +208,33 @@ def main() -> None:
         },
     )
     write_json("01-plot-r1.json", plot_message(first, 1, 1))
-    write_json("02-table-r1.json", table_message(first))
+    write_json(
+        "02-table-request-r1.json",
+        {
+            "schema": "godot-charts/table-request/1.0",
+            "message_id": "message-table-request-r1",
+            "session_id": SESSION_ID,
+            "sequence": 2,
+            "operation": "table.request",
+            "created_at": CREATED_AT,
+            "payload": {
+                "request_id": "request-table-window-1",
+                "dataset_id": DATASET_ID,
+                "dataset_revision": 1,
+                "offset": 0,
+                "limit": 5,
+                "column_ids": list(first.columns),
+            },
+        },
+    )
+    write_json("02-table-r1.json", table_message(first, 3))
     write_json(
         "03-selection-r1.json",
         {
             "schema": "godot-charts/selection/1.0",
             "message_id": "message-selection-r1",
             "session_id": SESSION_ID,
-            "sequence": 3,
+            "sequence": 4,
             "operation": "selection.replace",
             "created_at": CREATED_AT,
             "payload": {
@@ -219,7 +248,30 @@ def main() -> None:
             },
         },
     )
-    write_json("04-plot-r2.json", plot_message(replacement, 2, 4))
+    write_json("04-plot-r2.json", plot_message(replacement, 2, 5))
+    identity_break = plot_message(replacement.set_axis([f"replacement-{index}" for index in range(len(replacement))]), 3, 6)
+    identity_break["reset_scope"] = ["selection"]
+    write_json("06-plot-r3-identity-reset.json", identity_break)
+    gap = json.loads(json.dumps(identity_break))
+    gap["message_id"] = "message-plot-r3-gap"
+    gap["sequence"] = 7
+    write_json("negative/sequence-gap.json", gap)
+    undeclared = json.loads(json.dumps(identity_break))
+    undeclared["message_id"] = "message-plot-r3-undeclared-reset"
+    undeclared.pop("reset_scope")
+    write_json("negative/identity-break-undeclared.json", undeclared)
+    stale = plot_message(first, 1, 6)
+    stale["message_id"] = "message-plot-stale"
+    write_json("negative/stale-revision.json", stale)
+    invalid_handshake = {
+        "schema": "godot-charts/session-handshake/1.0",
+        "message_id": "message-invalid-missing-operation",
+        "session_id": SESSION_ID,
+        "sequence": 0,
+        "created_at": CREATED_AT,
+        "payload": {},
+    }
+    write_json("invalid/missing-operation.json", invalid_handshake)
     write_json(
         "replay-manifest.json",
         {
@@ -227,13 +279,14 @@ def main() -> None:
             "messages": [
                 "00-handshake.json",
                 "01-plot-r1.json",
+                "02-table-request-r1.json",
                 "02-table-r1.json",
                 "03-selection-r1.json",
                 "01-plot-r1.json",
                 "04-plot-r2.json"
             ],
             "expected": {
-                "applied_messages": 5,
+                "applied_messages": 6,
                 "duplicate_messages": 1,
                 "active_plot_revision": 2,
                 "preserved_row_ids": ["trial-2022", "trial-2024"]

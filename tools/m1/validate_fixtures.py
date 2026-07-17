@@ -16,8 +16,10 @@ FIXTURES = ROOT / "tests" / "m1" / "fixtures"
 SCHEMA_BY_PREFIX = {
     "godot-charts/session-handshake/": "session-handshake.schema.json",
     "godot-charts/plot-message/": "plot-message.schema.json",
+    "godot-charts/table-request/": "table-request.schema.json",
     "godot-charts/table-result/": "table-result.schema.json",
     "godot-charts/selection/": "selection.schema.json",
+    "godot-charts/replay-manifest/": "replay-manifest.schema.json",
 }
 
 
@@ -33,10 +35,9 @@ def main() -> None:
         registry = registry.with_resource(document["$id"], Resource.from_contents(document))
 
     validated = 0
-    for path in sorted(FIXTURES.glob("*.json")):
+    rejected = 0
+    for path in sorted(FIXTURES.rglob("*.json")):
         document = load(path)
-        if document.get("schema") == "godot-charts/replay-manifest/1.0":
-            continue
         schema_name = next(
             (name for prefix, name in SCHEMA_BY_PREFIX.items() if document.get("schema", "").startswith(prefix)),
             None,
@@ -47,11 +48,17 @@ def main() -> None:
             Draft202012Validator(schema_documents[schema_name], registry=registry).iter_errors(document),
             key=lambda error: list(error.absolute_path),
         )
+        expected_invalid = "invalid" in path.relative_to(FIXTURES).parts
+        if expected_invalid and not errors:
+            raise ValueError(f"Expected invalid fixture to be rejected: {path}")
+        if expected_invalid:
+            rejected += 1
+            continue
         if errors:
             formatted = "\n".join(f"{path}: /{'/'.join(map(str, error.absolute_path))}: {error.message}" for error in errors)
             raise ValueError(formatted)
         validated += 1
-    print(f"Validated {validated} M1 message fixtures against Draft 2020-12 schemas.")
+    print(f"Validated {validated} M1 fixtures and rejected {rejected} declared-invalid fixture against Draft 2020-12 schemas.")
 
 
 if __name__ == "__main__":

@@ -6,5 +6,8 @@ run/main_scene=""
 window/size/viewport_width=640
 window/size/viewport_height=360
 
+[editor_plugins]
+enabled=PackedStringArray("res://addons/godot-charts/plugin.cfg")
+
 [rendering]
 renderer/rendering_method="gl_compatibility"

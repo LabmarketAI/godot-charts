@@ -1,7 +1,7 @@
 {
   "expected": {
     "active_plot_revision": 2,
-    "applied_messages": 5,
+    "applied_messages": 6,
     "duplicate_messages": 1,
     "preserved_row_ids": [
       "trial-2022",
@@ -11,6 +11,7 @@
   "messages": [
     "00-handshake.json",
     "01-plot-r1.json",
+    "02-table-request-r1.json",
     "02-table-r1.json",
     "03-selection-r1.json",
     "01-plot-r1.json",

@@ -15,6 +15,11 @@
     "created_at": { "$ref": "common.schema.json#/$defs/timestamp" },
     "producer": { "$ref": "common.schema.json#/$defs/producer" },
     "provenance": { "$ref": "common.schema.json#/$defs/provenance" },
+    "reset_scope": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["selection", "inspection", "view", "frame"] }
+    },
     "diagnostics": {
       "type": "array",
       "maxItems": 64,
@@ -39,7 +44,7 @@
               "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["id", "coordinate_system", "layers", "scales"],
+                "required": ["id", "coordinate_system", "layers", "scales", "guides"],
                 "properties": {
                   "id": { "$ref": "common.schema.json#/$defs/identifier" },
                   "coordinate_system": { "const": "cartesian_3d" },
@@ -76,7 +81,23 @@
                     "properties": {
                       "x": { "$ref": "#/$defs/continuous_scale" },
                       "y": { "$ref": "#/$defs/continuous_scale" },
-                      "z": { "$ref": "#/$defs/continuous_scale" }
+                      "z": { "$ref": "#/$defs/continuous_scale" },
+                      "color": { "$ref": "#/$defs/categorical_scale" }
+                    }
+                  },
+                  "guides": {
+                    "type": "array",
+                    "maxItems": 8,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["id", "type", "channel", "title"],
+                      "properties": {
+                        "id": { "$ref": "common.schema.json#/$defs/identifier" },
+                        "type": { "enum": ["axis", "legend"] },
+                        "channel": { "enum": ["x", "y", "z", "color"] },
+                        "title": { "type": "string", "maxLength": 128 }
+                      }
                     }
                   }
                 }
@@ -104,6 +125,25 @@
           "type": "array",
           "prefixItems": [{ "type": "number" }, { "type": "number" }],
           "items": false
+        }
+      }
+    },
+    "categorical_scale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "domain", "range"],
+      "properties": {
+        "type": { "const": "categorical" },
+        "domain": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "range": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
         }
       }
     },

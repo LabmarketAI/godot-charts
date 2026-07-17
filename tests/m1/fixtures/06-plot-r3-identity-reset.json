@@ -1,0 +1,163 @@
+{
+  "created_at": "2026-07-16T12:00:00Z",
+  "diagnostics": [
+    {
+      "code": "missing-values-skipped",
+      "message": "Rows with missing positional values remain in the table and are not rendered as points.",
+      "path": "/payload/figure/data/0/columns/enrolled",
+      "severity": "info"
+    }
+  ],
+  "message_id": "message-plot-r3",
+  "operation": "replace",
+  "payload": {
+    "figure": {
+      "data": [
+        {
+          "columns": {
+            "enrolled": [
+              120.0,
+              155.0,
+              null,
+              210.0,
+              248.0
+            ],
+            "phase": [
+              "I",
+              "I",
+              "II",
+              "II",
+              "III"
+            ],
+            "sites": [
+              4.0,
+              5.0,
+              6.0,
+              8.0,
+              9.0
+            ],
+            "year": [
+              2021.0,
+              2022.0,
+              2023.0,
+              2024.0,
+              2025.0
+            ]
+          },
+          "id": "dataset-annual-trials",
+          "revision": 3,
+          "row_ids": [
+            "replacement-0",
+            "replacement-1",
+            "replacement-2",
+            "replacement-3",
+            "replacement-4"
+          ]
+        }
+      ],
+      "id": "figure-annual-trials",
+      "title": "Annual clinical trial enrollment",
+      "views": [
+        {
+          "coordinate_system": "cartesian_3d",
+          "guides": [
+            {
+              "channel": "x",
+              "id": "guide-x",
+              "title": "Year",
+              "type": "axis"
+            },
+            {
+              "channel": "y",
+              "id": "guide-y",
+              "title": "Sites",
+              "type": "axis"
+            },
+            {
+              "channel": "z",
+              "id": "guide-z",
+              "title": "Enrollment",
+              "type": "axis"
+            },
+            {
+              "channel": "color",
+              "id": "guide-phase",
+              "title": "Phase",
+              "type": "legend"
+            }
+          ],
+          "id": "view-main",
+          "layers": [
+            {
+              "data_id": "dataset-annual-trials",
+              "id": "layer-enrollment",
+              "mappings": {
+                "color": "phase",
+                "x": "year",
+                "y": "sites",
+                "z": "enrolled"
+              },
+              "mark": "point"
+            }
+          ],
+          "scales": {
+            "color": {
+              "domain": [
+                "I",
+                "II",
+                "III"
+              ],
+              "range": [
+                "#3b82f6",
+                "#f59e0b",
+                "#10b981"
+              ],
+              "type": "categorical"
+            },
+            "x": {
+              "domain": [
+                2021.0,
+                2025.0
+              ],
+              "type": "linear"
+            },
+            "y": {
+              "domain": [
+                4.0,
+                9.0
+              ],
+              "type": "linear"
+            },
+            "z": {
+              "domain": [
+                120.0,
+                250.0
+              ],
+              "type": "linear"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "plot_id": "plot-annual-trials",
+  "producer": {
+    "adapter": "godot-charts-matplotlib",
+    "adapter_version": "0.1.0",
+    "library": "matplotlib",
+    "library_version": "3.11.0"
+  },
+  "provenance": {
+    "dataset_id": "dataset-annual-trials",
+    "dataset_revision": 3,
+    "source_id": "matplotlib-figure-annual-trials",
+    "source_type": "python_object"
+  },
+  "reset_scope": [
+    "selection"
+  ],
+  "revision": 3,
+  "schema": "godot-charts/plot-message/1.0",
+  "sequence": 6,
+  "session_id": "session-m1-recorded"
+}

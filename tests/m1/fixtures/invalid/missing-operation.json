@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-07-16T12:00:00Z",
+  "message_id": "message-invalid-missing-operation",
+  "payload": {},
+  "schema": "godot-charts/session-handshake/1.0",
+  "sequence": 0,
+  "session_id": "session-m1-recorded"
+}

@@ -62,6 +62,24 @@ If you see `addons/godot-charts/addons/godot-charts/plugin.cfg`, the repository 
 
 > **Current runtime note:** the legacy implementation in this repository still contains C# chart classes and requires a compatible Godot .NET project and build. The active rebuild specification replaces those classes with a pure typed-GDScript addon for standard Godot and WebXR. Check the release notes for the runtime requirements of the version you install.
 
+### Pure-GDScript M1 preview
+
+The architectural-spine preview is packaged from an explicit allowlist and contains no C#, .NET project, NuGet reference, native binary, or demo dependency. Build and test it with:
+
+```bash
+./scripts/build-m1-addon.sh /tmp/godot-charts-preview/addons/godot-charts
+GODOT_BIN=/path/to/Godot_v4.6.3-stable_linux.x86_64 ./scripts/test-m1-contract.sh
+```
+
+The generated directory is the complete preview addon and installs directly at `res://addons/godot-charts/`. The current repository checkout still carries legacy code beside the rebuild for migration evidence; do not package the entire canonical directory as the M1 preview.
+
+| M1 dependency | Scope | Required by consumers | Version policy |
+|---|---|---|---|
+| Standard Godot | Runtime/editor | Yes | 4.6.3 stable floor; no .NET build |
+| Matplotlib | Fixture generation | No | Development-only, pinned in `tools/m1/requirements.txt` |
+| pandas | Fixture generation | No | Development-only, pinned in `tools/m1/requirements.txt` |
+| Python JSON Schema | Contract validation | No | Development-only, pinned in `tools/m1/requirements.txt` |
+
 ### Release archive or Godot Asset Library — preferred
 
 Release and Asset Library packages contain the canonical `addons/godot-charts/` tree. In Godot, use **AssetLib → Import** for a downloaded package, or merge the package's `addons/` directory into the root of your project. Then enable **Godot Charts** under **Project → Project Settings → Plugins**.

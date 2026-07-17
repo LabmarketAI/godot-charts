@@ -10,4 +10,4 @@ python3 -m venv .venv
 GODOT_BIN=/path/to/godot bash scripts/test-m1-contract.sh
 ```
 
-The Godot script creates a temporary standard-Godot project, copies the canonical addon and fixtures into it, and verifies deterministic replay, duplicate handling, compatible replacement, linked row selection, and atomic rejection of an invalid column shape. It does not use the .NET demo or a network connection.
+The Godot script creates a temporary standard-Godot project, copies the canonical addon and fixtures into it, and verifies deterministic replay, protocol limits, retained models, batched scatter rendering, bounded Tree-backed tables, and bidirectional selection. A coordinated session test proves revision preservation/reset behavior and exercises deterministic public diagnostics for source/adapter/schema/revision/provenance, protocol/replay, approximations, rejected paths, renderer lifecycle, table window, and linked selection. It does not use the .NET demo or a network connection.

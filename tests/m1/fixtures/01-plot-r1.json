@@ -60,6 +60,32 @@
       "views": [
         {
           "coordinate_system": "cartesian_3d",
+          "guides": [
+            {
+              "channel": "x",
+              "id": "guide-x",
+              "title": "Year",
+              "type": "axis"
+            },
+            {
+              "channel": "y",
+              "id": "guide-y",
+              "title": "Sites",
+              "type": "axis"
+            },
+            {
+              "channel": "z",
+              "id": "guide-z",
+              "title": "Enrollment",
+              "type": "axis"
+            },
+            {
+              "channel": "color",
+              "id": "guide-phase",
+              "title": "Phase",
+              "type": "legend"
+            }
+          ],
           "id": "view-main",
           "layers": [
             {
@@ -75,6 +101,19 @@
             }
           ],
           "scales": {
+            "color": {
+              "domain": [
+                "I",
+                "II",
+                "III"
+              ],
+              "range": [
+                "#3b82f6",
+                "#f59e0b",
+                "#10b981"
+              ],
+              "type": "categorical"
+            },
             "x": {
               "domain": [
                 2021.0,

@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-16
+goal: Deliver an ergonomic, scientifically credible Godot charting library with
+  composable plotting APIs and native desktop, 3D, VR, and XR interactions.

@@ -50,6 +50,36 @@ M1 is the first implementation gate. It SHALL remain deliberately narrow: one re
 - CI passes schema, numerical, semantic, serialization, lifecycle, selection, revision, packaging, and measured desktop-budget checks.
 - The quickstart and reference scene use only public contracts, and the M1 review records dependency decisions, measured budgets, deferred capabilities, and authorization to proceed.
 
+## Milestone M2. Interactive Analytical Frame
+
+M2 turns the proven scatter/session spine into the first scientifically readable and spatially manipulable analytical object. One retained frame SHALL host the existing recorded or live Matplotlib/DataFrame scatter, render deterministic guides, distinguish frame manipulation from chart interaction and navigation, and execute device-independent commands with desktop and mocked-XR conformance. M2 deliberately precedes additional chart families, real Jupyter discovery/authentication, compound figures, production WebXR wiring, and general workspace persistence so those capabilities build on a tested frame and interaction contract rather than demo-specific orchestration.
+
+- [ ] M2.1 Audit the legacy `ChartFrame3D`, frame orchestration, placement/move flows, workspace persistence, slider/pointer controls, and XR grab behavior as migration evidence; record reusable behavior and coupling failures without importing legacy or demo code.
+- [ ] M2.2 Define pure typed-GDScript frame state and binding ports with stable frame identity, transform, bounds/aspect, title/source/status chrome, theme reference, visibility/lock state, authored reset state, and local view state. Frame state SHALL not own source data, replay, transport, or renderer internals.
+- [ ] M2.3 Implement a retained `AnalyticalFrame3D` presentation node that hosts the existing renderer and bounded table through public ports, preserves content resources across compatible plot revisions, and remains installable without legacy charts, widgets, demo services, .NET, native binaries, or XR packages.
+- [ ] M2.4 Implement deterministic linear XYZ ticks, grid lines, axes, tick labels, axis labels, title, and interior orientation/reset landmarks from retained scale/guide state, with missing/degenerate-domain behavior and no decorative geometry that changes perceived values.
+- [ ] M2.5 Define explicit `content`, `frame`, and `navigate` input modes with visible ownership/capture. Content mode SHALL route inspection and row selection; frame mode SHALL route whole-frame manipulation; navigate mode SHALL change observer/view orientation without mutating frame transform or analytical scale domains.
+- [ ] M2.6 Implement device-independent frame commands for select, begin manipulation, preview move/rotate/resize, commit, cancel, lock/unlock, undo, redo, and reset. Commands SHALL use stable identities, preserve exact before/after state, reject invalid transitions atomically, and remain independent of mouse, OpenXR, WebXR, or XR Tools APIs.
+- [ ] M2.7 Implement a desktop mouse/keyboard adapter and a deterministic mocked-XR ray/grab adapter that emit the same intents and command sequences, including capture loss, cancellation, mode switching, and focus restoration.
+- [ ] M2.8 Extend the public reference scene so a user can read the scatter's title and XYZ guides, inspect/select a row, move and resize its frame, receive a compatible replay or live replacement, undo/cancel manipulation, and reset to authored state without consulting fixture JSON.
+- [ ] M2.9 Add headless interaction replay, numerical guide, lifecycle, and package tests proving desktop/mocked-XR parity; exact cancel/undo/reset; frame/content/navigation disambiguation; preservation of frame transform, local view, eligible selection, and picking across revision/reconnect; and no scene-tree or rendering-resource growth under repeated updates and manipulations.
+- [ ] M2.10 Publish an M2 review with visual/readability evidence, measured desktop budgets, remaining accessibility/XR risks, dependency decisions, and an explicit gate before selecting production WebXR wiring, Jupyter discovery/authentication, or additional chart families.
+
+### M2 Exit Criteria
+
+- The existing normalized scatter is readable as a scientific chart through rendered title, axes, ticks, labels, grid, and orientation landmarks.
+- Frame manipulation, chart-content interaction, and observer navigation have explicit, visible, non-conflicting modes and deterministic capture behavior.
+- Move/rotate/resize support preview, commit, cancel, undo/redo, lock, and reset through device-independent commands.
+- Desktop and mocked-XR adapters produce equivalent command traces and final states for the acceptance workflow.
+- Compatible replay and live revisions preserve frame transform, local view state, eligible selection, table context, and stable picking identities.
+- Repeated revisions and manipulations do not replace retained content resources, grow the scene tree, or introduce a mandatory optional dependency.
+- The clean preview remains pure typed GDScript and uses no legacy chart/widget/demo service, .NET, native, OpenXR, WebXR, or XR Tools runtime dependency.
+- The public example demonstrates the complete workflow offline and can substitute the existing optional Python/WebSocket companion without changing frame or interaction contracts.
+
+### M2 Sequencing Decision
+
+After M2, implement the real WebXR ray/select adapter against the proven command contract, then define backend-neutral Jupyter context/data descriptors and read-only discovery/target selection. DataFrame catalog/preview and locally authored plots follow; line/bar marks, compound figures, Qiskit, and geospatial slices then reuse the same frame, guide, command, and capability boundaries. This order avoids expanding chart/backend breadth before the product has one usable embodied analytical loop.
+
 ## 2. Test and Package Foundations
 
 - [ ] 2.1 Create the clean module boundaries for pure plot core, Godot renderer/editor adapter, input adapters, and optional integrations.

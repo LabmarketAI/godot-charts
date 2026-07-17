@@ -17,9 +17,13 @@ M1 is the first implementation gate. It SHALL remain deliberately narrow: one re
 - [ ] M1.1 Complete the legacy audit and dependency scorecards needed by this slice; record keep/adapt/rewrite/remove and adopt/wrap/optional/build-minimal decisions.
   - Initial evidence: `legacy-audit.md` and `dependency-scorecard.md`. Public API inventory, measurements, version pins, and owner approval remain open.
 - [ ] M1.2 Establish clean pure-model, Godot-renderer, input-intent, protocol/replay, and optional-integration boundaries plus a standard-Godot CI fixture with no .NET or native runtime dependency.
+  - Started: the protocol/replay module runs in a temporary standard-Godot project through `scripts/test-m1-contract.sh`; model, renderer, input, optional-integration skeletons and CI remain open.
 - [ ] M1.3 Publish the minimum versioned schemas and golden fixtures for session handshake/capabilities, plot-message replacement, bounded table request/result, row identity, selection, provenance, diagnostics, and replacement revision.
+  - Started: Draft 2020-12 schemas and golden handshake, replacement, table-result, selection, diagnostics, and compatible-revision fixtures live under `addons/godot-charts/schemas/m1/` and `tests/m1/fixtures/`; table request and negative protocol fixtures remain open.
 - [ ] M1.4 Produce one deterministic Python-side fixture from a supported Matplotlib scatter plot and DataFrame-like source, including missing values and stable row/layer/view/plot identities.
+  - Implemented pending review: `tools/m1/generate_fixture.py` uses pinned Matplotlib/pandas dependencies and preserves a missing table row that Matplotlib omits from rendered marks.
 - [ ] M1.5 Implement deterministic in-process recorded replay with ordering, duplicate handling, revision checks, bounded limits, pause/step/restart, and no network or live-kernel requirement.
+  - Started: typed-GDScript replay covers duplicate delivery, monotonic sequence/revision, bounded structural validation, pause/step/restart, compatible selection preservation, and atomic invalid-message rejection; gap policy and broader limit fixtures remain open.
 - [ ] M1.6 Implement the minimum typed-GDScript retained figure/view/layer model, continuous/categorical scales, axes/guides, validation, serialization, and incremental diff contract required by the fixture.
 - [ ] M1.7 Render the scatter plot incrementally in standard Godot with stable picking identities, bounded resource lifecycle, readable inspection, missing-value behavior, and no destructive full-tree rebuild on a compatible update.
 - [ ] M1.8 Implement a bounded virtualized table view for the same rows and link table/chart inspection and selection through normalized row identities without mutating source data.

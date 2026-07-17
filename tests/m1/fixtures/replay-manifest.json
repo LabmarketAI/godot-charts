@@ -1,0 +1,20 @@
+{
+  "expected": {
+    "active_plot_revision": 2,
+    "applied_messages": 5,
+    "duplicate_messages": 1,
+    "preserved_row_ids": [
+      "trial-2022",
+      "trial-2024"
+    ]
+  },
+  "messages": [
+    "00-handshake.json",
+    "01-plot-r1.json",
+    "02-table-r1.json",
+    "03-selection-r1.json",
+    "01-plot-r1.json",
+    "04-plot-r2.json"
+  ],
+  "schema": "godot-charts/replay-manifest/1.0"
+}

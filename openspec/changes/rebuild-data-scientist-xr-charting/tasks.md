@@ -15,6 +15,7 @@
 M1 is the first implementation gate. It SHALL remain deliberately narrow: one recorded Python-originated scatter plot and its bounded table arrive through the normalized session protocol, render incrementally in a clean standard-Godot typed-GDScript project, preserve stable row identity, support inspection and linked selection, survive a compatible replacement revision, expose diagnostics/provenance, and replay deterministically in automated tests. M1 does not require live Jupyter authentication, a network message-bus choice, the full chart catalog, native GIS packages, production XR assets, or a headset.
 
 - [ ] M1.1 Complete the legacy audit and dependency scorecards needed by this slice; record keep/adapt/rewrite/remove and adopt/wrap/optional/build-minimal decisions.
+  - Initial evidence: `legacy-audit.md` and `dependency-scorecard.md`. Public API inventory, measurements, version pins, and owner approval remain open.
 - [ ] M1.2 Establish clean pure-model, Godot-renderer, input-intent, protocol/replay, and optional-integration boundaries plus a standard-Godot CI fixture with no .NET or native runtime dependency.
 - [ ] M1.3 Publish the minimum versioned schemas and golden fixtures for session handshake/capabilities, plot-message replacement, bounded table request/result, row identity, selection, provenance, diagnostics, and replacement revision.
 - [ ] M1.4 Produce one deterministic Python-side fixture from a supported Matplotlib scatter plot and DataFrame-like source, including missing values and stable row/layer/view/plot identities.

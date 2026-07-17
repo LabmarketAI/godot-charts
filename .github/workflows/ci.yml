@@ -86,4 +86,6 @@ jobs:
         run: |
           bash scripts/test-m1-contract.sh
           bash scripts/test-m1-example.sh
+          PYTHON_BIN=python bash scripts/test-python-companion.sh
           PYTHON_BIN=python bash scripts/test-live-transport.sh
+          PYTHON_BIN=python bash scripts/test-companion-transport.sh

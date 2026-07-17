@@ -115,7 +115,9 @@ M1 is the first implementation gate. It SHALL remain deliberately narrow: one re
 
 - [ ] 3A.1 Publish JSON Schema and canonical fixtures for the transport-independent `plot-message` envelope, normalized spec, diagnostics, provenance, full replacement, and patch updates.
 - [ ] 3A.2 Build the companion Python adapter package with registry, compatibility report, resource limits, deterministic IDs, and no-pickle/no-code security tests.
+  - Progress: the installable `godot-charts-companion` preview establishes the package boundary, bounded JSON-only Matplotlib/DataFrame API, explicit identity/mapping requirements, transport publisher, arbitrary-object rejection tests, and companion-to-Godot CI path. Registry, compatibility reporting, generalized deterministic IDs, and the broader security matrix remain before completion.
 - [ ] 3A.3 Implement Matplotlib extraction for figures, subplots, lines, scatter collections, bars, histograms, images, surfaces, axes/scales, titles, annotations, legends, colors, and stable source identities.
+  - Progress: the first supported extractor handles one 3D scatter axes, title and XYZ guides, linear scales, categorical colors, missing positional values, explicit DataFrame columns, and stable index identities. Other artists, subplots, annotations, images, surfaces, inferred source linkage, and compatibility diagnostics remain.
 - [ ] 3A.4 Implement Seaborn adaptation through its compiled Matplotlib output and preserve source-library/statistical provenance where exposed.
 - [ ] 3A.5 Implement Plotly adaptation from validated figure JSON for supported traces, subplots, layout, 3D scenes, frames, and selection identity.
 - [ ] 3A.6 Implement Altair/Vega-Lite adaptation from versioned JSON specs with inline/named data, supported transforms, layers, facets, concatenation, encodings, scales, guides, and parameters.

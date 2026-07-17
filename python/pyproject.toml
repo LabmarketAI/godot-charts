@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "godot-charts-companion"
+version = "0.1.0"
+description = "Safe Python-object adapters and publishers for Godot Charts"
+requires-python = ">=3.10"
+dependencies = [
+  "matplotlib>=3.10,<3.12",
+  "pandas>=2.2,<3.1",
+  "websockets>=15,<17",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["godot_charts_companion*"]

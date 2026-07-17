@@ -97,6 +97,33 @@ GODOT_BIN=/path/to/Godot_v4.6.3-stable_linux.x86_64 \
 
 The Python `websockets` package is pinned for the fixture publisher only. It is not an addon runtime dependency. Authentication, remote workspace discovery, and Jupyter kernel selection remain separate follow-up integrations.
 
+### Python companion preview
+
+The repository now contains the first reusable companion API under `python/godot_charts_companion`. A notebook or trusted Python process supplies a Matplotlib 3D figure, its explicit pandas DataFrame, stable index identities, and column mappings. The adapter reads public Matplotlib axes state and emits the normalized plot envelope consumed by Godot:
+
+```python
+from godot_charts_companion import (
+    Scatter3DMapping,
+    handshake_message,
+    matplotlib_scatter_message,
+    serve_messages,
+)
+
+plot = matplotlib_scatter_message(
+    figure,
+    dataframe,
+    Scatter3DMapping("year", "sites", "enrolled", "phase"),
+    session_id="session-notebook",
+    sequence=1,
+    plot_id="plot-trials",
+    dataset_id="dataset-trials",
+    color_map={"I": "#3b82f6", "II": "#f59e0b", "III": "#10b981"},
+)
+await serve_messages([handshake_message("session-notebook"), plot])
+```
+
+Install the preview companion from the repository with `python -m pip install ./python`. It supports only the explicit 3D scatter/DataFrame slice today. It does not deserialize pickle, execute callbacks or code strings, discover notebook variables, or handle Jupyter authentication.
+
 ### Release archive or Godot Asset Library — preferred
 
 Release and Asset Library packages contain the canonical `addons/godot-charts/` tree. In Godot, use **AssetLib → Import** for a downloaded package, or merge the package's `addons/` directory into the root of your project. Then enable **Godot Charts** under **Project → Project Settings → Plugins**.

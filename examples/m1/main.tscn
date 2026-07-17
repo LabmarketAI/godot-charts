@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://addons/godot-charts/renderers/scatter_renderer_3d.gd" id="2_scatter"]
 [ext_resource type="Script" path="res://addons/godot-charts/tables/bounded_table_view.gd" id="3_table"]
+[ext_resource type="Script" path="res://addons/godot-charts/renderers/analytical_frame_3d.gd" id="4_frame"]
 
 [node name="M1Quickstart" type="Node"]
 script = ExtResource("1_main")
@@ -13,8 +14,11 @@ script = ExtResource("1_main")
 transform = Transform3D(1, 0, 0, 0, 0.970143, 0.242536, 0, -0.242536, 0.970143, 0, 2, 8)
 current = true
 
-[node name="ScatterRenderer3D" type="Node3D" parent="."]
+[node name="AnalyticalFrame3D" type="Node3D" parent="."]
 position = Vector3(-1.5, 0, 0)
+script = ExtResource("4_frame")
+
+[node name="ScatterRenderer3D" type="Node3D" parent="."]
 script = ExtResource("2_scatter")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
@@ -39,6 +43,6 @@ max_visible_rows = 10
 offset_left = 24.0
 offset_top = 20.0
 offset_right = 900.0
-offset_bottom = 52.0
+offset_bottom = 78.0
 text = "Loading recorded analytical session…"
 theme_override_font_sizes/font_size = 18

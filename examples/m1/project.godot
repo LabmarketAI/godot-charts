@@ -1,5 +1,5 @@
 [application]
-config/name="Godot Charts M1 Quickstart"
+config/name="Godot Charts M2 Interactive Frame Quickstart"
 run/main_scene="res://main.tscn"
 
 [display]

@@ -73,7 +73,7 @@ GODOT_BIN=/path/to/Godot_v4.6.3-stable_linux.x86_64 ./scripts/test-m1-contract.s
 
 The generated directory is the complete preview addon and installs directly at `res://addons/godot-charts/`. The current repository checkout still carries legacy code beside the rebuild for migration evidence; do not package the entire canonical directory as the M1 preview.
 
-The current M2 preview adds a retained spatial frame and readable Cartesian 3D guides around the M1 scatter: deterministic ticks, axes, grids, labels, source titles, and orientation/reset landmarks. It also provides device-independent content/frame/navigate modes and reversible move/rotate/resize, lock, cancel, undo/redo, and reset commands. Desktop and mocked-XR adapters are the next gate; applications do not yet receive ready-made mouse or XR event wiring.
+The current M2 preview adds a retained spatial frame and readable Cartesian 3D guides around the M1 scatter: deterministic ticks, axes, grids, labels, source titles, and orientation/reset landmarks. It also provides device-independent content/frame/navigate modes and reversible move/rotate/resize, lock, cancel, undo/redo, and reset commands. Thin desktop mouse/keyboard and deterministic mocked-XR ray/grab adapters translate application events into the same intent contract; production engine-event and WebXR wiring remain application/integration responsibilities until their later milestones.
 
 For a self-contained recorded-session scene, follow [the M1 five-minute quickstart](examples/m1/README.md).
 

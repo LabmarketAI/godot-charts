@@ -21,6 +21,8 @@ Notes:
 - Right joystick is configured for 30 degree snap-turns on Quest 3.
 - The right hand does not have direct locomotion attached; this keeps the
   right thumbstick dedicated to turning.
+- The chart exposes two XR Tools grab handles: cyan moves the chart, orange
+  rotates it around the vertical axis.
 - Use the Meta browser to open the printed `https://<LAN-IP>:8457/` URL.
 
 ## Upstream Template README

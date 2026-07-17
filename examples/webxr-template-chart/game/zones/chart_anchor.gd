@@ -6,6 +6,7 @@ const FrameBinding = preload("res://addons/godot-charts/frames/frame_binding.gd"
 const Frame = preload("res://addons/godot-charts/renderers/analytical_frame_3d.gd")
 const Scatter = preload("res://addons/godot-charts/renderers/scatter_renderer_3d.gd")
 const Guides = preload("res://addons/godot-charts/renderers/cartesian_guides_3d.gd")
+const ChartXRHandles = preload("res://game/zones/chart_xr_handles.gd")
 
 @export var frame_bounds := Vector3(3.2, 2.0, 1.6)
 
@@ -53,6 +54,8 @@ func _build_chart() -> void:
 		push_error("XR chart frame failed to apply figure: %s" % [frame.diagnostics])
 		return
 
+	var handles := ChartXRHandles.new()
+	handles.setup(frame)
 	print("XR template chart ready: points=%d revision=%d" % [frame.rendered_point_count(), replay.active_plot_revision])
 
 

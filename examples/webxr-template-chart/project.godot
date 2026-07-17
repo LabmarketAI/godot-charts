@@ -35,7 +35,7 @@ import/blender/enabled=false
 
 [godot_xr_tools]
 
-input/default_snap_turning=false
+input/default_snap_turning=true
 
 [gui]
 

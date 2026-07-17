@@ -239,9 +239,9 @@ transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70
 grab_distance = 0.15
 ranged_angle = 15.0
 
-[node name="MovementDirect" parent="XROrigin3D/RightHand/CollisionHandRight" index="3" unique_id=1501538499 instance=ExtResource("9_cv4ub")]
-
 [node name="MovementTurn" parent="XROrigin3D/RightHand/CollisionHandRight" index="4" unique_id=1789677111 instance=ExtResource("14_yb1jn")]
+turn_mode = 1
+step_turn_angle = 30.0
 
 [node name="MovementJump" parent="XROrigin3D/RightHand/CollisionHandRight" index="5" unique_id=667737219 instance=ExtResource("10_6ajyr")]
 jump_button_action = "ax_button"

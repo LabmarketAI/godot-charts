@@ -18,7 +18,9 @@ open while testing on the Quest.
 Notes:
 
 - Left joystick locomotion is the current verified baseline on Quest 3.
-- Right joystick turning is not yet verified in WebXR.
+- Right joystick is configured for 30 degree snap-turns on Quest 3.
+- The right hand does not have direct locomotion attached; this keeps the
+  right thumbstick dedicated to turning.
 - Use the Meta browser to open the printed `https://<LAN-IP>:8457/` URL.
 
 ## Upstream Template README

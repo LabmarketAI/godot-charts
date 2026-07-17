@@ -9,6 +9,11 @@ if rg -n '^extends (Node|Node3D|Control|Resource|EditorPlugin)|res://addons/godo
     exit 1
 fi
 
+if rg -n '^extends (Node|Node3D|Control|Resource|EditorPlugin)|res://addons/godot-charts/(protocol|renderers|tables|interactions|session|diagnostics|integrations|charts|circuits|utils|widgets)/' "$addon/frames"; then
+    echo "Frame-state boundary violation: frames must remain RefCounted and may import only frame/core state." >&2
+    exit 1
+fi
+
 if rg -n 'res://addons/godot-charts/(renderers|tables|interactions|session|diagnostics|charts|circuits|utils|widgets)/' "$addon/protocol"; then
     echo "Protocol boundary violation: protocol may depend on core/protocol only." >&2
     exit 1
@@ -21,7 +26,7 @@ fi
 
 if rg -n 'res://addons/godot-charts/(charts|circuits|utils|widgets)/' \
     "$addon/core" "$addon/protocol" "$addon/renderers" "$addon/tables" \
-    "$addon/interactions" "$addon/session" "$addon/diagnostics"; then
+    "$addon/frames" "$addon/interactions" "$addon/session" "$addon/diagnostics"; then
     echo "M1 boundary violation: preview code imports a legacy surface." >&2
     exit 1
 fi

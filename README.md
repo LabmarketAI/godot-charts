@@ -124,6 +124,8 @@ await serve_messages([handshake_message("session-notebook"), plot])
 
 Install the preview companion from the repository with `python -m pip install ./python`. It supports only the explicit 3D scatter/DataFrame slice today. It does not deserialize pickle, execute callbacks or code strings, discover notebook variables, or handle Jupyter authentication.
 
+The companion also exposes `AdapterRegistry`, `CompatibilityReport`, `PlotRequest`, and `deterministic_id`. Applications can inspect support before conversion and present supported, approximated, and rejected features instead of silently degrading a figure. Adapter registration is explicit; the package does not discover or import executable plugins from notebook data.
+
 ### Release archive or Godot Asset Library — preferred
 
 Release and Asset Library packages contain the canonical `addons/godot-charts/` tree. In Godot, use **AssetLib → Import** for a downloaded package, or merge the package's `addons/` directory into the root of your project. Then enable **Godot Charts** under **Project → Project Settings → Plugins**.

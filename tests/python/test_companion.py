@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import sys
 import unittest
+import ast
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "python"))
@@ -18,7 +19,15 @@ import pandas as pd
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
-from godot_charts_companion import Scatter3DMapping, handshake_message, matplotlib_scatter_message
+from godot_charts_companion import (
+    AdapterRegistry,
+    PlotRequest,
+    Scatter3DMapping,
+    deterministic_id,
+    handshake_message,
+    matplotlib_scatter_adapter,
+    matplotlib_scatter_message,
+)
 
 
 class CompanionTests(unittest.TestCase):
@@ -55,6 +64,51 @@ class CompanionTests(unittest.TestCase):
         unsafe["object"] = [object(), object(), object()]
         with self.assertRaisesRegex(TypeError, "unsupported DataFrame scalar"):
             self._message(frame=unsafe)
+
+    def test_registry_reports_compatibility_and_converts(self) -> None:
+        registry = AdapterRegistry()
+        registry.register(matplotlib_scatter_adapter())
+        options = {
+            "mapping": Scatter3DMapping("x", "y", "z", "group"),
+            "session_id": "session-test",
+            "sequence": 1,
+            "plot_id": "plot-test",
+            "dataset_id": "dataset-test",
+            "color_map": {"a": "#3366ff", "b": "#ff6633"},
+            "created_at": "2026-07-17T03:00:00Z",
+        }
+        request = PlotRequest(self.figure, self.frame, options)
+        report = registry.compatibility(request)[0]
+        self.assertTrue(report.compatible)
+        self.assertEqual(report.status, "approximated")
+        self.assertIn("scatter.points", report.supported)
+        self.assertIn("artist.point-style", report.approximated)
+        self.assertEqual(registry.convert(request)["schema"], "godot-charts/plot-message/1.0")
+        with self.assertRaisesRegex(ValueError, "already registered"):
+            registry.register(matplotlib_scatter_adapter())
+
+    def test_deterministic_ids_and_resource_limits(self) -> None:
+        first = deterministic_id("plot", "kernel-1", "figure-1")
+        self.assertEqual(first, deterministic_id("plot", "kernel-1", "figure-1"))
+        self.assertNotEqual(first, deterministic_id("plot", "kernel-2", "figure-1"))
+        oversized = pd.concat([self.frame] * 3334, ignore_index=True)
+        oversized.index = [f"row-{index}" for index in range(len(oversized))]
+        with self.assertRaisesRegex(ValueError, "row or column limits"):
+            self._message(frame=oversized)
+
+    def test_package_has_no_pickle_or_code_execution_calls(self) -> None:
+        package = ROOT / "python" / "godot_charts_companion"
+        forbidden_imports = {"pickle", "cloudpickle", "dill", "subprocess"}
+        forbidden_calls = {"eval", "exec", "compile", "__import__"}
+        for path in package.glob("*.py"):
+            tree = ast.parse(path.read_text(), filename=str(path))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    self.assertTrue(forbidden_imports.isdisjoint(alias.name.split(".")[0] for alias in node.names), path.name)
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    self.assertNotIn(node.module.split(".")[0], forbidden_imports, path.name)
+                elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                    self.assertNotIn(node.func.id, forbidden_calls, path.name)
 
     def _message(self, mapping: Scatter3DMapping | None = None, frame: pd.DataFrame | None = None) -> dict:
         return matplotlib_scatter_message(

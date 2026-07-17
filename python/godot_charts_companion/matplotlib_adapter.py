@@ -13,10 +13,40 @@ from matplotlib.figure import Figure
 import pandas as pd
 
 from . import __version__
+from .contracts import CompatibilityReport, PlotRequest
+from .registry import Adapter
 
 IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 MAX_ROWS = 10_000
 MAX_COLUMNS = 64
+
+
+def inspect_matplotlib_scatter(request: PlotRequest) -> CompatibilityReport:
+    if not isinstance(request.source, Figure):
+        return CompatibilityReport("matplotlib.scatter3d", "rejected", rejected=("source:not-matplotlib-figure",))
+    if not isinstance(request.data, pd.DataFrame):
+        return CompatibilityReport("matplotlib.scatter3d", "rejected", rejected=("data:not-pandas-dataframe",))
+    if len(request.source.axes) != 1 or not hasattr(request.source.axes[0], "get_zlabel"):
+        return CompatibilityReport("matplotlib.scatter3d", "rejected", rejected=("figure:requires-one-3d-axes",))
+    collections = request.source.axes[0].collections
+    if len(collections) != 1:
+        return CompatibilityReport("matplotlib.scatter3d", "rejected", rejected=("axes:requires-one-scatter-collection",))
+    supported = ("figure.title", "axes.xyz", "scatter.points", "dataframe.rows", "missing.positions")
+    approximated = ("artist.point-style",) if collections else ()
+    return CompatibilityReport(
+        "matplotlib.scatter3d",
+        "approximated" if approximated else "supported",
+        supported=supported,
+        approximated=approximated,
+    )
+
+
+def matplotlib_scatter_adapter() -> Adapter:
+    return Adapter(
+        "matplotlib.scatter3d",
+        inspect_matplotlib_scatter,
+        lambda request: matplotlib_scatter_message(request.source, request.data, **request.options),
+    )
 
 
 @dataclass(frozen=True)
@@ -49,6 +79,9 @@ def matplotlib_scatter_message(
     The function never evaluates callbacks or serializes Python objects. The DataFrame
     is copied into bounded JSON scalar columns; its index supplies stable row IDs.
     """
+    report = inspect_matplotlib_scatter(PlotRequest(figure, frame))
+    if not report.compatible:
+        raise ValueError("incompatible Matplotlib scatter: " + ", ".join(report.rejected))
     for identifier in (session_id, plot_id, dataset_id, view_id, layer_id):
         _require_identifier(identifier)
     figure_id = figure_id or f"figure-{plot_id}"

@@ -85,6 +85,7 @@ jobs:
           GODOT_BIN: /tmp/godot/Godot_v4.6.3-stable_linux.x86_64
         run: |
           bash scripts/test-m1-contract.sh
+          bash scripts/test-visual-assets.sh
           bash scripts/test-m1-example.sh
           bash scripts/test-m2-foundation.sh
           PYTHON_BIN=python bash scripts/test-python-companion.sh

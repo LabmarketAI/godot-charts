@@ -1,0 +1,42 @@
+{
+  "schema": "godot-charts/visual-asset-pack/1.0",
+  "id": "core-procedural-modern",
+  "name": "Core Procedural Modern",
+  "license": "MIT",
+  "source": "project-owned procedural GDScript",
+  "roles": [
+    "structure/axis_line",
+    "structure/tick_major",
+    "structure/grid_line",
+    "structure/plot_bounds",
+    "structure/origin",
+    "structure/reset_landmark",
+    "mark/point",
+    "mark/bar",
+    "mark/line",
+    "control/handle_linear",
+    "control/slider_track",
+    "control/slider_thumb",
+    "control/button",
+    "control/grab_anchor",
+    "control/reset",
+    "control/focus_ring",
+    "control/hover_halo",
+    "fallback/minimal_point",
+    "fallback/minimal_line",
+    "fallback/minimal_bar",
+    "fallback/minimal_handle"
+  ],
+  "provider": "res://addons/godot-charts/assets/visual/procedural_visual_asset_factory.gd",
+  "tokens": "res://addons/godot-charts/assets/visual/visual_theme_tokens.gd",
+  "pivots": {
+    "mark/bar": "baseline-center",
+    "structure/reset_landmark": "floor-center",
+    "default": "center"
+  },
+  "performance_tiers": {
+    "desktop": { "max_triangles_per_asset": 512, "shadows": false },
+    "native_xr": { "max_triangles_per_asset": 256, "shadows": false },
+    "webxr": { "max_triangles_per_asset": 128, "shadows": false, "reduced_motion": true }
+  }
+}

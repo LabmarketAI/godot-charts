@@ -92,6 +92,18 @@ func _enable_plugin() -> void:
 		null
 	)
 	add_custom_type(
+		"VisualThemeTokens",
+		"Resource",
+		preload("assets/visual/visual_theme_tokens.gd"),
+		null
+	)
+	add_custom_type(
+		"VisualAssetGallery3D",
+		"Node3D",
+		preload("assets/visual/visual_asset_gallery_3d.gd"),
+		null
+	)
+	add_custom_type(
 		"WidgetPanel3D",
 		"Node3D",
 		preload("widgets/widget_panel_3d.gd"),
@@ -188,6 +200,8 @@ func _disable_plugin() -> void:
 	remove_custom_type("HistogramChart3D")
 	remove_custom_type("GraphNetworkChart3D")
 	remove_custom_type("CircuitChart3D")
+	remove_custom_type("VisualThemeTokens")
+	remove_custom_type("VisualAssetGallery3D")
 	remove_custom_type("WidgetPanel3D")
 	remove_custom_type("WidgetRow3D")
 	remove_custom_type("WidgetColumn3D")

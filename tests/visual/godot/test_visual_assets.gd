@@ -36,6 +36,16 @@ func _initialize() -> void:
 	_assert(snapshot["asset_count"] == Roles.all_roles().size(), "gallery instantiates every core role")
 	gallery.queue_free()
 
+	var scene := load("res://main.tscn") as PackedScene
+	_assert(scene != null, "visual asset gallery example scene loads")
+	if scene != null:
+		var instance := scene.instantiate()
+		root.add_child(instance)
+		await process_frame
+		var example_gallery := instance.find_child("VisualAssetGallery3D", true, false)
+		_assert(example_gallery != null, "visual asset gallery example creates gallery")
+		instance.queue_free()
+
 	if _failures > 0:
 		quit(1)
 	else:

@@ -1,0 +1,15 @@
+[application]
+config/name="Godot Charts Visual Asset Gallery"
+run/main_scene="res://main.tscn"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+
+[editor_plugins]
+enabled=PackedStringArray("res://addons/godot-charts/plugin.cfg")
+
+[rendering]
+renderer/rendering_method="gl_compatibility"

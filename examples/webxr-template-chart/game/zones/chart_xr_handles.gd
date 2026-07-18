@@ -1,10 +1,12 @@
 extends Node3D
 
+const Roles = preload("res://addons/godot-charts/assets/visual/visual_asset_roles.gd")
+const Tokens = preload("res://addons/godot-charts/assets/visual/visual_theme_tokens.gd")
+const Factory = preload("res://addons/godot-charts/assets/visual/procedural_visual_asset_factory.gd")
+
 const HANDLE_LAYER := 1 << 18
 const HELD_LAYER := 1 << 16
 const POINTABLE_LAYER := 1 << 20
-const MOVE_COLOR := Color(0.1, 0.85, 1.0, 1.0)
-const ROTATE_COLOR := Color(1.0, 0.64, 0.16, 1.0)
 
 
 class PointableHandle:
@@ -22,11 +24,13 @@ var _move_handle: XRToolsInteractableHandle
 var _rotate_handle: XRToolsInteractableHandle
 var _active_grabs: Dictionary = {}
 var _active_pointers: Dictionary = {}
+var _asset_factory: ProceduralVisualAssetFactory
 
 
 func setup(frame: AnalyticalFrame3D) -> void:
 	_frame = frame
 	name = "ChartXRHandles"
+	_asset_factory = Factory.new(Tokens.webxr_performance())
 	_frame.handle_root().add_child(self)
 	_frame.apply_interaction_state("frame", true)
 	_rebuild()
@@ -50,17 +54,17 @@ func _rebuild() -> void:
 		"MoveHandle",
 		Vector3(-bounds.x * 0.24, -bounds.y * 0.34, bounds.z * 0.5 + 0.2),
 		0.13,
-		MOVE_COLOR
+		Roles.STATE_FOCUS
 	)
 	_rotate_handle = _create_handle(
 		"RotateHandle",
 		Vector3(bounds.x * 0.24, -bounds.y * 0.34, bounds.z * 0.5 + 0.2),
 		0.13,
-		ROTATE_COLOR
+		Roles.STATE_SELECTED
 	)
 
 
-func _create_handle(handle_name: String, local_position: Vector3, radius: float, color: Color) -> XRToolsInteractableHandle:
+func _create_handle(handle_name: String, local_position: Vector3, radius: float, state: String) -> XRToolsInteractableHandle:
 	var origin := Node3D.new()
 	origin.name = handle_name + "Origin"
 	origin.position = local_position
@@ -82,19 +86,9 @@ func _create_handle(handle_name: String, local_position: Vector3, radius: float,
 	shape.shape = sphere_shape
 	handle.add_child(shape)
 
-	var mesh := MeshInstance3D.new()
-	var sphere_mesh := SphereMesh.new()
-	sphere_mesh.radius = radius
-	sphere_mesh.height = radius * 2.0
-	sphere_mesh.radial_segments = 16
-	sphere_mesh.rings = 8
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.albedo_color = color
-	sphere_mesh.material = material
-	mesh.mesh = sphere_mesh
-	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	handle.add_child(mesh)
+	var asset := _asset_factory.instantiate(Roles.CONTROL_GRAB_ANCHOR, state)
+	asset.name = handle_name + "Visual"
+	handle.add_child(asset)
 
 	_add_grab_point(handle, "GrabPointLeft", XRToolsGrabPointHand.Hand.LEFT)
 	_add_grab_point(handle, "GrabPointRight", XRToolsGrabPointHand.Hand.RIGHT)

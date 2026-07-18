@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://main.gd" id="1_main"]
+
+[sub_resource type="Environment" id="Environment_gallery"]
+background_mode = 1
+background_color = Color(0.91, 0.93, 0.95, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.82, 0.86, 0.9, 1)
+ambient_light_energy = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Material_floor"]
+albedo_color = Color(0.82, 0.85, 0.88, 1)
+roughness = 0.7
+
+[sub_resource type="PlaneMesh" id="Plane_floor"]
+size = Vector2(5.5, 3.5)
+material = SubResource("Material_floor")
+
+[node name="VisualAssetGalleryExample" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_gallery")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.353553, 0.612372, 0, 0.866025, 0.5, -0.707107, -0.353553, 0.612372, 0, 4, 4)
+light_energy = 1.4
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 1.85, 4.25)
+current = true
+fov = 58.0
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("Plane_floor")
+skeleton = NodePath("")
+
+[node name="StatusLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, -1.35, 1.82, 0.05)
+text = "Visual asset roles"
+font_size = 36
+modulate = Color(0.1, 0.12, 0.16, 1)

@@ -11,6 +11,8 @@ mkdir -p "$xdg_root/config" "$xdg_root/data" "$xdg_root/cache"
 "$repo_root/scripts/build-m1-addon.sh" "$test_project/addons/godot-charts"
 cp "$repo_root/tests/m1/godot/project.godot" "$test_project/project.godot"
 cp "$repo_root/tests/visual/godot/test_visual_assets.gd" "$test_project/test_visual_assets.gd"
+cp "$repo_root/examples/visual-assets/main.gd" "$test_project/main.gd"
+cp "$repo_root/examples/visual-assets/main.tscn" "$test_project/main.tscn"
 
 XDG_CONFIG_HOME="$xdg_root/config" XDG_DATA_HOME="$xdg_root/data" XDG_CACHE_HOME="$xdg_root/cache" \
     "$godot_bin" --headless --editor --path "$test_project" --quit-after 2

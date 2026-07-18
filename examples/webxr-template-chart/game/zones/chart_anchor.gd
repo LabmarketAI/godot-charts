@@ -7,6 +7,7 @@ const Frame = preload("res://addons/godot-charts/renderers/analytical_frame_3d.g
 const Scatter = preload("res://addons/godot-charts/renderers/scatter_renderer_3d.gd")
 const Guides = preload("res://addons/godot-charts/renderers/cartesian_guides_3d.gd")
 const ChartXRHandles = preload("res://game/zones/chart_xr_handles.gd")
+const ChartAxisDomainHandles = preload("res://game/zones/chart_axis_domain_handles.gd")
 
 @export var frame_bounds := Vector3(3.2, 2.0, 1.6)
 
@@ -56,6 +57,8 @@ func _build_chart() -> void:
 
 	var handles := ChartXRHandles.new()
 	handles.setup(frame)
+	var domain_handles := ChartAxisDomainHandles.new()
+	domain_handles.setup(frame, replay.active_figure)
 	print("XR template chart ready: points=%d revision=%d" % [frame.rendered_point_count(), replay.active_plot_revision])
 
 

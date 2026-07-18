@@ -1,6 +1,7 @@
 # WebXR Headset Baseline Memo
 
 Date: 2026-07-17
+Updated: 2026-07-18
 
 ## Current Working Baseline
 
@@ -18,6 +19,8 @@ Date: 2026-07-17
 - Left joystick movement works.
 - Trigger/button input is reaching the scene.
 - A single Godot Charts M1 scatter frame was inserted into the outdoor zone and rendered in headset.
+- The chart frame has working lower front handles for whole-frame move and vertical-axis rotate.
+- The chart has an experimental first chart-native control pass: X/Y/Z min/max endpoint handles preview and commit retained linear scale-domain changes through `AxisDomainInteractionController`.
 - Headless runtime check reached:
   - `XR template chart ready: points=4 revision=2`
 
@@ -25,8 +28,8 @@ Date: 2026-07-17
 
 - Right joystick pivot/snap-turn still does not respond in Quest Browser.
 - The chart is visible, but its y axis is oriented away from the user.
-- The chart currently has no interaction handles or direct manipulation controls.
-- The working XR-template experiment is local under `.local/` and intentionally ignored; promote it into tracked source only after the baseline shape settles.
+- Axis-domain handles are not yet full production analytical controls: they do not have typed parameter resources, undo/reset integration, linked-view propagation, slice planes, thresholds, or selection volumes.
+- Endpoint handle placement/selectability needs continued headset validation across Quest Browser runtime updates.
 
 ## Local Template Changes To Preserve
 
@@ -39,5 +42,7 @@ Date: 2026-07-17
   - `ScatterRenderer3D`
   - `CartesianGuides3D`
   - M1 replay-backed annual enrollment chart
+- Add `game/zones/chart_xr_handles.gd` for whole-chart move/rotate using XR Tools handles.
+- Add `game/zones/chart_axis_domain_handles.gd` for experimental X/Y/Z min/max scale-domain controls using semantic visual assets, pointer targets, and XR Tools handle-origin nodes.
 - Mount `ChartAnchor` in `game/zones/outside/outside_zone.tscn`.
 - Keep single-threaded Web export for Quest Browser compatibility.

@@ -42,7 +42,23 @@ Then enable **Godot Charts** under **Project → Project Settings → Plugins**.
 
 If you downloaded the full source repository, copy only `addons/godot-charts/`; do not clone the repository itself into your project's `addons/godot-charts/` path. Doing so creates `addons/godot-charts/addons/godot-charts/`, which Godot will not treat as the intended plugin location.
 
-> **Current runtime note:** this legacy release still contains C# chart implementations and requires a compatible Godot .NET project and build. The planned rebuild will ship as pure typed GDScript for standard Godot and WebXR; consult the installed release notes for its exact requirements.
+> **Current runtime note:** this legacy release still contains C# chart implementations and requires a compatible Godot .NET project and build. The active rebuild ships preview pure typed-GDScript slices for standard Godot and WebXR; consult the installed release notes for the exact requirements of the version you install.
+
+## Pure-GDScript Preview APIs
+
+The rebuild preview is packaged from an explicit allowlist by `scripts/build-m1-addon.sh`. It includes the retained M1/M2 scatter, frame, guide, table, replay, diagnostics, visual asset, and interaction contracts without C#, .NET, native binaries, or demo services.
+
+Key preview entry points:
+
+| API | Purpose |
+|---|---|
+| `renderers/analytical_frame_3d.gd` | Retained frame presentation with stable content, guide, chrome, and handle roots |
+| `renderers/cartesian_guides_3d.gd` | Deterministic XYZ axes, grids, tick labels, source axis titles, and orientation/reset landmarks |
+| `interactions/frame_interaction_controller.gd` | Device-independent frame selection, move/rotate/resize, cancel, undo/redo, and reset |
+| `interactions/axis_domain_interaction_controller.gd` | Experimental begin/preview/commit/cancel controller for X/Y/Z linear scale-domain endpoint manipulation |
+| `assets/visual/*` | Semantic role/token driven procedural chart and control assets, including WebXR-performance handles |
+
+The WebXR template under `examples/webxr-template-chart/` uses these APIs with Godot XR Tools. Frame handles operate on the whole chart transform; axis-domain handles operate on scale domains and reapply the retained figure. The controller logic remains separate from XR Tools so it can be tested headlessly.
 
 From a source checkout, the root installer performs the correct copy:
 

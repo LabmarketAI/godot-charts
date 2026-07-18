@@ -11,6 +11,7 @@ const TableView = preload("res://addons/godot-charts/tables/bounded_table_view.g
 const Session = preload("res://addons/godot-charts/session/plot_session.gd")
 const Diagnostics = preload("res://addons/godot-charts/diagnostics/plot_diagnostics.gd")
 const FrameInteraction = preload("res://addons/godot-charts/interactions/frame_interaction_controller.gd")
+const AxisDomainInteraction = preload("res://addons/godot-charts/interactions/axis_domain_interaction_controller.gd")
 
 var _failures := 0
 
@@ -134,6 +135,19 @@ func _initialize() -> void:
 	var diagnostic_snapshot: Dictionary = public_diagnostics.snapshot()
 	_assert(diagnostic_snapshot["renderer"]["rendered_points"] == 4, "frame facade preserves public renderer diagnostics")
 	_assert(diagnostic_snapshot["renderer"]["guides"]["active_tick_labels"] == 11, "public diagnostics expose retained guide lifecycle")
+	var domain_controller = AxisDomainInteraction.new()
+	_assert(domain_controller.bind(frame_view, session.active_figure), "axis-domain controller binds current Cartesian figure")
+	var original_domains: Dictionary = domain_controller.domain_snapshot()
+	_assert(domain_controller.begin("x", "min") and domain_controller.preview_delta(0.25), "axis-domain controller previews X minimum")
+	var preview_domains: Dictionary = domain_controller.domain_snapshot()
+	_assert(float(preview_domains["x"]["min"]) > float(original_domains["x"]["min"]), "X minimum preview narrows domain")
+	_assert(scatter.rendered_point_count() <= 4, "domain preview reapplies scatter under narrowed scale")
+	_assert(domain_controller.cancel(), "axis-domain controller cancels preview")
+	_assert(domain_controller.domain_snapshot() == original_domains, "axis-domain cancel restores exact domains")
+	_assert(domain_controller.begin("z", "max") and domain_controller.preview_delta(0.20) and domain_controller.commit(), "axis-domain controller commits Z maximum expansion")
+	var committed_domains: Dictionary = domain_controller.domain_snapshot()
+	_assert(float(committed_domains["z"]["max"]) > float(original_domains["z"]["max"]), "Z maximum commit expands domain")
+	_assert(not domain_controller.begin("q", "min"), "axis-domain controller rejects unsupported channel")
 	frame_lifecycle = frame_view.lifecycle_snapshot()
 	for iteration: int in 100:
 		_assert(frame_view.apply_frame_state(state), "repeated valid state applies: %d" % iteration)

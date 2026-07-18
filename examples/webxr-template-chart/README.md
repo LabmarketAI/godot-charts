@@ -24,7 +24,28 @@ Notes:
 - The chart exposes two lower front controls: cyan moves the chart, orange
   rotates it around the vertical axis. They support both near grab and
   controller pointer selection with the trigger.
+- The chart also exposes six smaller endpoint controls outside the X/Y/Z plot
+  bounds. These are experimental axis-domain handles. Drag an endpoint along
+  its axis with ray/select or near grab to preview a linear scale-domain change;
+  release to commit. The server log prints `chart-domain-preview` and
+  `chart-domain-commit` lines with the resulting domain values.
+- The axis-domain handles are deliberately separate from frame manipulation:
+  frame handles move or rotate the whole chart object, while endpoint handles
+  mutate retained scale domains and re-render the chart content/guides.
 - Use the Meta browser to open the printed `https://<LAN-IP>:8457/` URL.
+
+Troubleshooting:
+
+- If only a red handle appears near the chart center, rebuild/reload the served
+  export. Current handles use XR Tools handle-origin nodes and should sit
+  outside the axis endpoints.
+- If endpoint handles are visible but cannot be selected, try the controller ray
+  plus trigger first, then close grip. The endpoint controls include pointer
+  targets and larger near-grab colliders, but Quest Browser input profiles can
+  vary by runtime.
+- If the script refuses to start because port `8457` is in use, stop the old
+  host terminal before rerunning; the script intentionally keeps this fixed port
+  for headset bookmarks.
 
 ## Upstream Template README
 

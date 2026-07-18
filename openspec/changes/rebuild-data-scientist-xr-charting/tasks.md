@@ -271,8 +271,10 @@ The product owner has selected WebXR as the primary delivery target, with a simp
 - [ ] 5.4 Implement linked selection/filtering across views with transformation provenance and event payload tests.
 - [ ] 5.5 Validate target size, viewing-distance typography, depth/occlusion behavior, seated/standing reach, and stereo performance on the declared XR matrix.
 - [ ] 5.6 Implement typed analytical parameters and bindings for handles, sliders, dials, buttons, scroll/joystick input, and one/two-hand manipulation with preview, commit, cancel, undo, and reset behavior.
+  - Progress: the first `AxisDomainInteractionController` mutates retained X/Y/Z linear scale domains through begin/preview/commit/cancel operations, reapplies the retained figure through the frame port, rejects unsupported channels, and is covered by the M2 headless frame suite. General typed parameter resources, binding metadata, undo/reset integration, and non-axis controls remain.
 - [ ] 5.7 Implement embodied spatial-view transforms, plot bounds, entry/reset landmarks, interior axes/guides, and distinct locomotion, orbit/pan, scale-domain zoom, and whole-plot manipulation state.
 - [ ] 5.8 Implement interactive slice planes, thresholds, axis-domain handles, and 3D selection volumes with linked-view provenance.
+  - Progress: the WebXR template chart now instantiates six XR Tools grab anchors for X/Y/Z min/max scale-domain handles using semantic visual assets; dragged thumbs preview and commit scale-domain changes and print domain preview/commit logs. Slice planes, thresholds, selection volumes, linked-view predicates, and headset validation remain.
 - [ ] 5.9 Implement the WebXR capability adapter with ray/select baseline, controller and squeeze enhancement, progressive hand input, capability-loss recovery, and no XR Tools dependency.
 - [ ] 5.10 Add WebXR browser/headset smoke scenes and benchmarks for entering plots, interior inspection, controls, scale zoom, slicing, reset, adaptive detail, and interaction fallback.
 

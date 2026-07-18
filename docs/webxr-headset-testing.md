@@ -70,7 +70,7 @@ Start from a cool device at a documented battery level. Disable unrelated record
 2. Confirm the scene reports revision 1 and four rendered points, with no fatal loading message.
 3. Confirm the linked table, status, help, and `Enter VR` control are readable.
 4. Use a pointer/controller-as-pointer to activate at least one ordinary flat-web control.
-5. Select **Frame** mode before entering VR. The current immersive baseline consumes WebXR select events only while frame mode is active.
+5. Select **Frame** mode before entering VR when using the M1 flat-web reference scene. The tracked WebXR template chart starts with frame controls already visible.
 6. Confirm the status says immersive VR is available. If it says unavailable, record the browser/runtime result and stop; do not count the tier as passed.
 
 ## 5. Verify immersive entry and baseline ray/select
@@ -79,23 +79,26 @@ Start from a cool device at a documented battery level. Disable unrelated record
 2. Confirm the browser presents its normal permission/session UI and the application enters VR without reloading.
 3. Record the selected reference space shown by diagnostics. The session requires the `local-floor` feature and requests `bounded-floor`, `local-floor`, then `local`; a selected `bounded-floor` or `local-floor` space satisfies the floor-relative baseline. Treat `local` as a degraded fallback and do not pass the current tier unless the matrix explicitly accepts and explains it.
 4. Confirm the analytical frame appears at a comfortable authored pose and scale, the title and axes are readable, and the view is stereo rather than a flat browser quad.
-5. Aim a tracked controller at the frame and press select once. This selects the frame.
-6. Press select again and hold it. Move the tracked controller a small distance. Release select to commit the previewed frame move.
-7. Confirm the frame moved once, capture ended on release, revision 1 remains active, and the four points/table content did not change.
-8. Repeat the move using squeeze only if the runtime exposes it. Squeeze is an enhancement; failure or absence of squeeze is not a baseline failure.
-9. If hand tracking is exposed, record whether it works, but verify that no required step depends on hands.
+5. Aim a tracked controller at the lower front cyan frame handle and press/hold select. Move the tracked controller a small distance. Release select to commit the previewed frame move.
+6. Aim at the lower front orange frame handle and press/hold select. Move around the frame's vertical axis. Release select to commit the previewed frame rotation.
+7. Confirm the frame moved or rotated once, capture ended on release, revision 1 remains active, and the four points/table content did not change.
+8. Aim at one X/Y/Z endpoint thumb outside the plot bounds and press/hold select. Drag roughly along that axis, then release.
+9. Confirm the endpoint interaction prints `chart-domain-preview` while held and `chart-domain-commit` on release, the chart/guides re-render, observer pose does not change, and the scale domain remains valid. Record if the endpoint handle is visible but cannot be acquired.
+10. Repeat the frame move using squeeze only if the runtime exposes it. Squeeze is an enhancement; failure or absence of squeeze is not a baseline failure.
+11. If hand tracking is exposed, record whether it works, but verify that no required step depends on hands.
 
-Fail the baseline input tier if ray/select has no tracked aim pose, cannot select and commit a frame move, commits repeatedly, or changes analytical revision/content.
+Fail the baseline input tier if ray/select has no tracked aim pose, cannot select and commit a frame move, commits repeatedly, or changes analytical revision/content. Treat axis-domain endpoint failure as a chart-native-control failure, not as a failure of the previously established frame-move baseline, unless the release matrix declares endpoint handles required for that tier.
 
 ## 6. Verify cancellation, exit, and capability loss
 
 Perform each applicable case and record the resulting revision, frame state, and browser mode:
 
-1. Begin a move, then intentionally interrupt tracking before release. The uncommitted capture must cancel rather than partially commit.
-2. Use **Exit VR**, the browser's exit action, or the headset's normal session-exit control. The application must return to flat web without a page reload and retain committed frame state and revision.
-3. Re-enter VR and confirm the same analytical state is presented.
-4. During a second active capture, cause a safe session loss—such as ending the immersive session from browser/runtime controls. Do not remove the headset in a way that risks the tester. The capture must cancel and flat-web mode must recover.
-5. In flat web, use **Reset** and confirm the authored frame pose returns while revision 1 and the four points remain valid.
+1. Begin a frame move, then intentionally interrupt tracking before release. The uncommitted capture must cancel rather than partially commit.
+2. Begin an axis-domain endpoint drag, then intentionally interrupt tracking before release if the runtime permits this safely. The uncommitted domain preview should cancel or terminate cleanly without leaving an invalid domain.
+3. Use **Exit VR**, the browser's exit action, or the headset's normal session-exit control. The application must return to flat web without a page reload and retain committed frame state and revision.
+4. Re-enter VR and confirm the same analytical state is presented.
+5. During a second active capture, cause a safe session loss—such as ending the immersive session from browser/runtime controls. Do not remove the headset in a way that risks the tester. The capture must cancel and flat-web mode must recover.
+6. In flat web, use **Reset** and confirm the authored frame pose returns while revision 1 and the four points remain valid.
 
 If testing live data, also interrupt the network or WSS service. The recorded/offline plot must remain usable and the transport failure must be visible without exposing credentials.
 
@@ -105,7 +108,7 @@ Warm the scene for at least one minute before recording. Then collect:
 
 - stereo application/GPU frame time p50, p95, and maximum;
 - refresh rate and missed/reprojected frame count;
-- command-to-visible-update latency for at least 20 select/move/commit operations;
+- command-to-visible-update latency for at least 20 select/move/commit operations and, when endpoint handles are in scope, at least 10 axis-domain preview/commit operations;
 - application/browser memory at warm-up and at the end;
 - browser or runtime crashes, WebGL context loss, and session loss;
 - device temperature or the available vendor thermal level;

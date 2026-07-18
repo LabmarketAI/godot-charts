@@ -243,7 +243,7 @@ mesh = SubResource("QuadMesh_pt6e2")
 material_override = SubResource("StandardMaterial3D_srm7c")
 
 [node name="ChartAnchor" type="Node3D" parent="World" index="8"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, -3.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, -3.8)
 script = ExtResource("15_chart")
 
 [node name="Stone1" type="StaticBody3D" parent="World" index="9"]

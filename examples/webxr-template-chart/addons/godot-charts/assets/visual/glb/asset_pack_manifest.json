@@ -1,0 +1,96 @@
+{
+  "schema": "godot-charts/visual-asset-pack/1.0",
+  "id": "core-glb-instrument-p0",
+  "name": "Core GLB Instrument P0",
+  "license": "MIT",
+  "source": "project-owned Blender-generated GLB assets",
+  "roles": {
+    "control/handle_linear": {
+      "asset": "res://addons/godot-charts/assets/visual/glb/control_handle_linear.glb",
+      "source_blend": "tools/assets/blender/generated/control_handle_linear.blend",
+      "source_prompt": "openspec/changes/chart-asset-production-pipeline/prompts/p0/control-handle-linear.md",
+      "pivot": "center",
+      "forward": "+Z",
+      "up": "+Y",
+      "visible_body": {
+        "diameter_m": 0.1,
+        "thickness_m": 0.035
+      },
+      "collision": {
+        "type": "sphere",
+        "diameter_m": 0.16,
+        "object": "collision__control_handle_linear__sphere_0_16m"
+      },
+      "lods": {
+        "LOD0": [
+          "role__control_handle_linear__body_lod0",
+          "role__control_handle_linear__grip_groove_lod0",
+          "role__control_handle_linear__axis_alignment_inset_x_lod0",
+          "role__control_handle_linear__axis_alignment_inset_y_lod0"
+        ],
+        "LOD1": [
+          "lod__control_handle_linear__body_lod1",
+          "lod__control_handle_linear__grip_groove_lod1"
+        ]
+      },
+      "sockets": {
+        "focus_ring": "socket__control_handle_linear__focus_ring_0_14m",
+        "warning_state": "socket__control_handle_linear__warning_state",
+        "error_state": "socket__control_handle_linear__error_state",
+        "pivot_center": "origin__control_handle_linear__center"
+      },
+      "material_slots": [
+        "control_body",
+        "control_focus",
+        "control_active",
+        "status_warning",
+        "status_error",
+        "collision_hidden"
+      ],
+      "states": [
+        "normal",
+        "hover",
+        "focus",
+        "active",
+        "disabled",
+        "warning",
+        "error"
+      ],
+      "inputs": [
+        "controller_ray",
+        "direct_grab",
+        "mouse_pointer",
+        "keyboard_focus"
+      ],
+      "accessibility": {
+        "non_color_cues": [
+          "focus_ring_socket",
+          "active_grip_groove",
+          "axis_alignment_inset"
+        ],
+        "minimum_non_text_contrast": "3:1 through theme tokens",
+        "gaze_dwell_required": false,
+        "reduced_motion_fallback": true
+      },
+      "performance_tiers": {
+        "desktop": {
+          "lod": "LOD0",
+          "max_triangles": 3000,
+          "shadows": false
+        },
+        "native_xr": {
+          "lod": "LOD0",
+          "max_triangles": 1800,
+          "shadows": false
+        },
+        "webxr": {
+          "lod": "LOD1",
+          "max_triangles": 900,
+          "shadows": false,
+          "reduced_motion": true
+        }
+      },
+      "fallback": "fallback/minimal_handle"
+    }
+  }
+}

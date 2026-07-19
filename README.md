@@ -60,7 +60,7 @@ your-project/
 
 If you see `addons/godot-charts/addons/godot-charts/plugin.cfg`, the repository was installed one directory too deep. Move the inner `godot-charts` directory to `res://addons/godot-charts/`.
 
-> **Current runtime note:** the legacy implementation in this repository still contains C# chart classes and requires a compatible Godot .NET project and build. The active rebuild specification replaces those classes with a pure typed-GDScript addon for standard Godot and WebXR. Check the release notes for the runtime requirements of the version you install.
+> **Current runtime note:** the active rebuild is a pure typed-GDScript addon for standard Godot and WebXR. Legacy C# sources have been moved out of the runnable addon path as migration evidence and are not required by the M1/M2/M3 preview.
 
 ### Pure-GDScript M1 preview
 
@@ -75,7 +75,7 @@ The generated directory is the complete preview addon and installs directly at `
 
 The current M2/M3 preview adds a retained spatial frame and readable Cartesian 3D guides around the M1 scatter: deterministic ticks, axes, grids, labels, source titles, and orientation/reset landmarks. It also provides device-independent content/frame/navigate modes and reversible move/rotate/resize, lock, cancel, undo/redo, and reset commands. Thin desktop mouse/keyboard and deterministic mocked-XR ray/grab adapters translate application events into the same intent contract; production engine-event wiring remains application/integration responsibility.
 
-The tracked WebXR template baseline now demonstrates the first headset-facing analytical controls. The lower front cyan/orange handles move and rotate the whole chart frame, while six smaller endpoint thumbs on X/Y/Z preview and commit linear scale-domain changes through `AxisDomainInteractionController`. The domain controls are still an experimental vertical slice: they prove retained-scale mutation, cancellation, re-rendering, and Quest ray/select or near-grab presentation, but they do not yet provide full typed parameter binding, undo/reset integration, linked-view propagation, slice planes, thresholds, or selection volumes.
+The tracked WebXR template baseline now demonstrates the first headset-facing analytical controls. The shared editor-authored inspection scene appears in both desktop and VR entry points. X/Y/Z axis scrubbers sit around the chart: dragging the visible-domain body pans the viewport over a fixed full extent, and dragging an edge resizes the visible domain with the opposite edge pinned. The lower front frame handles remain the whole-chart move/rotate controls. The scrubber controls are still an experimental vertical slice: they prove retained-scale mutation, cancellation, re-rendering, and Quest ray/select presentation, but they do not yet provide full typed parameter binding, undo integration, linked-view propagation, slice planes, thresholds, selection volumes, or final authored GLB scrubber assets.
 
 For a self-contained recorded-session scene, follow [the M1 five-minute quickstart](examples/m1/README.md).
 

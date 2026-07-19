@@ -74,6 +74,10 @@ Priority meanings:
 | Priority | Semantic role | Initial variants / notes |
 |---|---|---|
 | P0 | `control/handle_linear` | Axis endpoint, range endpoint, threshold; constrained drag |
+| P0 | `control/axis_scrubber_rail` | Full analytical extent rail for axis viewport controls |
+| P0 | `control/axis_scrubber_window` | Draggable visible-domain body; size communicates zoom level |
+| P0 | `control/axis_scrubber_edge` | Min/max edge grip or handle for resizing the visible domain |
+| P0 | `control/axis_scrubber_focus` | Optional zoom-focus marker for center, pointer, or selection focus |
 | P0 | `control/slider_track` | Linear, stepped, range, time |
 | P0 | `control/slider_thumb` | Ray and direct-touch hit targets |
 | P0 | `control/button` | Icon/label socket; normal through disabled states |

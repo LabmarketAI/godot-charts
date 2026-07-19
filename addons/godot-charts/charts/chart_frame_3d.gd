@@ -1,2 +1,2 @@
 @tool
-extends "res://addons/godot-charts/charts/ChartFrame3D.cs"
+extends "res://addons/godot-charts/renderers/analytical_frame_3d.gd"

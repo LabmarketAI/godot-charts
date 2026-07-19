@@ -43,6 +43,10 @@ P0 assets are required before the first production GLB pack can replace procedur
 | `guide/leader_line` | leader/callout line | annotations, tooltips | unobtrusive, target identity preserved |
 | `guide/crosshair` | cursor/crosshair | inspection, measurement, brushing | 2D and tri-planar variants |
 | `control/handle_linear` | linear/domain handle | axis domain, threshold, range endpoints | controller-ray and direct-grab target |
+| `control/axis_scrubber_rail` | axis viewport rail | axis pan/zoom scrubbers | represents full extent; exact scalable length |
+| `control/axis_scrubber_window` | visible viewport body | axis pan/zoom scrubbers | draggable body; size and position encode visible domain |
+| `control/axis_scrubber_edge` | viewport edge grip/handle | axis pan/zoom scrubbers | min/max edge resize; large ray target |
+| `control/axis_scrubber_focus` | viewport zoom focus marker | axis pan/zoom scrubbers | optional pointer/center/selection focus cue |
 | `control/slider_track` | slider/range track | filters, time, thresholds | stepped/range-ready |
 | `control/slider_thumb` | slider thumb | filters, time, thresholds | large WebXR hit target |
 | `control/button` | button body/socket | reset, mode, confirm/cancel | icon/label socket; stateful |
@@ -79,7 +83,7 @@ P1 assets unlock richer chart families and analytical controls after the core pa
 | `guide/annotation_pin` | annotation marker | notes, provenance, warnings | author/status socket |
 | `guide/measurement_ruler` | ruler/measurement | spatial measurement | data/world units explicit |
 | `guide/selection_summary` | selection summary panel | brushing, linked selections | count/range/status |
-| `control/axis_grip` | axis grip | pan/zoom/domain controls | axis-specific affordance |
+| `control/axis_grip` | axis grip | axis selection and mode controls | axis-specific affordance distinct from viewport scrubbers |
 | `control/slice_plane` | slice plane | volume, surface, tensor views | plane + edge handles |
 | `control/threshold_plane` | threshold plane | filtering, segmentation | visually distinct from reference plane |
 | `control/selection_box` | 2D brush box | scatter, heatmap, bar ranges | planar/extruded variants |
@@ -147,7 +151,7 @@ Every fundamental asset must declare:
 ## Build Order
 
 1. P0 structure and fallback line primitives.
-2. P0 controls: linear handle, focus ring, hover halo, ray cursor.
+2. P0 controls: linear handle, axis scrubber rail/window/edge/focus, focus ring, hover halo, ray cursor.
 3. P0 marks: point, bar, line.
 4. P0 guide anchors and tooltip/legend basics.
 5. P1 analytical controls: axis grip, selection box/volume, slice plane.

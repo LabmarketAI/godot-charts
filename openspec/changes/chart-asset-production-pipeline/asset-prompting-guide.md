@@ -108,6 +108,8 @@ Interaction prompts should specify:
 - feedback: visual, optional audio/haptic hook, and reduced-motion alternative
 - cancellation: visible active state must support cancel/release without ambiguity
 
+Top-surface icons and state cues must not stack every possible cue into the default visible mesh. Use only the final intended visible mark geometry for the default asset. Do not place state previews, warning/error overlays, construction guides, or alternate icon variants on top of the asset as simultaneous visible meshes. If an icon is a cross, plus, minus, arrow, or other multi-stroke mark, the visible strokes must be coplanar, centered, and physically intersect or meet cleanly as one integrated symbol. State-specific overlays should be named sockets, metadata, hidden/disabled variants, or runtime-swapped geometry, not exported as stacked visible meshes.
+
 Prompt example:
 
 ```text

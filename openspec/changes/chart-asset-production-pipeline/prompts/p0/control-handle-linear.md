@@ -22,6 +22,8 @@ Shape:
 - Required geometry: body, grip groove, interaction anchor, focus-ring socket, collision proxy.
 - Symmetry/origin: centered at local origin; drag axis passes through origin.
 - Value-bearing edges/surfaces that must remain exact: center point and local axis alignment.
+- Top axis cue: one integrated two-stroke cross, exactly two shallow beveled bars, one X-axis and one Y-axis, sharing the same center plane and intersecting at the midpoint.
+- State overlay discipline: do not export visible warning/error/status bars above the top axis cue. Warning and error affordances must be sockets, metadata, hidden variants, or runtime-swapped state geometry, not stacked visible meshes in the default asset.
 
 Interaction vocabulary:
 - Supported states: normal, hover, focus, active, disabled, warning, error.
@@ -58,4 +60,5 @@ Export:
 
 Negative constraints:
 - No glass, chrome, neon, toy-like plastic, decorative screws, background scene, baked labels, unrelated parts, or rough faceted placeholder geometry.
+- No stacked visible state overlays, no four-bar top icon, and no simultaneous warning/error/status stripe meshes in the default asset.
 ```

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cvn48xcmsmkrb"]
 
-[ext_resource type="PackedScene" uid="uid://di1bu0tceg332" path="res://components/persistent/persistent_zone.tscn" id="1_radar"]
+[ext_resource type="PackedScene" uid="uid://qbmx03iibuuu" path="res://addons/godot-xr-tools/staging/scene_base.tscn" id="1_radar"]
 [ext_resource type="Script" uid="uid://c8vnltn217quj" path="res://addons/godot-xr-tools/hands/collision_hand.gd" id="3_d4qbf"]
 [ext_resource type="PackedScene" uid="uid://b4kad2kuba1yn" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn" id="5_2k6vw"]
 [ext_resource type="PackedScene" uid="uid://bjcxf427un2wp" path="res://addons/godot-xr-tools/player/poke/poke.tscn" id="6_3jgly"]
@@ -9,13 +9,9 @@
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="9_cv4ub"]
 [ext_resource type="PackedScene" uid="uid://c2q5phg8w08o" path="res://addons/godot-xr-tools/functions/movement_jump.tscn" id="10_6ajyr"]
 [ext_resource type="PackedScene" uid="uid://clt88d5d1dje4" path="res://addons/godot-xr-tools/functions/movement_crouch.tscn" id="11_5npet"]
-[ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="12_jg4e1"]
 [ext_resource type="PackedScene" uid="uid://l2n30mpbkdyw" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="13_dr7jm"]
-[ext_resource type="PackedScene" uid="uid://b3bubdytjn523" path="res://game/zones/zone_wrist_ui.tscn" id="13_w2gnj"]
 [ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="14_yb1jn"]
 [ext_resource type="PackedScene" uid="uid://diyu06cw06syv" path="res://addons/godot-xr-tools/player/player_body.tscn" id="15_x1dm3"]
-[ext_resource type="PackedScene" uid="uid://qmejywplaagw" path="res://components/persistent/persistent_pocket.tscn" id="16_4oqtv"]
-[ext_resource type="PackedScene" uid="uid://da2qgxxwwitl6" path="res://addons/godot-xr-tools/objects/highlight/highlight_ring.tscn" id="17_1njvn"]
 [ext_resource type="PackedScene" uid="uid://drs4eeq721ojn" path="res://addons/godot-xr-tools/functions/movement_sprint.tscn" id="18_l4ed5"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_d4qbf"]
@@ -80,27 +76,10 @@ nodes/Trigger/node = SubResource("AnimationNodeBlend2_6k8ts")
 nodes/Trigger/position = Vector2(-360, 40)
 node_connections = [&"output", 0, &"Grip", &"Grip", 0, &"Trigger", &"Grip", 1, &"ClosedHand2", &"Trigger", 0, &"OpenHand", &"Trigger", 1, &"ClosedHand1"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g8k03"]
-transparency = 1
-shading_mode = 0
-albedo_color = Color(0, 0, 0.501961, 0.25098)
-
-[sub_resource type="SphereMesh" id="SphereMesh_1ccdy"]
-material = SubResource("StandardMaterial3D_g8k03")
-flip_faces = true
-radius = 0.1
-height = 0.2
-
 [node name="ZoneBase" unique_id=1616403681 instance=ExtResource("1_radar")]
 
 [node name="XRCamera3D" parent="XROrigin3D" index="0"]
 near = 0.03
-
-[node name="BackPocket" parent="XROrigin3D/XRCamera3D" index="0" unique_id=460620834 instance=ExtResource("16_4oqtv")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0.2)
-pocket_id = "backpack_pocket"
-grab_distance = 0.2
-snap_require = "backpack"
 
 [node name="LeftHand" parent="XROrigin3D" index="1"]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, -0.70710677, 0, 0.70710677, 0.70710677, -0.5, 1, -0.5)
@@ -153,12 +132,14 @@ tree_root = SubResource("AnimationNodeBlendTree_bp8r4")
 
 [node name="FunctionPointer" parent="XROrigin3D/LeftHand/CollisionHandLeft" index="1" unique_id=2055156181 instance=ExtResource("7_573pv")]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0.02, -0.03535534, -0.10606602)
-show_laser = 2
+show_laser = 1
 laser_length = 1
+show_target = true
 
 [node name="FunctionPickup" parent="XROrigin3D/LeftHand/CollisionHandLeft" index="2" unique_id=472699193 instance=ExtResource("8_7p3lb")]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 0, 0)
 grab_distance = 0.15
+ranged_collision_mask = 262148
 ranged_angle = 15.0
 
 [node name="MovementDirect" parent="XROrigin3D/LeftHand/CollisionHandLeft" index="3" unique_id=448946267 instance=ExtResource("9_cv4ub")]
@@ -169,18 +150,6 @@ jump_button_action = "ax_button"
 
 [node name="MovementCrouch" parent="XROrigin3D/LeftHand/CollisionHandLeft" index="5" unique_id=478573451 instance=ExtResource("11_5npet")]
 crouch_button_action = "by_button"
-
-[node name="WristUI" parent="XROrigin3D/LeftHand/CollisionHandLeft" index="6" unique_id=1543098121 instance=ExtResource("12_jg4e1")]
-transform = Transform3D(1.30801e-07, -1, 7.6194e-09, -0.0871558, -3.8097e-09, 0.996195, -0.996195, -1.30968e-07, -0.0871558, -0.029999971, 0, 0.3)
-screen_size = Vector2(0.16, 0.08)
-collision_layer = 4194304
-scene = ExtResource("13_w2gnj")
-viewport_size = Vector2(400, 200)
-update_mode = 2
-throttle_fps = 15.0
-transparent = 0
-unshaded = true
-scene_properties_keys = PackedStringArray("zone_wrist_ui.gd")
 
 [node name="RightHand" parent="XROrigin3D" index="2"]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, -0.70710677, 0, 0.70710677, 0.70710677, 0.5, 1, -0.5)
@@ -231,12 +200,14 @@ tree_root = SubResource("AnimationNodeBlendTree_i6y08")
 
 [node name="FunctionPointer" parent="XROrigin3D/RightHand/CollisionHandRight" index="1" unique_id=132222768 instance=ExtResource("7_573pv")]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, -0.02, -0.03535534, -0.10606602)
-show_laser = 2
+show_laser = 1
 laser_length = 1
+show_target = true
 
 [node name="FunctionPickup" parent="XROrigin3D/RightHand/CollisionHandRight" index="2" unique_id=705308326 instance=ExtResource("8_7p3lb")]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 0, 0)
 grab_distance = 0.15
+ranged_collision_mask = 262148
 ranged_angle = 15.0
 
 [node name="MovementTurn" parent="XROrigin3D/RightHand/CollisionHandRight" index="4" unique_id=1789677111 instance=ExtResource("14_yb1jn")]
@@ -250,28 +221,6 @@ jump_button_action = "ax_button"
 crouch_button_action = "by_button"
 
 [node name="PlayerBody" parent="XROrigin3D" index="3" unique_id=1003560517 instance=ExtResource("15_x1dm3")]
-
-[node name="LeftPocket" parent="XROrigin3D/PlayerBody" index="0" unique_id=219221858 instance=ExtResource("16_4oqtv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 1, -0.1)
-pocket_id = "pocket_left"
-grab_distance = 0.1
-snap_require = "fits_in_pocket"
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/PlayerBody/LeftPocket" index="2" unique_id=1015611982]
-mesh = SubResource("SphereMesh_1ccdy")
-
-[node name="HighlightRing" parent="XROrigin3D/PlayerBody/LeftPocket" index="3" unique_id=467286438 instance=ExtResource("17_1njvn")]
-
-[node name="RightPocket" parent="XROrigin3D/PlayerBody" index="1" unique_id=814652681 instance=ExtResource("16_4oqtv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1, -0.1)
-pocket_id = "pocket_right"
-grab_distance = 0.1
-snap_require = "fits_in_pocket"
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/PlayerBody/RightPocket" index="2" unique_id=1464066872]
-mesh = SubResource("SphereMesh_1ccdy")
-
-[node name="HighlightRing" parent="XROrigin3D/PlayerBody/RightPocket" index="3" unique_id=631230919 instance=ExtResource("17_1njvn")]
 
 [node name="MovementSprint" parent="XROrigin3D" index="4" unique_id=781212283 instance=ExtResource("18_l4ed5")]
 

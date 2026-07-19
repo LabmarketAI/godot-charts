@@ -13,6 +13,10 @@ const MARK_BAR := "mark/bar"
 const MARK_LINE := "mark/line"
 
 const CONTROL_HANDLE_LINEAR := "control/handle_linear"
+const CONTROL_AXIS_SCRUBBER_RAIL := "control/axis_scrubber_rail"
+const CONTROL_AXIS_SCRUBBER_WINDOW := "control/axis_scrubber_window"
+const CONTROL_AXIS_SCRUBBER_EDGE := "control/axis_scrubber_edge"
+const CONTROL_AXIS_SCRUBBER_FOCUS := "control/axis_scrubber_focus"
 const CONTROL_SLIDER_TRACK := "control/slider_track"
 const CONTROL_SLIDER_THUMB := "control/slider_thumb"
 const CONTROL_BUTTON := "control/button"
@@ -48,6 +52,10 @@ static func all_roles() -> PackedStringArray:
 		MARK_BAR,
 		MARK_LINE,
 		CONTROL_HANDLE_LINEAR,
+		CONTROL_AXIS_SCRUBBER_RAIL,
+		CONTROL_AXIS_SCRUBBER_WINDOW,
+		CONTROL_AXIS_SCRUBBER_EDGE,
+		CONTROL_AXIS_SCRUBBER_FOCUS,
 		CONTROL_SLIDER_TRACK,
 		CONTROL_SLIDER_THUMB,
 		CONTROL_BUTTON,
@@ -146,6 +154,10 @@ static func _metadata() -> Dictionary:
 			"sockets": ["data_color", "opacity", "outline"],
 		},
 		CONTROL_HANDLE_LINEAR: _control_metadata(["data_color", "outline", "focus", "selection", "interaction_anchor", "collision_shape"]),
+		CONTROL_AXIS_SCRUBBER_RAIL: _control_metadata(["extent_axis", "track_material", "tick_anchor", "collision_shape"]),
+		CONTROL_AXIS_SCRUBBER_WINDOW: _control_metadata(["visible_domain", "data_color", "focus", "interaction_anchor", "collision_shape"]),
+		CONTROL_AXIS_SCRUBBER_EDGE: _control_metadata(["edge_role", "outline", "focus", "interaction_anchor", "collision_shape"]),
+		CONTROL_AXIS_SCRUBBER_FOCUS: _control_metadata(["focus_position", "secondary_color", "label_anchor"]),
 		CONTROL_SLIDER_TRACK: _control_metadata(["data_color", "secondary_color", "value_axis", "collision_shape"]),
 		CONTROL_SLIDER_THUMB: _control_metadata(["data_color", "outline", "focus", "selection", "interaction_anchor", "collision_shape"]),
 		CONTROL_BUTTON: _control_metadata(["data_color", "outline", "focus", "label_anchor", "interaction_anchor", "collision_shape"]),

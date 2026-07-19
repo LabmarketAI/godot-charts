@@ -1,12 +1,11 @@
 @tool
 class_name GameStaging
-extends PersistentStaging
+extends XRToolsStaging
 
 
 ## Game Staging Script
 ##
-## This script registers the staging instance with the [GameState] singleton
-## and handles pausing/resuming.
+## This script handles staging pause/resume and WebXR session exit.
 
 
 const WEBXR_EXIT_ACTIONS := [&"menu_button", &"primary_click"]

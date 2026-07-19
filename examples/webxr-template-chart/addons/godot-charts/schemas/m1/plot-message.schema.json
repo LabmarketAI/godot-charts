@@ -125,7 +125,22 @@
           "type": "array",
           "prefixItems": [{ "type": "number" }, { "type": "number" }],
           "items": false
-        }
+        },
+        "extent": {
+          "type": "array",
+          "prefixItems": [{ "type": "number" }, { "type": "number" }],
+          "items": false
+        },
+        "min_span": { "type": "number", "exclusiveMinimum": 0 },
+        "max_span": { "type": "number", "exclusiveMinimum": 0 },
+        "focus": { "type": "number", "minimum": 0, "maximum": 1 },
+        "allow_overscroll": { "type": "boolean" },
+        "range": {
+          "type": "array",
+          "prefixItems": [{ "type": "number" }, { "type": "number" }],
+          "items": false
+        },
+        "clamp": { "type": "boolean" }
       }
     },
     "categorical_scale": {

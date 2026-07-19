@@ -22,6 +22,7 @@ Shape:
 - Required geometry: [parts].
 - Symmetry/origin: [requirements].
 - Value-bearing edges/surfaces that must remain exact: [list].
+- Icon/state overlay discipline: [default visible marks only; state overlays as sockets/variants, no stacked visible state previews].
 
 Interaction vocabulary:
 - Supported states: [normal, hover, focus, selected, active, disabled, warning, error].
@@ -61,4 +62,5 @@ Negative constraints:
 - [No background scene.]
 - [No baked labels.]
 - [No unrelated decorative parts.]
+- [No stacked visible state overlays or alternate icon variants in the default asset.]
 ```

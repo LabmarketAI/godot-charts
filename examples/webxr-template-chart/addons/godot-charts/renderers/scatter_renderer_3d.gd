@@ -1,3 +1,4 @@
+@tool
 class_name ScatterRenderer3D
 extends Node3D
 
@@ -17,6 +18,7 @@ var _pick_records: Array[Dictionary] = []
 var _primitive_to_instance: Dictionary = {}
 var _base_colors: Array[Color] = []
 var _selected_row_ids: PackedStringArray = []
+var _clipped_rows := 0
 
 
 func apply_figure(figure: RefCounted, figure_diff: RefCounted = null) -> bool:
@@ -101,6 +103,7 @@ func lifecycle_snapshot() -> Dictionary:
 		"point_mesh_instance_id": 0 if _point_mesh == null else _point_mesh.get_instance_id(),
 		"renderer_child_count": get_child_count(),
 		"rendered_points": rendered_point_count(),
+		"clipped_rows": _clipped_rows,
 		"pick_records": _pick_records.size(),
 	}
 
@@ -149,11 +152,13 @@ func _resolve_point_layer(figure: RefCounted) -> Dictionary:
 
 func _renderable_rows(figure: RefCounted, view: RefCounted, layer: RefCounted, table: RefCounted) -> Array[Dictionary]:
 	var rows: Array[Dictionary] = []
+	_clipped_rows = 0
 	for row_id: String in table.row_ids:
 		var x: Variant = _mapped_position(table, row_id, layer, view, "x")
 		var y: Variant = _mapped_position(table, row_id, layer, view, "y")
 		var z: Variant = _mapped_position(table, row_id, layer, view, "z")
 		if x == null or y == null or z == null:
+			_clipped_rows += 1
 			continue
 		var color := Color.WHITE
 		if layer.mappings.has("color") and view.scales.has("color"):
@@ -184,7 +189,11 @@ func _renderable_rows(figure: RefCounted, view: RefCounted, layer: RefCounted, t
 func _mapped_position(table: RefCounted, row_id: String, layer: RefCounted, view: RefCounted, channel: String) -> Variant:
 	if not layer.mappings.has(channel) or not view.scales.has(channel):
 		return null
-	return view.scales[channel].map(table.value(row_id, layer.mappings[channel]))
+	var scale: RefCounted = view.scales[channel]
+	var value: Variant = table.value(row_id, layer.mappings[channel])
+	if scale.has_method("visible_contains") and not scale.visible_contains(value):
+		return null
+	return scale.map(value)
 
 
 func _row_values(table: RefCounted, row_id: String) -> Dictionary:

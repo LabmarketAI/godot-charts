@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://dnvpecvwdfxa7"]
+
+[ext_resource type="PackedScene" uid="uid://cadyd3qjgujsj" path="res://addons/godot-charts/assets/visual/glb/control_handle_linear.glb" id="1_handle"]
+
+[node name="GlbImportProbe" type="Node3D"]
+
+[node name="ControlHandleLinear" parent="." instance=ExtResource("1_handle")]

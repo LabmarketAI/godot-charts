@@ -27,8 +27,12 @@ func instantiate(role: String, state := Roles.STATE_NORMAL, options: Dictionary 
 			return _bar_asset(role, state, options)
 		Roles.CONTROL_HANDLE_LINEAR, Roles.CONTROL_SLIDER_THUMB, Roles.CONTROL_GRAB_ANCHOR, Roles.FALLBACK_MINIMAL_HANDLE:
 			return _handle_asset(role, state)
-		Roles.CONTROL_SLIDER_TRACK:
+		Roles.CONTROL_SLIDER_TRACK, Roles.CONTROL_AXIS_SCRUBBER_RAIL, Roles.CONTROL_AXIS_SCRUBBER_WINDOW:
 			return _slider_track_asset(role, state, options)
+		Roles.CONTROL_AXIS_SCRUBBER_EDGE:
+			return _button_asset(role, state, {"size": options.get("size", Vector3(0.16, 0.16, 0.05))})
+		Roles.CONTROL_AXIS_SCRUBBER_FOCUS:
+			return _focus_marker_asset(role, state)
 		Roles.CONTROL_BUTTON:
 			return _button_asset(role, state, options)
 		Roles.CONTROL_FOCUS_RING:
@@ -188,6 +192,13 @@ func _focus_ring_asset(role: String, state: String) -> Node3D:
 	root.add_child(_axis_aligned_segment(role, ring_state, Vector3(half, -half, 0.0), Vector3(half, half, 0.0)))
 	root.add_child(_axis_aligned_segment(role, ring_state, Vector3(half, half, 0.0), Vector3(-half, half, 0.0)))
 	root.add_child(_axis_aligned_segment(role, ring_state, Vector3(-half, half, 0.0), Vector3(-half, -half, 0.0)))
+	return root
+
+
+func _focus_marker_asset(role: String, state: String) -> Node3D:
+	var root := _root(role)
+	root.add_child(_axis_aligned_segment(role, state, Vector3(-0.06, 0.0, 0.0), Vector3(0.06, 0.0, 0.0)))
+	root.add_child(_axis_aligned_segment(role, state, Vector3(0.0, -0.06, 0.0), Vector3(0.0, 0.06, 0.0)))
 	return root
 
 

@@ -11,6 +11,7 @@
 - [ ] 2.3 Port accepted circuit loading, validation, dependency layering, and rendering behavior to typed GDScript without QuikGraph or `System.Text.Json`.
 - [ ] 2.4 Replace MathNet-backed statistics with minimal deterministic GDScript routines only where required by retained plot contracts; otherwise document source-side computation as the supported path.
 - [ ] 2.5 Ensure `addons/godot-charts/`, mirrored addon copies, examples, and WebXR template scenes load in standard Godot with no .NET feature flags.
+  - Progress: demo project now opens in local standard Godot 4.7 without active C# script load errors or the missing desktop-capture GDExtension. Legacy C# demo scenes and desktop-capture addon were moved under ignored `demo/legacy-csharp/`; active `demo/scenes/main.tscn` uses `gdscript_demo_main.gd`.
 
 ## 3. Tests and CI
 

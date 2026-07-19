@@ -1,0 +1,318 @@
+[gd_scene load_steps=27 format=3]
+
+[ext_resource type="Script" path="res://game/chart_inspection/chart_inspection_root.gd" id="1_root"]
+[ext_resource type="Script" path="res://addons/godot-charts/renderers/analytical_frame_3d.gd" id="2_frame"]
+[ext_resource type="Script" path="res://addons/godot-charts/renderers/scatter_renderer_3d.gd" id="3_scatter"]
+[ext_resource type="Script" path="res://addons/godot-charts/renderers/cartesian_guides_3d.gd" id="4_guides"]
+[ext_resource type="Script" path="res://game/zones/chart_axis_domain_handles.gd" id="5_domain_scrubbers"]
+[ext_resource type="Script" path="res://game/zones/chart_domain_pointer_target.gd" id="6_pointer_target"]
+
+[sub_resource type="Environment" id="Environment_inspection"]
+background_mode = 1
+background_color = Color(0.035, 0.04, 0.048, 1)
+ambient_light_source = 1
+ambient_light_color = Color(0.72, 0.76, 0.82, 1)
+ambient_light_energy = 0.42
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.09, 0.105, 0.12, 1)
+roughness = 0.86
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector2(7, 7)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_frame_bounds"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(0.16, 0.19, 0.24, 0.035)
+
+[sub_resource type="BoxMesh" id="BoxMesh_frame_bounds"]
+material = SubResource("StandardMaterial3D_frame_bounds")
+size = Vector3(3.2, 2, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_safety_floor"]
+size = Vector3(12, 0.2, 12)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_scrubber_rail"]
+albedo_color = Color(0.28, 0.32, 0.36, 1)
+roughness = 0.68
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_scrubber_window"]
+albedo_color = Color(0.12, 0.72, 0.84, 1)
+emission_enabled = true
+emission = Color(0.05, 0.32, 0.38, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_scrubber_end"]
+albedo_color = Color(0.94, 0.72, 0.22, 1)
+roughness = 0.46
+
+[sub_resource type="BoxMesh" id="BoxMesh_x_rail"]
+material = SubResource("StandardMaterial3D_scrubber_rail")
+size = Vector3(3.2, 0.035, 0.035)
+
+[sub_resource type="BoxMesh" id="BoxMesh_x_window"]
+material = SubResource("StandardMaterial3D_scrubber_window")
+size = Vector3(2.35, 0.07, 0.07)
+
+[sub_resource type="BoxMesh" id="BoxMesh_y_rail"]
+material = SubResource("StandardMaterial3D_scrubber_rail")
+size = Vector3(0.035, 2, 0.035)
+
+[sub_resource type="BoxMesh" id="BoxMesh_y_window"]
+material = SubResource("StandardMaterial3D_scrubber_window")
+size = Vector3(0.07, 1.45, 0.07)
+
+[sub_resource type="BoxMesh" id="BoxMesh_z_rail"]
+material = SubResource("StandardMaterial3D_scrubber_rail")
+size = Vector3(0.035, 0.035, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_z_window"]
+material = SubResource("StandardMaterial3D_scrubber_window")
+size = Vector3(0.07, 0.07, 1.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_scrubber_end"]
+material = SubResource("StandardMaterial3D_scrubber_end")
+size = Vector3(0.16, 0.16, 0.16)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_x_range"]
+size = Vector3(2.35, 0.22, 0.22)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_y_range"]
+size = Vector3(0.22, 1.45, 0.22)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_z_range"]
+size = Vector3(0.22, 0.22, 1.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_scrubber_end"]
+size = Vector3(0.24, 0.24, 0.24)
+
+[node name="ChartInspectionRoot" type="Node3D"]
+script = ExtResource("1_root")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_inspection")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.359923, 0.346189, 0, 0.693478, 0.720478, -0.5, -0.624269, 0.600185, 0, 0, 0)
+light_energy = 2.1
+
+[node name="AssetFillLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 2.2, 1.8)
+light_energy = 0.85
+omni_range = 5.0
+
+[node name="InspectionLayout" type="Node3D" parent="."]
+
+[node name="ReferenceFloor" type="MeshInstance3D" parent="InspectionLayout"]
+mesh = SubResource("PlaneMesh_floor")
+
+[node name="InvisibleSafetyFloor" type="StaticBody3D" parent="InspectionLayout"]
+visible = false
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InspectionLayout/InvisibleSafetyFloor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = SubResource("BoxShape3D_safety_floor")
+
+[node name="InspectionChartFrame" type="Node3D" parent="InspectionLayout"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, -2.35)
+script = ExtResource("2_frame")
+
+[node name="ContentRoot" type="Node3D" parent="InspectionLayout/InspectionChartFrame"]
+
+[node name="InspectionScatterRenderer" type="Node3D" parent="InspectionLayout/InspectionChartFrame/ContentRoot"]
+script = ExtResource("3_scatter")
+plot_size = Vector3(3.2, 2, 2)
+point_radius = 0.045
+
+[node name="GuideRoot" type="Node3D" parent="InspectionLayout/InspectionChartFrame"]
+
+[node name="InspectionCartesianGuides" type="Node3D" parent="InspectionLayout/InspectionChartFrame/GuideRoot"]
+script = ExtResource("4_guides")
+target_tick_count = 4
+
+[node name="ChromeRoot" type="Node3D" parent="InspectionLayout/InspectionChartFrame"]
+
+[node name="ChartAxisDomainScrubbers" type="Node3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot"]
+script = ExtResource("5_domain_scrubbers")
+
+[node name="StatusLabel" type="Label3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.48, 0)
+modulate = Color(0.88, 0.94, 1, 1)
+pixel_size = 0.006
+outline_size = 6
+text = "Trigger ray: drag axis window to scrub; drag ends to zoom."
+font_size = 30
+billboard = 1
+
+[node name="XAxisScrubber" type="Node3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers"]
+
+[node name="Rail" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber"]
+mesh = SubResource("BoxMesh_x_rail")
+
+[node name="Window" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber"]
+mesh = SubResource("BoxMesh_x_window")
+
+[node name="RangeTarget" type="StaticBody3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber"]
+collision_layer = 1048576
+collision_mask = 0
+script = ExtResource("6_pointer_target")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber/RangeTarget"]
+shape = SubResource("BoxShape3D_x_range")
+
+[node name="MinTarget" type="StaticBody3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber"]
+collision_layer = 1048576
+collision_mask = 0
+script = ExtResource("6_pointer_target")
+
+[node name="MinVisual" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber/MinTarget"]
+mesh = SubResource("BoxMesh_scrubber_end")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber/MinTarget"]
+shape = SubResource("BoxShape3D_scrubber_end")
+
+[node name="MaxTarget" type="StaticBody3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber"]
+collision_layer = 1048576
+collision_mask = 0
+script = ExtResource("6_pointer_target")
+
+[node name="MaxVisual" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber/MaxTarget"]
+mesh = SubResource("BoxMesh_scrubber_end")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber/MaxTarget"]
+shape = SubResource("BoxShape3D_scrubber_end")
+
+[node name="Label" type="Label3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/XAxisScrubber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0.18, 0)
+modulate = Color(0.88, 0.94, 1, 1)
+pixel_size = 0.0042
+outline_size = 6
+text = "X domain"
+font_size = 28
+billboard = 1
+
+[node name="YAxisScrubber" type="Node3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers"]
+
+[node name="Rail" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber"]
+mesh = SubResource("BoxMesh_y_rail")
+
+[node name="Window" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber"]
+mesh = SubResource("BoxMesh_y_window")
+
+[node name="RangeTarget" type="StaticBody3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber"]
+collision_layer = 1048576
+collision_mask = 0
+script = ExtResource("6_pointer_target")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber/RangeTarget"]
+shape = SubResource("BoxShape3D_y_range")
+
+[node name="MinTarget" type="StaticBody3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber"]
+collision_layer = 1048576
+collision_mask = 0
+script = ExtResource("6_pointer_target")
+
+[node name="MinVisual" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber/MinTarget"]
+mesh = SubResource("BoxMesh_scrubber_end")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber/MinTarget"]
+shape = SubResource("BoxShape3D_scrubber_end")
+
+[node name="MaxTarget" type="StaticBody3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber"]
+collision_layer = 1048576
+collision_mask = 0
+script = ExtResource("6_pointer_target")
+
+[node name="MaxVisual" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber/MaxTarget"]
+mesh = SubResource("BoxMesh_scrubber_end")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber/MaxTarget"]
+shape = SubResource("BoxShape3D_scrubber_end")
+
+[node name="Label" type="Label3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/YAxisScrubber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0.18, 0)
+modulate = Color(0.88, 0.94, 1, 1)
+pixel_size = 0.0042
+outline_size = 6
+text = "Y domain"
+font_size = 28
+billboard = 1
+
+[node name="ZAxisScrubber" type="Node3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers"]
+
+[node name="Rail" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber"]
+mesh = SubResource("BoxMesh_z_rail")
+
+[node name="Window" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber"]
+mesh = SubResource("BoxMesh_z_window")
+
+[node name="RangeTarget" type="StaticBody3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber"]
+collision_layer = 1048576
+collision_mask = 0
+script = ExtResource("6_pointer_target")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber/RangeTarget"]
+shape = SubResource("BoxShape3D_z_range")
+
+[node name="MinTarget" type="StaticBody3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber"]
+collision_layer = 1048576
+collision_mask = 0
+script = ExtResource("6_pointer_target")
+
+[node name="MinVisual" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber/MinTarget"]
+mesh = SubResource("BoxMesh_scrubber_end")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber/MinTarget"]
+shape = SubResource("BoxShape3D_scrubber_end")
+
+[node name="MaxTarget" type="StaticBody3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber"]
+collision_layer = 1048576
+collision_mask = 0
+script = ExtResource("6_pointer_target")
+
+[node name="MaxVisual" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber/MaxTarget"]
+mesh = SubResource("BoxMesh_scrubber_end")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber/MaxTarget"]
+shape = SubResource("BoxShape3D_scrubber_end")
+
+[node name="Label" type="Label3D" parent="InspectionLayout/InspectionChartFrame/ChromeRoot/ChartAxisDomainScrubbers/ZAxisScrubber"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0.18, 0)
+modulate = Color(0.88, 0.94, 1, 1)
+pixel_size = 0.0042
+outline_size = 6
+text = "Z domain"
+font_size = 28
+billboard = 1
+
+[node name="HandleRoot" type="Node3D" parent="InspectionLayout/InspectionChartFrame"]
+
+[node name="FrameBounds" type="MeshInstance3D" parent="InspectionLayout/InspectionChartFrame"]
+mesh = SubResource("BoxMesh_frame_bounds")
+skeleton = NodePath("")
+cast_shadow = 0
+
+[node name="StatusLabels" type="Node3D" parent="InspectionLayout"]
+
+[node name="TitleLabel" type="Label3D" parent="InspectionLayout/StatusLabels"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.82, -2.7)
+modulate = Color(0.9, 0.93, 0.96, 1)
+pixel_size = 0.004
+outline_size = 6
+text = "Shared chart inspection scene"
+font_size = 32
+billboard = 1
+
+[node name="ActionLabel" type="Label3D" parent="InspectionLayout/StatusLabels"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.67, -2.7)
+modulate = Color(0.9, 0.93, 0.96, 1)
+pixel_size = 0.004
+outline_size = 6
+text = "Trigger ray: drag axis window to scrub; drag ends to zoom."
+font_size = 32
+billboard = 1

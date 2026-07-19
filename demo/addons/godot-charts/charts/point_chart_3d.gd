@@ -1,2 +1,2 @@
 @tool
-extends "res://addons/godot-charts/charts/PointChart3D.cs"
+extends "res://addons/godot-charts/renderers/scatter_renderer_3d.gd"

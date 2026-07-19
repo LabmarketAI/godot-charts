@@ -1,2 +1,2 @@
 @tool
-extends "res://addons/godot-charts/charts/LineChart3D.cs"
+extends Node3D

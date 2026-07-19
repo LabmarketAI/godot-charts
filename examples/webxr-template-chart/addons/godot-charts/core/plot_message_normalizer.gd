@@ -42,7 +42,19 @@ func normalize(message: Dictionary) -> Dictionary:
 				scale = Categorical.new(PackedStringArray(source_scale["domain"]), source_scale["range"])
 			else:
 				var domain: Array = source_scale["domain"]
-				scale = Scale.new(float(domain[0]), float(domain[1]))
+				var extent: Array = source_scale.get("extent", domain)
+				scale = Scale.new(float(domain[0]), float(domain[1]), 0.0, 1.0, bool(source_scale.get("clamp", false)), float(extent[0]), float(extent[1]))
+				if scale.has_method("configure_viewport"):
+					scale.configure_viewport(
+						float(extent[0]),
+						float(extent[1]),
+						float(domain[0]),
+						float(domain[1]),
+						source_scale.get("min_span", null),
+						source_scale.get("max_span", null),
+						float(source_scale.get("focus", 0.5)),
+						bool(source_scale.get("allow_overscroll", false))
+					)
 			diagnostics.append_array(scale.validate("/payload/figure/views/%d/scales/%s" % [view_index, channel]))
 			scales[channel] = scale
 		var guides: Array[RefCounted] = []

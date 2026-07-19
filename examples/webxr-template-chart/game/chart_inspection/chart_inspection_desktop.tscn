@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://cy8x7oqtusab6"]
+
+[ext_resource type="Script" uid="uid://cdd4j47mv4ftq" path="res://game/chart_inspection/chart_inspection_desktop.gd" id="1_desktop"]
+[ext_resource type="PackedScene" path="res://game/chart_inspection/chart_inspection_root.tscn" id="2_root"]
+
+[node name="ChartInspectionDesktop" type="Node3D" unique_id=1129484204]
+script = ExtResource("1_desktop")
+
+[node name="ChartInspectionRoot" parent="." unique_id=326438887 instance=ExtResource("2_root")]
+
+[node name="DesktopCameraRig" type="Node3D" parent="." unique_id=1012314814]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 4.6)
+
+[node name="DesktopCamera" type="Camera3D" parent="DesktopCameraRig" unique_id=608528601]
+current = true
+fov = 68.0
+near = 0.03

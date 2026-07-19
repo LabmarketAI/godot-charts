@@ -6,6 +6,7 @@
 .import/
 *.uid
 *.import
+*.blend1
 export.cfg
 export_credentials.cfg
 

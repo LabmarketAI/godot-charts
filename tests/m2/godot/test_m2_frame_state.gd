@@ -5,6 +5,7 @@ const FrameState = preload("res://addons/godot-charts/frames/analytical_frame_st
 const FrameView = preload("res://addons/godot-charts/renderers/analytical_frame_3d.gd")
 const Guides = preload("res://addons/godot-charts/renderers/cartesian_guides_3d.gd")
 const Ticks = preload("res://addons/godot-charts/core/linear_ticks.gd")
+const LinearScale = preload("res://addons/godot-charts/core/linear_scale.gd")
 const Replay = preload("res://addons/godot-charts/protocol/m1_recorded_replay.gd")
 const Scatter = preload("res://addons/godot-charts/renderers/scatter_renderer_3d.gd")
 const TableView = preload("res://addons/godot-charts/tables/bounded_table_view.gd")
@@ -78,6 +79,15 @@ func _initialize() -> void:
 	_assert(frame_view.content_renderer() == scatter and frame_view.table_view() == table, "frame exposes bound content ports")
 	_assert(scatter.get_parent() == frame_view.content_root(), "frame owns renderer under stable content root")
 	_assert(frame_view.guide_root().name == "GuideRoot" and frame_view.chrome_root().name == "ChromeRoot" and frame_view.handle_root().name == "HandleRoot", "frame exposes stable presentation roots")
+	_assert(frame_view.handle_root().get_child_count() == 0, "frame does not synthesize domain handle assets")
+	var authored_handle := StaticBody3D.new()
+	authored_handle.name = "AuthoredXMinHandle"
+	authored_handle.set_meta("axis_channel", "x")
+	authored_handle.set_meta("axis_edge", "min")
+	authored_handle.set_meta("asset_source", "authored")
+	frame_view.handle_root().add_child(authored_handle)
+	var resolved_handle := frame_view.resolve_domain_handle(authored_handle)
+	_assert(resolved_handle.get("channel", "") == "x" and resolved_handle.get("edge", "") == "min" and resolved_handle.get("asset_source", "") == "authored", "frame resolves authored semantic domain handles")
 	_assert(scatter.plot_size.is_equal_approx(Vector3(4.0, 3.0, 4.0) * 0.625), "preserve aspect fits content within frame bounds")
 	var frame_lifecycle := frame_view.lifecycle_snapshot()
 	var applied_transform: Transform3D = frame_view.transform
@@ -137,8 +147,19 @@ func _initialize() -> void:
 	_assert(diagnostic_snapshot["renderer"]["guides"]["active_tick_labels"] == 11, "public diagnostics expose retained guide lifecycle")
 	var domain_controller = AxisDomainInteraction.new()
 	_assert(domain_controller.bind(frame_view, session.active_figure), "axis-domain controller binds current Cartesian figure")
+	var main_view: RefCounted = session.active_figure.view("view-main")
+	var x_scale: RefCounted = main_view.scales["x"]
+	var z_scale: RefCounted = main_view.scales["z"]
+	x_scale.configure_viewport(x_scale.domain_min, x_scale.domain_max + 2.0, x_scale.domain_min, x_scale.domain_max, 0.25, x_scale.domain_max - x_scale.domain_min + 2.0)
+	z_scale.configure_viewport(z_scale.domain_min, z_scale.domain_max + 2.0, z_scale.domain_min, z_scale.domain_max, 0.25, z_scale.domain_max - z_scale.domain_min + 2.0)
+	var previous_x_max: float = x_scale.domain_max
+	x_scale.set_visible_domain(x_scale.domain_min, x_scale.domain_min + (x_scale.domain_max - x_scale.domain_min) * 0.5)
+	_assert(frame_view.apply_figure(session.active_figure), "narrowed X viewport reapplies figure")
+	_assert(scatter.lifecycle_snapshot()["clipped_rows"] > 0, "narrowed X viewport clips out-of-domain scatter rows instead of clamping them to an edge")
+	x_scale.set_visible_domain(x_scale.domain_min, previous_x_max)
+	_assert(frame_view.apply_figure(session.active_figure), "restored X viewport reapplies figure")
 	var original_domains: Dictionary = domain_controller.domain_snapshot()
-	_assert(domain_controller.begin("x", "min") and domain_controller.preview_delta(0.25), "axis-domain controller previews X minimum")
+	_assert(domain_controller.begin_from_handle(authored_handle) and domain_controller.preview_delta(0.25), "axis-domain controller previews X minimum from authored handle")
 	var preview_domains: Dictionary = domain_controller.domain_snapshot()
 	_assert(float(preview_domains["x"]["min"]) > float(original_domains["x"]["min"]), "X minimum preview narrows domain")
 	_assert(scatter.rendered_point_count() <= 4, "domain preview reapplies scatter under narrowed scale")
@@ -147,6 +168,19 @@ func _initialize() -> void:
 	_assert(domain_controller.begin("z", "max") and domain_controller.preview_delta(0.20) and domain_controller.commit(), "axis-domain controller commits Z maximum expansion")
 	var committed_domains: Dictionary = domain_controller.domain_snapshot()
 	_assert(float(committed_domains["z"]["max"]) > float(original_domains["z"]["max"]), "Z maximum commit expands domain")
+	var before_scrub: Dictionary = domain_controller.domain_snapshot()
+	var before_scrub_span := float(before_scrub["x"]["max"]) - float(before_scrub["x"]["min"])
+	_assert(domain_controller.begin("x", "range") and domain_controller.preview_delta(0.10) and domain_controller.commit(), "axis-domain controller scrubs X range window")
+	var scrubbed_domains: Dictionary = domain_controller.domain_snapshot()
+	var after_scrub_span := float(scrubbed_domains["x"]["max"]) - float(scrubbed_domains["x"]["min"])
+	_assert(is_equal_approx(before_scrub_span, after_scrub_span), "range scrub preserves X zoom span")
+	_assert(float(scrubbed_domains["x"]["min"]) > float(before_scrub["x"]["min"]) and float(scrubbed_domains["x"]["max"]) > float(before_scrub["x"]["max"]), "range scrub pans both X domain edges")
+	var scale_fixture := LinearScale.new(2.0, 6.0, 0.0, 1.0, true, 0.0, 10.0)
+	_assert(scale_fixture.configure_viewport(0.0, 10.0, 2.0, 6.0, 1.0, 10.0), "linear scale configures explicit viewport extent")
+	_assert(scale_fixture.pan_visible(3.0) and scale_fixture.domain_min == 5.0 and scale_fixture.domain_max == 9.0, "linear scale pans viewport while preserving span")
+	_assert(scale_fixture.resize_visible("min", 3.0) and scale_fixture.domain_min == 8.0 and scale_fixture.domain_max == 9.0, "linear scale min edge pins max and clamps to min span")
+	_assert(scale_fixture.zoom_visible(2.0, 0.5) and scale_fixture.domain_min == 7.5 and scale_fixture.domain_max == 9.5, "linear scale zoom expands around center focus")
+	_assert(scale_fixture.fit_extent() and scale_fixture.domain_min == 0.0 and scale_fixture.domain_max == 10.0, "linear scale reset fits full extent")
 	_assert(not domain_controller.begin("q", "min"), "axis-domain controller rejects unsupported channel")
 	frame_lifecycle = frame_view.lifecycle_snapshot()
 	for iteration: int in 100:
@@ -238,6 +272,38 @@ func _load_json(path: String) -> Dictionary:
 	var value: Variant = JSON.parse_string(file.get_as_text())
 	_assert(value is Dictionary, "fixture parses: " + path)
 	return value
+
+
+func _domain_handle_count(root_node: Node, asset_source: String) -> int:
+	var count := 0
+	for child in root_node.get_children():
+		if child.get_meta("interaction_role", "") == "axis_domain_handle" and child.get_meta("asset_source", "") == asset_source:
+			count += 1
+	return count
+
+
+func _domain_handle_channels(root_node: Node) -> PackedStringArray:
+	var result := PackedStringArray()
+	for child in root_node.get_children():
+		if child.get_meta("interaction_role", "") == "axis_domain_handle":
+			result.append("%s:%s" % [child.get_meta("domain_channel", ""), child.get_meta("domain_edge", "")])
+	result.sort()
+	return result
+
+
+func _domain_handle_collision_count(root_node: Node) -> int:
+	var count := 0
+	for child in root_node.get_children():
+		if child.get_meta("interaction_role", "") == "axis_domain_handle" and child.find_child("CollisionProxy", true, false) is StaticBody3D:
+			count += 1
+	return count
+
+
+func _first_domain_collision_proxy(root_node: Node) -> Node:
+	for child in root_node.get_children():
+		if child.get_meta("domain_channel", "") == "x" and child.get_meta("domain_edge", "") == "min":
+			return child.find_child("CollisionProxy", true, false)
+	return null
 
 
 func _assert(condition: bool, message: String) -> void:

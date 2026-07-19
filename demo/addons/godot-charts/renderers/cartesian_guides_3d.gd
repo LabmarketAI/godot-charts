@@ -1,3 +1,4 @@
+@tool
 class_name CartesianGuides3D
 extends Node3D
 

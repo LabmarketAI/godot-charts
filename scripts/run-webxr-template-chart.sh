@@ -129,10 +129,43 @@ fi
 
 mkdir -p "$output" "$web" "$godot_home/.config" "$godot_home/.cache"
 cp -R "$project_src" "$project"
+python3 - "$project/project.godot" <<'PY'
+from pathlib import Path
+import sys
+
+project_file = Path(sys.argv[1])
+text = project_file.read_text()
+desktop_main = 'run/main_scene="res://game/chart_inspection/chart_inspection_desktop.tscn"'
+webxr_main = 'run/main_scene="res://game/main.tscn"'
+if desktop_main not in text and webxr_main not in text:
+    raise SystemExit("Could not find run/main_scene in copied WebXR project")
+text = text.replace(desktop_main, webxr_main)
+desktop_xr = "openxr/enabled=false"
+webxr_xr = "openxr/enabled=true"
+if desktop_xr in text:
+    text = text.replace(desktop_xr, webxr_xr)
+elif webxr_xr not in text:
+    xr_header = "[xr]\n\n"
+    if xr_header not in text:
+        raise SystemExit("Could not find [xr] section in copied WebXR project")
+    text = text.replace(xr_header, xr_header + webxr_xr + "\n", 1)
+project_file.write_text(text)
+PY
+fresh_addon="$output/fresh-godot-charts-addon"
+"$repo_root/scripts/build-m1-addon.sh" "$fresh_addon"
+rm -rf "$project/addons/godot-charts"
+mv "$fresh_addon" "$project/addons/godot-charts"
+
+python3 "$repo_root/tools/assets/validate_glb_asset_pack.py" \
+    --manifest "$project/addons/godot-charts/assets/visual/glb/asset_pack_manifest.json"
 
 export GODOT_EXPORT_DATA_HOME="$export_data_home"
-run_godot --headless --editor --path "$project" --quit-after 2 || \
+run_godot --headless --import --path "$project" || \
     echo "Godot editor import returned nonzero; continuing to verify export artifacts." >&2
+if ! find "$project/.godot/imported" -name 'control_handle_linear.glb-*.scn' -print -quit | grep -q .; then
+    echo "GLB import cache was not created for control_handle_linear.glb" >&2
+    exit 1
+fi
 run_godot --headless --path "$project" --export-release WebXR "$web/index.html" || \
     echo "Godot WebXR export returned nonzero; continuing to verify export artifacts." >&2
 
@@ -167,6 +200,15 @@ cat <<EOF
 WEBXR TEMPLATE CHART HEADSET URL
   https://$lan_ip:$port/
 ============================================================
+
+Export entry:
+  res://game/main.tscn
+
+Loaded VR chart scene:
+  res://game/chart_inspection/chart_inspection_vr.tscn
+
+Desktop editor entry:
+  res://game/chart_inspection/chart_inspection_desktop.tscn
 
 Source:
   $project_src

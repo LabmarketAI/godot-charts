@@ -11,6 +11,8 @@ Primary entry points:
   WebXR-performance token sets.
 - `procedural_visual_asset_factory.gd` creates low-cost Godot nodes for the
   first structural, mark, control, and fallback roles.
+- `glb_visual_asset_provider.gd` resolves GLB-backed roles through
+  `glb/asset_pack_manifest.json` and falls back to the procedural factory.
 - `visual_asset_gallery_3d.gd` instantiates every registered role for visual
   review.
 - `asset_pack_manifest.json` documents the initial procedural pack metadata,

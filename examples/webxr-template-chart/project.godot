@@ -15,27 +15,23 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Godot XR Template"
-run/main_scene="res://game/main.tscn"
-config/features=PackedStringArray("4.6")
+run/main_scene="res://game/chart_inspection/chart_inspection_desktop.tscn"
+config/features=PackedStringArray("4.7")
 config/icon="res://icon.png"
 
 [autoload]
 
 XRToolsUserSettings="*uid://bqgb8i74tm0t"
-GameState="*res://game/game_state.tscn"
 XRToolsRumbleManager="*uid://by853dk86g1qw"
+_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot-xr-tools/plugin.cfg")
+enabled=PackedStringArray("res://addons/godot-xr-tools/plugin.cfg", "res://addons/godot_ai/plugin.cfg")
 
 [filesystem]
 
 import/blender/enabled=false
-
-[godot_xr_tools]
-
-input/default_snap_turning=true
 
 [gui]
 
@@ -70,7 +66,6 @@ environment/defaults/default_environment="res://default_env.tres"
 
 [xr]
 
-openxr/enabled=true
 openxr/foveation_level=3
 openxr/foveation_dynamic=true
 shaders/enabled=true

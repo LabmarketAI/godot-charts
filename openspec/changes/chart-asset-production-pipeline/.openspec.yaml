@@ -1,0 +1,5 @@
+schema: spec-driven
+created: 2026-07-19
+goal: Establish a reproducible asset-production pipeline for modern chart
+  components using Blender-authored GLB packs, procedural Godot fallbacks, and
+  optional ComfyUI-generated visual references.

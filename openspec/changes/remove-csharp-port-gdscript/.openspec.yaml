@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-19
+goal: Remove legacy C#/.NET charting surfaces and complete the standard-Godot
+  typed-GDScript port for the core addon, demos, documentation, packaging, and CI.

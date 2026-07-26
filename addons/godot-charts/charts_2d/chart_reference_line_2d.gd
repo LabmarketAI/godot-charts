@@ -20,13 +20,19 @@ extends Resource
 	set(next_value):
 		width = next_value
 		emit_changed()
+@export var y_axis_id: StringName = &"y":
+	set(next_value):
+		y_axis_id = next_value
+		emit_changed()
 
 
 func _init(
 		line_value := 0.0,
 		line_label := "",
-		line_color := Color(1.0, 0.75, 0.2, 0.9)
+		line_color := Color(1.0, 0.75, 0.2, 0.9),
+		axis_id: StringName = &"y"
 ) -> void:
 	value = line_value
 	label = line_label
 	color = line_color
+	y_axis_id = axis_id

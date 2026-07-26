@@ -4,6 +4,7 @@ const ChartDataset = preload("res://addons/godot-charts/charts_2d/chart_dataset_
 const ChartData = preload("res://addons/godot-charts/charts_2d/chart_data_2d.gd")
 const ChartPalette = preload("res://addons/godot-charts/charts_2d/chart_palette_2d.gd")
 const ChartReferenceLine = preload("res://addons/godot-charts/charts_2d/chart_reference_line_2d.gd")
+const ChartAxis = preload("res://addons/godot-charts/charts_2d/chart_axis_2d.gd")
 const LineChart = preload("res://addons/godot-charts/charts_2d/line_chart_2d.gd")
 
 var _failures: PackedStringArray = []
@@ -19,6 +20,7 @@ func _run() -> void:
 	_test_domain_behavior()
 	_test_dataset_change_propagation()
 	_test_palette_slots()
+	_test_multiple_y_axes()
 	_test_control_instantiation()
 	if _failures.is_empty():
 		print("Godot Charts 2D contract passed.")
@@ -96,6 +98,40 @@ func _test_palette_slots() -> void:
 	_expect(seen.size() == 8, "The first eight categorical colors must be distinct.")
 	_expect(palette.series_color(8) == palette.series_color(7),
 		"Palette overflow must clamp instead of silently reusing the first hue.")
+
+
+func _test_multiple_y_axes() -> void:
+	var chart = LineChart.new()
+	root.add_child(chart)
+	var stock = ChartDataset.new(
+		"Stock", PackedFloat32Array([8000.0, 7000.0]),
+		Color.BLUE, &"stock")
+	var ratio = ChartDataset.new(
+		"Ratio", PackedFloat32Array([8.0, 4.0]),
+		Color.GREEN, &"ratio")
+	chart.chart_data = ChartData.new(
+		PackedStringArray(["D1", "D2"]), [stock, ratio])
+	var axes_config: Array[Resource] = [
+		ChartAxis.new(&"stock", "L", ChartAxis.Side.LEFT, Color.BLUE),
+		ChartAxis.new(&"ratio", "R", ChartAxis.Side.RIGHT, Color.GREEN),
+	]
+	chart.y_axes = axes_config
+	var axes := chart._resolved_axes(ChartPalette.new())
+	var domains := chart._axis_domains(axes)
+	_expect(domains.size() == 2,
+		"Each named Y axis must resolve an independent domain.")
+	_expect(domains[&"stock"].x > 1000.0,
+		"Large stock values must remain on the stock axis.")
+	_expect(domains[&"ratio"].y < 10.0,
+		"Small ratios must remain readable on their own axis.")
+	var threshold = ChartReferenceLine.new(
+		5.0, "Ratio threshold", Color.YELLOW, &"ratio")
+	var threshold_lines: Array[Resource] = [threshold]
+	chart.reference_lines = threshold_lines
+	domains = chart._axis_domains(axes)
+	_expect(domains[&"ratio"].x <= 4.0 and domains[&"ratio"].y >= 8.0,
+		"Reference lines must participate only in their assigned axis.")
+	chart.queue_free()
 
 
 func _test_control_instantiation() -> void:

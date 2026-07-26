@@ -3,6 +3,7 @@ extends SceneTree
 const ChartDataset = preload("res://addons/godot-charts/charts_2d/chart_dataset_2d.gd")
 const ChartData = preload("res://addons/godot-charts/charts_2d/chart_data_2d.gd")
 const ChartPalette = preload("res://addons/godot-charts/charts_2d/chart_palette_2d.gd")
+const ChartReferenceLine = preload("res://addons/godot-charts/charts_2d/chart_reference_line_2d.gd")
 const LineChart = preload("res://addons/godot-charts/charts_2d/line_chart_2d.gd")
 
 var _failures: PackedStringArray = []
@@ -63,6 +64,19 @@ func _test_domain_behavior() -> void:
 		"Constant series must widen to a valid domain.")
 	_expect(LineChart.value_domain(ChartData.new()) == null,
 		"Empty chart data must have no value domain.")
+	_expect(LineChart.resolved_domain(
+			ordinary, false, true, Vector2(-10.0, 10.0)) \
+			== Vector2(-10.0, 10.0),
+		"A valid explicit domain must override automatic scaling.")
+	_expect(LineChart.resolved_domain(
+			ordinary, false, true, Vector2(10.0, -10.0)) == domain,
+		"An invalid explicit domain must fall back to automatic scaling.")
+	var warning_lines: Array[Resource] = [
+		ChartReferenceLine.new(50.0, "Warning")]
+	var warned_domain: Vector2 = LineChart.domain_with_reference_lines(
+		domain, warning_lines)
+	_expect(warned_domain.x == domain.x and warned_domain.y == 50.0,
+		"Visible reference lines must expand the chart domain.")
 
 
 func _test_dataset_change_propagation() -> void:
@@ -90,6 +104,10 @@ func _test_control_instantiation() -> void:
 	chart.chart_data = ChartData.new(PackedStringArray(["1", "2"]), [
 		ChartDataset.new("series", PackedFloat32Array([1.0, 2.0])),
 	])
+	chart.title = "Compact example"
+	chart.compact_mode = true
+	chart.content_inset_left = 24.0
+	chart.show_legend = false
 	root.add_child(chart)
 	_expect(chart is Control and chart.size == Vector2(640.0, 360.0),
 		"LineChart2D must instantiate as a resizable Godot Control.")

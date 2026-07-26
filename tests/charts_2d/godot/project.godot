@@ -1,0 +1,7 @@
+[application]
+config/name="Godot Charts 2D Contract Test"
+run/main_scene=""
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

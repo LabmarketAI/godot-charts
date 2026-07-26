@@ -9,6 +9,7 @@ fi
 addon="$1"
 test -f "$addon/plugin.cfg"
 test -f "$addon/plugin.gd"
+test -d "$addon/charts_2d"
 test -d "$addon/core"
 test -d "$addon/protocol"
 test -d "$addon/renderers"

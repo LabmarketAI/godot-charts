@@ -18,7 +18,7 @@ cp "$repo_root/tests/m2/godot/test_m2_frame_state.gd" "$test_project/test_m2_fra
 cp "$repo_root/tests/m2/godot/test_m2_input_adapters.gd" "$test_project/test_m2_input_adapters.gd"
 mkdir -p "$test_project/home" "$test_project/data" "$test_project/cache"
 export HOME="$test_project/home" XDG_DATA_HOME="$test_project/data" XDG_CACHE_HOME="$test_project/cache"
-"$godot_bin" --headless --editor --path "$test_project" --quit-after 8
+"$godot_bin" --headless --editor --path "$test_project" --import
 if ! find "$test_project/.godot/imported" -name 'control_handle_linear.glb-*.scn' -print -quit | grep -q .; then
     echo "GLB import cache was not created for control_handle_linear.glb" >&2
     exit 1

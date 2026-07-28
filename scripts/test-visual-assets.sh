@@ -29,7 +29,7 @@ cp "$repo_root/examples/visual-assets/main.gd" "$test_project/main.gd"
 cp "$repo_root/examples/visual-assets/main.tscn" "$test_project/main.tscn"
 
 XDG_CONFIG_HOME="$xdg_root/config" XDG_DATA_HOME="$xdg_root/data" XDG_CACHE_HOME="$xdg_root/cache" \
-    "$godot_bin" --headless --editor --path "$test_project" --quit-after 8
+    "$godot_bin" --headless --editor --path "$test_project" --import
 if ! find "$test_project/.godot/imported" -name 'control_handle_linear.glb-*.scn' -print -quit | grep -q .; then
     echo "GLB import cache was not created for control_handle_linear.glb" >&2
     exit 1

@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://addons/godot-charts/renderers/scatter_renderer_3d.gd" id="2_scatter"]
@@ -11,14 +11,20 @@
 [ext_resource type="PackedScene" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="9_right_hand"]
 [ext_resource type="PackedScene" path="res://addons/godot-xr-tools/functions/function_teleport.tscn" id="10_teleport"]
 [ext_resource type="PackedScene" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="11_pointer"]
-[ext_resource type="PackedScene" path="res://assets/Floor.glb" id="12_floor"]
-
 [sub_resource type="Environment" id="Environment_m1"]
 background_mode = 1
 background_color = Color(0.055, 0.065, 0.075, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.7, 0.76, 0.82, 1)
 ambient_light_energy = 0.65
+
+[sub_resource type="StandardMaterial3D" id="FloorMaterial_m1"]
+albedo_color = Color(0.12, 0.14, 0.17, 1)
+roughness = 0.82
+
+[sub_resource type="PlaneMesh" id="FloorMesh_m1"]
+material = SubResource("FloorMaterial_m1")
+size = Vector2(30, 30)
 
 [node name="M1Quickstart" type="Node3D"]
 script = ExtResource("1_main")
@@ -30,7 +36,8 @@ environment = SubResource("Environment_m1")
 transform = Transform3D(0.707107, -0.353553, 0.612372, 0, 0.866025, 0.5, -0.707107, -0.353553, 0.612372, 0, 5, 6)
 light_energy = 2.0
 
-[node name="Floor" parent="." instance=ExtResource("12_floor")]
+[node name="Floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("FloorMesh_m1")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.970143, 0.242536, 0, -0.242536, 0.970143, 0, 2, 8)

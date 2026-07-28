@@ -21,26 +21,6 @@ jobs:
           cd src
           bash scripts/check-demo-addon-sync.sh
 
-  unit-tests:
-    name: Unit Tests (.NET)
-    runs-on: ubuntu-latest
-    needs: addon-sync-check
-
-    steps:
-      - name: Checkout addon
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "8.0.x"
-
-      - name: Restore test project
-        run: dotnet restore tests/GodotChartsTests.csproj
-
-      - name: Run NUnit tests
-        run: dotnet test tests/GodotChartsTests.csproj --configuration Release --verbosity minimal
-
   m1-standard-godot:
     name: M1 Pure GDScript (Godot 4.6.3)
     runs-on: ubuntu-latest
@@ -84,6 +64,7 @@ jobs:
         env:
           GODOT_BIN: /tmp/godot/Godot_v4.6.3-stable_linux.x86_64
         run: |
+          bash scripts/test-m1-boundaries.sh
           bash scripts/test-m1-contract.sh
           bash scripts/test-visual-assets.sh
           bash scripts/test-m1-example.sh

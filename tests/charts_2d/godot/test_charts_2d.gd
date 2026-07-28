@@ -18,6 +18,7 @@ func _init() -> void:
 func _run() -> void:
 	_test_data_range()
 	_test_domain_behavior()
+	_test_category_positions()
 	_test_dataset_change_propagation()
 	_test_palette_slots()
 	_test_multiple_y_axes()
@@ -79,6 +80,14 @@ func _test_domain_behavior() -> void:
 		domain, warning_lines)
 	_expect(warned_domain.x == domain.x and warned_domain.y == 50.0,
 		"Visible reference lines must expand the chart domain.")
+
+
+func _test_category_positions() -> void:
+	_expect(LineChart.category_unit(0, 1) == 0.0,
+		"A single sample must begin at the left origin.")
+	_expect(LineChart.category_unit(0, 2) == 0.0 \
+			and LineChart.category_unit(1, 2) == 1.0,
+		"Two samples must span the full horizontal domain.")
 
 
 func _test_dataset_change_propagation() -> void:

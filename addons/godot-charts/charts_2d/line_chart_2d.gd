@@ -172,6 +172,19 @@ static func domain_with_reference_lines(
 	return result
 
 
+## Map an ordered category index across the horizontal plot span. A chart with
+## one sample represents the beginning of a series, so it belongs at the left
+## origin rather than floating at the midpoint.
+static func category_unit(index: int, category_count: int) -> float:
+	if category_count <= 1:
+		return 0.0
+	return clampf(
+		float(index) / float(category_count - 1),
+		0.0,
+		1.0
+	)
+
+
 func _plot_rect() -> Rect2:
 	var padding := plot_padding
 	if compact_mode:
@@ -301,7 +314,7 @@ func _draw_series(
 				_draw_segment(segment, color)
 				segment.clear()
 				continue
-			var x_unit := 0.5 if category_count == 1 else float(value_index) / float(category_count - 1)
+			var x_unit := category_unit(value_index, category_count)
 			var y_unit := (value - domain.x) / (domain.y - domain.x)
 			segment.append(Vector2(
 				lerpf(plot.position.x, plot.end.x, x_unit),

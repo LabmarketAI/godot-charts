@@ -31,6 +31,29 @@ chart.y_axes = axes
 chart.chart_data = data
 ```
 
+## Longitudinal data integrity
+
+`ChartData2D` uses one shared category axis. Every dataset must have exactly one
+value for every label:
+
+```gdscript
+assert(data.validation_errors().is_empty())
+```
+
+For live or simulation-driven charts, append a complete sample atomically:
+
+```gdscript
+data.append_sample("D3", {
+    "Stored": 6800.0,
+    "Capture": 82.0,
+})
+```
+
+Dataset labels are the sample keys and must be unique. Category labels must
+also be unique. An omitted dataset receives `NAN`, producing a visible line
+gap instead of shifting later values onto the wrong category. Unknown dataset
+keys and duplicate categories reject the complete append without mutation.
+
 ### Design precedents
 
 The implementation follows established open-source chart patterns:

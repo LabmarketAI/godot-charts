@@ -17,6 +17,8 @@ func _init() -> void:
 
 func _run() -> void:
 	_test_data_range()
+	_test_longitudinal_data_contract()
+	_test_atomic_sample_append()
 	_test_domain_behavior()
 	_test_category_positions()
 	_test_dataset_change_propagation()
@@ -47,6 +49,65 @@ func _test_data_range() -> void:
 	])
 	_expect(empty.finite_value_range() == null,
 		"All-non-finite data must return an empty range.")
+
+
+func _test_longitudinal_data_contract() -> void:
+	var valid = ChartData.new(PackedStringArray(["D0", "D1"]), [
+		ChartDataset.new("water", PackedFloat32Array([10.0, 8.0])),
+		ChartDataset.new("air", PackedFloat32Array([90.0, 85.0])),
+	])
+	_expect(valid.validation_errors().is_empty(),
+		"Aligned longitudinal data must validate.")
+
+	var mismatched = ChartData.new(PackedStringArray(["D0", "D1"]), [
+		ChartDataset.new("water", PackedFloat32Array([10.0])),
+	])
+	_expect(mismatched.validation_errors() == PackedStringArray([
+		"Dataset 'water' has 1 values for 2 labels."]),
+		"Mismatched series must report a deterministic alignment error.")
+
+	var duplicates = ChartData.new(PackedStringArray(["D0", "D0"]), [
+		ChartDataset.new("water", PackedFloat32Array([10.0, 8.0])),
+		ChartDataset.new("water", PackedFloat32Array([90.0, 85.0])),
+	])
+	var duplicate_errors := duplicates.validation_errors()
+	_expect(duplicate_errors.has("Duplicate category label 'D0' at index 1."),
+		"Duplicate category labels must be rejected.")
+	_expect(duplicate_errors.has("Duplicate dataset label 'water' at index 1."),
+		"Duplicate dataset labels must be rejected.")
+
+
+func _test_atomic_sample_append() -> void:
+	var water = ChartDataset.new("water", PackedFloat32Array([10.0]))
+	var air = ChartDataset.new("air", PackedFloat32Array([90.0]))
+	var data = ChartData.new(PackedStringArray(["D0"]), [water, air])
+	_change_count = 0
+	data.changed.connect(_on_data_changed)
+
+	var result: Error = data.append_sample("D1", {"water": 8.0})
+	_expect(result == OK, "A valid sample append must succeed.")
+	_expect(data.labels == PackedStringArray(["D0", "D1"]),
+		"Atomic append must add the shared category label.")
+	_expect(water.values == PackedFloat32Array([10.0, 8.0]),
+		"Atomic append must add provided series values.")
+	_expect(air.values.size() == 2 and is_nan(air.values[1]),
+		"Missing series values must append as explicit NAN gaps.")
+	_expect(_change_count == 1,
+		"Atomic append must invalidate owning chart data exactly once.")
+
+	var labels_before: PackedStringArray = data.labels.duplicate()
+	var water_before: PackedFloat32Array = water.values.duplicate()
+	result = data.append_sample("D1", {"water": 7.0})
+	_expect(result == ERR_INVALID_DATA,
+		"Duplicate categories must fail.")
+	_expect(data.labels == labels_before and water.values == water_before,
+		"A rejected duplicate category must not partially mutate data.")
+
+	result = data.append_sample("D2", {"unknown": 1.0})
+	_expect(result == ERR_INVALID_PARAMETER,
+		"Unknown dataset keys must fail.")
+	_expect(data.labels == labels_before and water.values == water_before,
+		"A rejected unknown series must not partially mutate data.")
 
 
 func _test_domain_behavior() -> void:
@@ -93,6 +154,7 @@ func _test_category_positions() -> void:
 func _test_dataset_change_propagation() -> void:
 	var dataset = ChartDataset.new("series", PackedFloat32Array([1.0]))
 	var data = ChartData.new(PackedStringArray(["1"]), [dataset])
+	_change_count = 0
 	data.changed.connect(_on_data_changed)
 	dataset.values = PackedFloat32Array([2.0])
 	_expect(_change_count == 1,

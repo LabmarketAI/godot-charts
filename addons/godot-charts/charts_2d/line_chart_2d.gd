@@ -53,6 +53,10 @@ var _y_axes: Array[Resource] = []
 	set(value):
 		show_legend = value
 		queue_redraw()
+@export var show_latest_values := false:
+	set(value):
+		show_latest_values = value
+		queue_redraw()
 @export var show_x_labels := true:
 	set(value):
 		show_x_labels = value
@@ -183,6 +187,35 @@ static func category_unit(index: int, category_count: int) -> float:
 		0.0,
 		1.0
 	)
+
+
+static func latest_finite_value(dataset: Resource) -> Variant:
+	if dataset == null or not "values" in dataset:
+		return null
+	for index in range(dataset.values.size() - 1, -1, -1):
+		var value: float = dataset.values[index]
+		if is_finite(value):
+			return value
+	return null
+
+
+static func legend_text(dataset: Resource, include_latest_value: bool) -> String:
+	if dataset == null:
+		return ""
+	var result := str(dataset.label)
+	if not include_latest_value:
+		return result
+	var latest: Variant = latest_finite_value(dataset)
+	if latest == null:
+		return result
+	return "%s  %s" % [result, _format_display_value(float(latest))]
+
+
+static func _format_display_value(value: float) -> String:
+	var magnitude := absf(value)
+	if magnitude >= 1.0e6 or (magnitude > 0.0 and magnitude < 1.0e-4):
+		return "%.3e" % value
+	return String.num(value, 2)
 
 
 func _plot_rect() -> Rect2:
@@ -393,18 +426,19 @@ func _draw_header(colors: ChartPalette2D) -> void:
 		if dataset == null or not dataset.visible:
 			continue
 		var color := dataset.color if dataset.color.a > 0.0 else colors.series_color(index)
+		var label := legend_text(dataset, show_latest_values)
 		draw_line(Vector2(x, y - 5.0), Vector2(x + 24.0, y - 5.0), color, line_width)
 		draw_string(
 			ThemeDB.fallback_font,
 			Vector2(x + 32.0, y),
-			dataset.label,
+			label,
 			HORIZONTAL_ALIGNMENT_LEFT,
 			-1.0,
 			ThemeDB.fallback_font_size,
 			colors.foreground
 		)
 		x += 48.0 + ThemeDB.fallback_font.get_string_size(
-			dataset.label,
+			label,
 			HORIZONTAL_ALIGNMENT_LEFT,
 			-1.0,
 			ThemeDB.fallback_font_size

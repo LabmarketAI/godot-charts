@@ -21,6 +21,7 @@ func _run() -> void:
 	_test_atomic_sample_append()
 	_test_domain_behavior()
 	_test_category_positions()
+	_test_latest_value_legend()
 	_test_dataset_change_propagation()
 	_test_palette_slots()
 	_test_multiple_y_axes()
@@ -149,6 +150,20 @@ func _test_category_positions() -> void:
 	_expect(LineChart.category_unit(0, 2) == 0.0 \
 			and LineChart.category_unit(1, 2) == 1.0,
 		"Two samples must span the full horizontal domain.")
+
+
+func _test_latest_value_legend() -> void:
+	var dataset = ChartDataset.new(
+		"Water", PackedFloat32Array([3578.0, NAN, 3499.25]))
+	_expect(LineChart.latest_finite_value(dataset) == 3499.25,
+		"Latest values must skip trailing non-finite gaps.")
+	_expect(LineChart.legend_text(dataset, true) == "Water  3499.25",
+		"The optional legend value must expose the latest finite sample.")
+	_expect(LineChart.legend_text(dataset, false) == "Water",
+		"Latest values must remain opt-in for compatibility.")
+	var empty = ChartDataset.new("Empty", PackedFloat32Array([NAN]))
+	_expect(LineChart.legend_text(empty, true) == "Empty",
+		"A series without a finite sample must keep its ordinary label.")
 
 
 func _test_dataset_change_propagation() -> void:

@@ -77,3 +77,11 @@ Accordingly, `LineChart2D`:
 Multiple axes increase comparison risk. Prefer one shared axis for compatible
 units and small multiples when many independent scales make the plot harder to
 read. Explicit axes are a deliberate choice, never inferred from magnitude.
+
+## Current values in legends
+
+Set `show_latest_values` when a live chart must communicate its current value
+as well as its trend. The legend then appends the last finite sample for each
+visible dataset. This also keeps a new one-sample series informative before a
+second point exists to form a line. The option defaults to `false` so ordinary
+legends retain their compact labels.
